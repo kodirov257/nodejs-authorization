@@ -1,3 +1,6 @@
 - table:
     schema: public
+    name: profiles
+- table:
+    schema: public
     name: users
