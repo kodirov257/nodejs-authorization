@@ -1,4 +1,6 @@
-let typeDefs = `
+let gql = require('graphql-tag');
+
+let typeDefs = gql`
     type AuthPayload {
         accessToken: String!
         refreshToken: String!
@@ -31,7 +33,8 @@ let typeDefs = `
     }
 
     type Query {
-        auth_me: User
+        auth_me: String!
+        context: Boolean
     }
 
     schema {
