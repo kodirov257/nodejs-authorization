@@ -1,23 +1,92 @@
-const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
-const gql = require('graphql-tag');
+import express from 'express';
+import { ApolloServer } from 'apollo-server-express';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
+import { typeDefs } from './typeDefs';
+import { memoize } from 'lodash';
+import fetch from 'node-fetch';
 require('custom-env').env();
+// let authController = require('controllers/auth');
 
-// Construct a schema, using GraphQL schema language
-const typeDefs = gql`
-  type Query {
-    hello: String
+const getDefaultHeaders = memoize(() => {
+  const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
+
+  if (!adminSecret) {
+    throw Error(
+        'The environment "HASURA_GRAPHQL_ADMIN_SECRET" has not provided',
+    );
   }
-`;
 
+  return Object.freeze({
+    [`${process.env.HASURA_GRAPHQL_HEADER_PREFIX}admin-secret`]: adminSecret,
+  });
+});
 
+async function hasuraQuery(document, variables) {
+  const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...getDefaultHeaders(),
+    },
+    body: JSON.stringify({
+      query: print(document),
+      variables,
+    })
+  });
 
+  return response.json();
+}
+
+async function getUserByEmail(username) {
+  try {
+    // const response = await hasuraQuery(
+    return await hasuraQuery(
+        gql`
+          fragment User on users {
+            id
+            username
+            email
+            phone
+            password
+            status
+            secret_token
+            created_at
+            updated_at
+            last_seen_at
+          }
+          query($where: user_bool_exp) {
+            user(where: $where) {
+              ...User
+            }
+          }
+        `,
+        {
+          where: {
+            username: { _eq: username },
+          },
+        },
+    );
+
+    // return getIn
+  } catch (e) {
+    // throw new Error('Unable to find the email');
+    throw new Error(e.message);
+  }
+}
 
 // Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
-    hello: () => 'Hello worlddddd21321!',
+    hello: () => 'Hello world !',
   },
+  Mutation: {
+    async auth_register (_, {username, email, phone, password}) {
+      // const user = getUserByEmail(email);
+      return getUserByEmail(username);
+    },
+  }
 };
 
 const server = new ApolloServer({ typeDefs, resolvers });

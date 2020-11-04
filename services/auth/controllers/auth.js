@@ -1,4 +1,4 @@
 
-exports.register = function (args, request) {
+exports.register = function (_, {username, email, phone, password}) {
     return request.ip;
 };

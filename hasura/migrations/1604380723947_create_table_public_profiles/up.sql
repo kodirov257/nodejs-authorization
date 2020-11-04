@@ -1,1 +1,0 @@
-CREATE TABLE "public"."profiles"("user_id" bigint NOT NULL, "first_name" character, "middle_name" character, "last_name" character, "date_of_birth" date, "gender" int2, "biography" text, "avatar" bpchar, PRIMARY KEY ("user_id") , FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE restrict ON DELETE restrict);

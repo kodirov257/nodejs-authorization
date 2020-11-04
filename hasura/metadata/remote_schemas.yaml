@@ -1,4 +1,1 @@
-- name: auth
-  definition:
-    url: http://hasura-auth:4000/graphql
-    timeout_seconds: 60
+[]

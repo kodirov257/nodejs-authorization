@@ -3,7 +3,7 @@ let router = express.Router();
 let { graphqlHTTP } = require('express-graphql');
 let { buildSchema } = require('graphql');
 const { ApolloServer } = require('apollo-server-express');
-let typeDefs = require('../typeDefs');
+// let typeDefs = require('../typeDefs');
 
 let auth = require('../controllers/auth');
 
