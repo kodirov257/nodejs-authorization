@@ -1,6 +1,12 @@
 import gql from 'graphql-tag';
 
 export const typeDefs = gql`
+    type AuthPayload {
+        accessToken: String!
+        refreshToken: String!
+        userId: ID!
+    }
+    
     type User {
         id: Int
         username: String
@@ -30,7 +36,11 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        auth_register(username: String!, password: String!): String!
+        auth_login(username: String!, password: String!): AuthPayload
+        auth_register(username: String!, password: String!): Boolean
+        auth_change_password(user_id: ID!, new_password: String!): Boolean
+        auth_activate_account(username: ID!, secret_token: String!): Boolean
+        auth_refresh_token: AuthPayload
     }
 
     schema {

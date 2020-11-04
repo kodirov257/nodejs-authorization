@@ -10,12 +10,12 @@ CREATE TABLE public.profiles (
 );
 CREATE TABLE public.users (
     id bigint NOT NULL,
-    username character varying(25),
-    email character varying(35),
+    username character varying(50),
+    email character varying(50),
     phone character varying(15),
-    password character varying(25) NOT NULL,
+    password character varying(255) NOT NULL,
     status smallint NOT NULL,
-    secret_token character varying(50) NOT NULL,
+    secret_token character varying(255) NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     last_seen_at timestamp with time zone DEFAULT now() NOT NULL
