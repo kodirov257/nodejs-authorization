@@ -18,7 +18,7 @@ require('custom-env').env();
 
 import { generateClaimsJwtToken, generateJwtRefreshToken } from './helpers/auth-tools';
 import { UserFragment, UserSessionFragment } from './fragments';
-import { createUserSession, hasuraQuery } from "./services";
+import { createUserSession, getCurrentUserId, hasuraQuery, isAuthenticated, getUserById } from "./services";
 
 const STATUS_INACTIVE = 1;
 const STATUS_ACTIVE = 5;
@@ -108,6 +108,19 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 const resolvers = {
   Query: {
     hello: () => 'Hello world !',
+    auth_me: async (_, args, ctx) => {
+      if (!isAuthenticated(ctx.req)) {
+        throw new Error('Authorization token has not provided');
+      }
+
+      try {
+        const currentUserId = getCurrentUserId(ctx.req);
+
+        return getUserById(currentUserId);
+      } catch (e) {
+        throw new Error('Not logged in');
+      }
+    }
   },
   Mutation: {
     async auth_register (_, {username, email, phone, password}) {
