@@ -14,6 +14,7 @@ CREATE TABLE public.users (
     email character varying(50),
     phone character varying(15),
     password character varying(255) NOT NULL,
+    role character varying(50) NOT NULL,
     status smallint NOT NULL,
     secret_token character varying(255) NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
