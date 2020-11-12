@@ -1,5 +1,5 @@
-import { hasuraQuery } from "./../client";
-import { UserFragment } from './../../fragments';
+import { hasuraQuery } from '../client';
+import { UserFragment } from '../../fragments';
 import gql from 'graphql-tag';
 
 export const getUserById = async (id) => {
@@ -7,7 +7,7 @@ export const getUserById = async (id) => {
         const response = await hasuraQuery(
             gql`
                 ${UserFragment}
-                query($id: uuid!) {
+                query($id: bigint!) {
                     users_by_pk(id: $id) {
                         ...User
                     }

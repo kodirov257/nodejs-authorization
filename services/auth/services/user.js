@@ -1,31 +1,22 @@
 import get from 'lodash/get';
 import jwt from "jsonwebtoken";
 
-export const getDataFromVerifiedAuthorizationToken = (req) => {
-    const { authorization } = req.headers;
-
-    if (authorization === undefined) {
-        return void 0;
-    }
-
-    const token = authorization.replace('Bearer ', '');
-
-    try {
-        return jwt.verify(token, process.env.JWT_PRIVATE_KEY);
-    } catch (e) {
-        return void 0;
-    }
-};
-
 export const isAuthenticated = (req) => {
-    return !!getDataFromVerifiedAuthorizationToken(req);
+    const headers = req.headers;
+
+    if (headers === undefined || headers[process.env.HASURA_GRAPHQL_HEADER_PREFIX+'role'] === 'anonymous') {
+        return void 0;
+    }
+
+    return true;
 };
 
 const getFieldFromDataAuthorizationToken = (req, field) => {
-    const verifiedToken = getDataFromVerifiedAuthorizationToken(req);
+    const headers = req.headers;
 
     return get(
-        verifiedToken, `["${process.env.HASURA_GRAPHQL_CLAIMS_KEY}"]${process.env.HASURA_GRAPHQL_HEADER_PREFIX}${field}`,
+        headers,
+        `${process.env.HASURA_GRAPHQL_HEADER_PREFIX}${field}`,
     );
 };
 

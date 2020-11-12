@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 
 export const generateJwtAccessToken = (payload) => {
+    console.log(process.env.JWT_TOKEN_EXPIRES);
     const jwtOptions = {
         algorithm: process.env.JWT_ALGORITHM,
-        expiresIn: process.env.JWT_TOKEN_EXPIRES,
+        expiresIn: `${3600}m`,
     };
 
     return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, jwtOptions);
@@ -12,7 +13,7 @@ export const generateJwtAccessToken = (payload) => {
 export const generateJwtRefreshToken = (payload) => {
     const jwtOptions = {
         algorithm: process.env.JWT_ALGORITHM,
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
+        expiresIn: `${process.env.REFRESH_TOKEN_EXPIRES_IN_MIN}m`,
     };
 
     return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, jwtOptions);

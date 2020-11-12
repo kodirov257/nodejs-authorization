@@ -8,13 +8,6 @@ import { UserSessionFragment } from '../fragments';
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {
     const refreshToken = uuidv4();
     try {
-        console.log({
-            user_id: user.id,
-            expires_at: getExpiresDate(),
-            refresh_token: refreshToken,
-            user_agent: userAgent,
-            ip_address: ipAddress,
-        });
         const expiresAt = getExpiresDate();
 
         const result = await hasuraQuery(
