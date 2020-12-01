@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 
 export const generateJwtAccessToken = (payload) => {
-    console.log(process.env.JWT_TOKEN_EXPIRES);
     const jwtOptions = {
         algorithm: process.env.JWT_ALGORITHM,
         expiresIn: `${3600}m`,
@@ -37,7 +36,6 @@ export const generateClaimsJwtToken = (user, sessionId = null) => {
             [`${headerPrefix}signed-at`]: dateTime,
         },
     };
-    console.log(payload);
 
     return generateJwtAccessToken(payload);
 };

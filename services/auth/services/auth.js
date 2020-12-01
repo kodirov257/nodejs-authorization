@@ -31,10 +31,7 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
             }
         );
 
-        console.log(result);
-
         const sessionId = get(result, 'data.insert_user_sessions.returning[0].id');
-        console.log(result);
         if (sessionId === undefined) {
             return Promise.reject(new Error('Error to create the user session.'));
         }

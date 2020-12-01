@@ -8,5 +8,6 @@ export const UserFragment = gql`
         phone
         role
         status
+        password
     }
 `;
