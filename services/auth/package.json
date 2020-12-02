@@ -6,6 +6,7 @@
     "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "apollo-server-express": "^2.19.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
