@@ -34,8 +34,15 @@ const ROLE_USER = 'user';
 const ROLE_ADMIN = 'admin';
 const ROLE_MODERATOR = 'moderator';
 
-async function getUserByCredentials(username, password) {
-  const user = await getUserByUsername(username);
+async function getUserByCredentials(usernameEmailOrPhone, password) {
+  let user = null;
+  if (isEmail(usernameEmailOrPhone)) {
+    user = await getUserByEmail(usernameEmailOrPhone);
+  } else if (isPhone(usernameEmailOrPhone)) {
+    user = await getUserByPhone(usernameEmailOrPhone);
+  } else {
+    user = await getUserByUsername(usernameEmailOrPhone);
+  }
 
   if (!user) {
     throw new Error('Invalid "username" or "password"');
@@ -152,7 +159,7 @@ const resolvers = {
           `,
           {
             user: {
-              username: username,
+              username: username.replace(/ /g, ''),
               email: isEmail(value.email_or_phone) ? value.email_or_phone : null,
               phone: isPhone(value.email_or_phone) ? value.email_or_phone : null,
               password: passwordHash,
@@ -167,8 +174,8 @@ const resolvers = {
 
       return data !== undefined;
     },
-    async auth_login (_, {username, email, phone, password}, ctx) {
-      const user = await getUserByCredentials(username, password);
+    async auth_login (_, {username_email_or_phone, password}, ctx) {
+      const user = await getUserByCredentials(username_email_or_phone, password);
 
       const ipAddress = (
           ctx.req.headers['x-forwarded-for'] || ctx.req.connection.remoteAddress || ''
