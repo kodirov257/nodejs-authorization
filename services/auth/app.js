@@ -29,7 +29,7 @@ import {
   sendEmailVerifyToken,
   sendSmsVerifyToken,
 } from "./services";
-import { isEmail, isPhone, validateRegistration, validateVerifyEmail } from './validators';
+import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
 import * as constants from './helpers/values';
 const authRouter = require('./routes/auth');
 
@@ -85,7 +85,8 @@ const resolvers = {
   },
   Mutation: {
     async auth_register (_, {username, email_or_phone, password}) {
-      const value = validateRegistration({ username, email_or_phone, password });
+      const value = validateRegistration(username, email_or_phone, password);
+      const emailOrPhone = value.email_or_phone;
 
       let user = await getUserByUsername(value.username);
 
@@ -93,10 +94,10 @@ const resolvers = {
         throw new Error('Username already registered');
       }
 
-      if (isEmail(value.email_or_phone)) {
-        user = await getUserByEmail(value.email_or_phone);
-      } else if (isPhone(value.email_or_phone)) {
-        user = await getUserByPhone(value.email_or_phone);
+      if (isEmail(emailOrPhone)) {
+        user = await getUserByEmail(emailOrPhone);
+      } else if (isPhone(emailOrPhone)) {
+        user = await getUserByPhone(emailOrPhone);
       } else {
         throw new ValidationError('Wrong email or phone is given.');
       }
@@ -109,18 +110,18 @@ const resolvers = {
 
       const params = {
         username: username.replace(/ /g, ''),
-        email: isEmail(value.email_or_phone) ? value.email_or_phone : null,
-        phone: isPhone(value.email_or_phone) ? value.email_or_phone : null,
+        email: isEmail(emailOrPhone) ? emailOrPhone : null,
+        phone: isPhone(emailOrPhone) ? emailOrPhone : null,
         password: passwordHash,
         role: constants.ROLE_USER,
         secret_token: uuidv4() + '-' + (+new Date()),
         status: constants.STATUS_INACTIVE,
       };
-      if (isEmail(value.email_or_phone)) {
-        params.email = value.email_or_phone;
+      if (isEmail(emailOrPhone)) {
+        params.email = emailOrPhone;
         params.email_verify_token = uuidv4() + '-' + (+new Date());
       } else {
-        params.phone = value.email_or_phone;
+        params.phone = emailOrPhone.replace(/^\++/, '');
         params.phone_verify_token = Math.floor(Math.random() * 99999) + 10000;
         params.phone_verify_token_expire = moment().add(5, 'minutes').format('Y-M-D H:mm:ss');
       }
@@ -157,7 +158,7 @@ const resolvers = {
     verify_email: async (_, {token}, ctx) => {
       validateVerifyEmail(token);
 
-      let user = await getUserByEmailVerifyToken(req.params.token);
+      let user = await getUserByEmailVerifyToken(token);
 
       if (!user) {
         throw new Error('Invalid token');
@@ -176,6 +177,40 @@ const resolvers = {
             user: {
               email_verified: true,
               email_verify_token: null,
+              status: constants.STATUS_ACTIVE,
+            },
+            id: {
+              id: user.id,
+            }
+          }
+      );
+
+      return get(result, 'data.update_users_by_pk') !== undefined;
+    },
+    verify_phone: async (_, {phone, token}, ctx) => {
+      validateVerifyPhone(phone, token);
+      phone = phone.replace(/^\++/, '');
+
+      let user = await getUserByPhone(phone);
+
+      if (!user) {
+        throw new Error('Invalid token');
+      }
+
+      const result = await hasuraQuery(
+          gql`
+            ${UserRegistrationFragment}
+            mutation ($user: users_set_input, $id: users_pk_columns_input!) {
+              update_users_by_pk(_set: $user, pk_columns: $id) {
+                ...User
+              }
+            }
+          `,
+          {
+            user: {
+              phone_verified: true,
+              phone_verify_token: null,
+              phone_verify_token_expire: null,
               status: constants.STATUS_ACTIVE,
             },
             id: {
