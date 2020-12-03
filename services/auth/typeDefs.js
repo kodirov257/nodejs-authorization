@@ -40,6 +40,7 @@ export const typeDefs = gql`
     type Mutation {
         auth_login(username_email_or_phone: String!, password: String!): AuthPayload
         auth_register(username: String!, email_or_phone: String!, password: String!): Boolean
+        verify_email(token: String!): Boolean
         auth_change_password(user_id: ID!, new_password: String!): Boolean
         auth_activate_account(username: ID!, secret_token: String!): Boolean
         auth_refresh_token: AuthPayload
