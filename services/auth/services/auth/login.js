@@ -1,9 +1,10 @@
-import { hasuraQuery } from './client';
-import gql from 'graphql-tag';
-import get from 'lodash/get';
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
+import gql from "graphql-tag";
+import get from "lodash/get";
 
-import { UserSessionFragment } from '../fragments';
+import { hasuraQuery } from "../client";
+import {getUserByCredentials} from "..";
+import {generateClaimsJwtToken, generateJwtRefreshToken} from "../../helpers/auth-tools";
 
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {
     const refreshToken = uuidv4();
@@ -40,6 +41,26 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
     } catch (e) {
         throw new Error('Could not create "session" for user');
     }
+}
+
+export const login = async  (usernameEmailOrPhone, password, ctx) => {
+    const user = await getUserByCredentials(usernameEmailOrPhone, password);
+
+    const ipAddress = (
+        ctx.req.headers['x-forwarded-for'] || ctx.req.connection.remoteAddress || ''
+    ).split(',')[0].trim();
+
+    const [refreshToken, sessionId] = await createUserSession(user, ctx.req.headers['user-agent'], ipAddress);
+
+    const accessToken = await generateClaimsJwtToken(user, sessionId);
+
+    return {
+        access_token: accessToken,
+        refresh_token: generateJwtRefreshToken({
+            token: refreshToken,
+        }),
+        user_id: user.id,
+    };
 }
 
 export const getExpiresDate = () => {
