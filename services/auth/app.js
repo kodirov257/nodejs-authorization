@@ -157,30 +157,34 @@ const resolvers = {
     verify_email: async (_, {token}, ctx) => {
       validateVerifyEmail(token);
 
-      let user = await getUserByEmailVerifyToken(token);
+      let user = await getUserByEmailVerifyToken(req.params.token);
+
+      if (!user) {
+        throw new Error('Invalid token');
+      }
 
       const result = await hasuraQuery(
           gql`
             ${UserRegistrationFragment}
-            mutation ($user: update_users_by_pk) {
-              users_set_input(_set: [$user]) {
-                returning {
-                  ...User
-                }
+            mutation ($user: users_set_input, $id: users_pk_columns_input!) {
+              update_users_by_pk(_set: $user, pk_columns: $id) {
+                ...User
               }
             }
           `,
           {
             user: {
-              id: user.id,
               email_verified: true,
               email_verify_token: null,
               status: constants.STATUS_ACTIVE,
+            },
+            id: {
+              id: user.id,
             }
           }
       );
 
-      return get(result, 'data.insert_users.returning') !== undefined;
+      return get(result, 'data.update_users_by_pk') !== undefined;
     },
     async auth_login (_, {username_email_or_phone, password}, ctx) {
       const user = await getUserByCredentials(username_email_or_phone, password);

@@ -9,31 +9,6 @@ let express = require('express');
 let router = express.Router();
 
 router.get('/verify-email/:token', async (req, res) => {
-    // try {
-    //     const response = await fetch(process.env.BASE_URL + '/graphql', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             Accept: 'application/json',
-    //             // 'x-hasura-admin-secret': 'losandijoncity!@$@'
-    //             // ...getDefaultHeaders(),      // TODO: fix environments
-    //         },
-    //         body: `mutation {verify_email(token: ${req.params.token})}`
-    //     });
-    //
-    //     res.send({
-    //         data: true,
-    //         result: result
-    //     });
-    // } catch (e) {
-    //     res.send({
-    //         data: false,
-    //         error: {
-    //             message: e.message,
-    //         }
-    //     });
-    // }
-
     try {
         let user = await getUserByEmailVerifyToken(req.params.token);
 
