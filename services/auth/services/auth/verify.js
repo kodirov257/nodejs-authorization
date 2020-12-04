@@ -45,6 +45,10 @@ export const verifyPhone = async (phone, token) => {
     let user = await getUserByPhone(phone);
 
     if (!user) {
+        throw new Error('Invalid phone');
+    }
+
+    if (user.phone_verify_token !== token) {
         throw new Error('Invalid token');
     }
 

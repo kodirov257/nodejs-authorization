@@ -1,12 +1,20 @@
-import gql from "graphql-tag";
-import {UserRegistrationFragment} from "../../fragments";
-import get from "lodash/get";
 const moment = require('moment');
+import bcrypt from "bcryptjs";
+import gql from "graphql-tag";
+import get from "lodash/get";
+import { v4 as uuidv4 } from 'uuid';
 
-import { validateEmail, validatePhone } from "../../validators";
-import { getUserByEmail } from "../hasura/get-user";
+import {
+    validateEmail,
+    validatePhone,
+    validateResetViaEmail,
+    validateResetViaPhone,
+} from "../../validators";
+import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone } from "../hasura/get-user";
+import { UserRegistrationFragment } from "../../fragments";
 import { sendEmailResetToken } from "../mail";
 import { hasuraQuery } from "../client";
+import { sendSmsResetToken } from "../sms";
 
 export const sendResetEmail = async (email) => {
     const value = validateEmail(email);
@@ -18,7 +26,11 @@ export const sendResetEmail = async (email) => {
         throw new Error('Invalid email provided');
     }
 
-    const result = await updateUser(user.id, 'email')
+    const fields = {
+        email_verify_token: uuidv4() + '-' + (+new Date()),
+    };
+
+    const result = await updateUser(user.id, fields)
 
     let data = get(result, 'data.update_users_by_pk');
 
@@ -33,21 +45,78 @@ export const sendResetEmail = async (email) => {
 
 export const sendResetPhone = async (phone) => {
     const value = validatePhone(phone);
-}
+    phone = value.phone
 
-const updateUser = async (userId, attribute) => {
-    let fields = {};
-    if (attribute === 'email') {
-        fields = {
-            email_verify_token: uuidv4() + '-' + (+new Date()),
-        };
-    } else {
-        fields = {
-            phone_verify_token: Math.floor(Math.random() * 99999) + 10000,
-            phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
-        };
+    let user = await getUserByEmail(phone);
+
+    if (!user) {
+        throw new Error('Invalid email provided');
     }
 
+    const fields = {
+        phone_verify_token: Math.floor(Math.random() * 99999) + 10000,
+        phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
+    };
+
+    const result = await updateUser(user.id, fields)
+
+    let data = get(result, 'data.update_users_by_pk');
+
+    if (data !== undefined) {
+        await sendSmsResetToken(data);
+
+        return true;
+    }
+
+    return false;
+}
+
+export const resetViaEmail = async (token, password) => {
+    validateResetViaEmail(token, password);
+
+    let user = await getUserByEmailVerifyToken(token);
+
+    if (!user) {
+        throw new Error('Invalid token');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const fields = {
+        email_verify_token: null,
+        password: passwordHash,
+    };
+
+    const result = await updateUser(user.id, fields)
+
+    return get(result, 'data.update_users_by_pk') !== undefined;
+}
+
+export const resetViaPhone = async (phone, token, password) => {
+    validateResetViaPhone(phone, token, password);
+
+    let user = await getUserByPhone(phone);
+
+    if (!user) {
+        throw new Error('Invalid phone');
+    }
+
+    if (user.phone_verify_token !== token) {
+        throw new Error('Invalid token');
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const fields = {
+        phone_verify_token: null,
+        phone_verify_token_expire: null,
+        password: passwordHash,
+    };
+
+    const result = await updateUser(user.id, fields)
+
+    return get(result, 'data.update_users_by_pk') !== undefined;
+}
+
+const updateUser = async (userId, fields) => {
     return hasuraQuery(
         gql`
             ${UserRegistrationFragment}

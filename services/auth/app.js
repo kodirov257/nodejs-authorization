@@ -21,7 +21,7 @@ import {
   login,
   register,
   resendEmail,
-  resendPhone,
+  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone,
 } from "./services";
 import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
 import * as constants from './helpers/values';
@@ -95,6 +95,18 @@ const resolvers = {
     },
     resend_phone: async (_, {phone}) => {
       return resendPhone(phone);
+    },
+    send_reset_email: async (_, {email}) => {
+      return sendResetEmail(email);
+    },
+    send_reset_phone: async (_, {phone}) => {
+      return sendResetPhone(phone);
+    },
+    reset_via_email: async (_, {token, password}) => {
+      return resetViaEmail(token, password);
+    },
+    reset_via_phone: async (_, {phone, token, password}) => {
+      return resetViaPhone(phone, token, password);
     },
   }
 };

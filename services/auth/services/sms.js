@@ -21,3 +21,7 @@ export const sendSmsVerifyToken = async (user) => {
         return true;
     });
 }
+
+export const sendSmsResetToken = async (user) => {
+
+}

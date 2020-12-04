@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 import get from "lodash/get";
+import { v4 as uuidv4 } from 'uuid';
 
 import { validateEmail, validatePhone } from "../../validators";
 import { UserRegistrationFragment } from "../../fragments";
