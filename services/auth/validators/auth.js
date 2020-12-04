@@ -4,7 +4,7 @@ const Joi = require('@hapi/joi');
 export const validateRegistration = (username, emailOrPhone, password) => {
     return validateGeneral({username, emailOrPhone, password}, {
         username: Joi.string().alphanum().min(3).max(30).required(),
-        email_or_phone: Joi.string().min(5).max(50).required(),
+        emailOrPhone: Joi.string().min(5).max(50).required(),
         password: Joi.string().min(5).max(50).required(),
     }, 'Failed to register the user.');
 }

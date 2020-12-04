@@ -50,7 +50,11 @@ export const getUserByPhone = async (phone) => {
     return getUser('phone', phone);
 }
 
-const getUser = async (attribute, value, fragment = null) => {
+export const getUserByPhoneVerifyToken = async (phone) => {
+    return getUser('phone', phone, UserRegistrationFragment);
+}
+
+const getUser = async (attribute, value, fragment = UserFragment) => {
     try {
         let condition = {};
         let where = {};
@@ -58,7 +62,7 @@ const getUser = async (attribute, value, fragment = null) => {
         condition.where = where;
         const response = await hasuraQuery(
             gql`
-                ${fragment ? fragment : UserFragment}
+                ${fragment}
                 query($where: users_bool_exp) {
                     users(where: $where) {
                         ...User

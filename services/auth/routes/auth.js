@@ -20,7 +20,7 @@ router.get('/verify-email/:token', async (req, res) => {
             status: constants.STATUS_ACTIVE,
         };
 
-        const result = updateUser(user.id, fields);
+        const result = await updateUser(user.id, fields);
 
         const data = get(result, 'data.update_users_by_pk');
 

@@ -19,7 +19,7 @@ import {
 
 export const register = async (username, emailOrPhone, password) => {
     const value = validateRegistration(username, emailOrPhone, password);
-    emailOrPhone = value.email_or_phone;
+    emailOrPhone = value.emailOrPhone;
 
     let user = await getUserByUsername(value.username);
 
@@ -55,7 +55,7 @@ export const register = async (username, emailOrPhone, password) => {
         params.email_verify_token = uuidv4() + '-' + (+new Date());
     } else {
         params.phone = emailOrPhone.replace(/^\++/, '');
-        params.phone_verify_token = Math.floor(Math.random() * 99999) + 10000;
+        params.phone_verify_token = (Math.floor(Math.random() * 99999) + 10000).toString();
         params.phone_verify_token_expire = moment().add(5, 'minutes').format('Y-M-D H:mm:ss');
     }
 
@@ -74,6 +74,8 @@ export const register = async (username, emailOrPhone, password) => {
             user: params
         }
     );
+
+    console.log(result);
 
     let data = get(result, 'data.insert_users.returning');
     if (data !== undefined && (data = data[0]) !== undefined) {

@@ -7,7 +7,7 @@ import { UserRegistrationFragment } from "../../fragments";
 import { getUserByEmail } from "../hasura/get-user";
 import { sendEmailVerifyToken } from "../mail";
 import { hasuraQuery } from "../client";
-import {updateUser} from "../hasura/update-user";
+import { updateUser } from "../hasura/update-user";
 
 export const resendEmail = async (email) => {
     const value = validateEmail(email);
@@ -24,7 +24,7 @@ export const resendEmail = async (email) => {
         email_verify_token: uuidv4() + '-' + (+new Date()),
     };
 
-    const result = updateUser(user.id, fields);
+    const result = await updateUser(user.id, fields);
 
     let data = get(result, 'data.update_users_by_pk');
 
