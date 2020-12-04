@@ -21,7 +21,7 @@ import {
   login,
   register,
   resendEmail,
-  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword,
+  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword, refreshToken,
 } from "./services";
 import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
 import * as constants from './helpers/values';
@@ -110,6 +110,12 @@ const resolvers = {
     },
     change_password: async (_, {old_password, new_password}, ctx) => {
       return changePassword(old_password, new_password, ctx)
+    },
+    refresh_token: async (_, {refresh_token}, ctx) => {
+      if (!refresh_token) {
+        throw new Error('Refresh token is not provided.');
+      }
+      return refreshToken(refresh_token);
     }
   }
 };

@@ -3,6 +3,7 @@ export * from './auth/verify';
 export * from './auth/login';
 export * from './auth/resend';
 export * from './auth/reset_password';
+export * from './auth/refresh_token';
 export * from './client';
 export * from './user';
 export * from './mail';

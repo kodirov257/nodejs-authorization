@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import * as constants from "../helpers/values";
 import { getUserById } from "./hasura/get-user-by-id";
 import { updateUser } from "./hasura/update-user";
-import {validateChangePassword} from "../validators";
+import { validateChangePassword } from "../validators";
 
 export const changePassword = async (oldPassword, newPassword, ctx) => {
     if (!isAuthenticated(ctx.req)) {
