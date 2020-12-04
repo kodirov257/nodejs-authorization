@@ -22,6 +22,8 @@ import {
   verifyPhone,
   login,
   register,
+  resendEmail,
+  resendPhone,
 } from "./services";
 import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
 import * as constants from './helpers/values';
@@ -78,7 +80,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    async auth_register (_, {username, email_or_phone, password}) {
+    auth_register: async (_, {username, email_or_phone, password}) => {
       return register(username, email_or_phone, password)
     },
     verify_email: async (_, {token}, ctx) => {
@@ -87,8 +89,14 @@ const resolvers = {
     verify_phone: async (_, {phone, token}, ctx) => {
       return verifyPhone(phone, token);
     },
-    async auth_login (_, {username_email_or_phone, password}, ctx) {
+    auth_login: async (_, {username_email_or_phone, password}, ctx) => {
       return login(username_email_or_phone, password, ctx);
+    },
+    resend_email: async (_, {email}) => {
+      return resendEmail(email);
+    },
+    resend_phone: async (_, {phone}) => {
+      return resendPhone(phone);
     },
   }
 };

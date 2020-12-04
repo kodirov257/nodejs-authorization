@@ -1,6 +1,7 @@
 export * from './auth/register';
 export * from './auth/verify';
 export * from './auth/login';
+export * from './auth/resend';
 export * from './client';
 export * from './user';
 export * from './mail';
