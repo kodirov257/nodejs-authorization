@@ -1,8 +1,7 @@
 const moment = require('moment');
-import bcrypt from "bcryptjs";
-import gql from "graphql-tag";
-import get from "lodash/get";
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from "bcryptjs";
+import get from "lodash/get";
 
 import {
     validateEmail,
@@ -10,10 +9,8 @@ import {
     validateResetViaEmail,
     validateResetViaPhone,
 } from "../../validators";
-import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone } from "../hasura/get-user";
-import { UserRegistrationFragment } from "../../fragments";
+import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone, updateUser } from "..";
 import { sendEmailResetToken } from "../mail";
-import { hasuraQuery } from "../client";
 import { sendSmsResetToken } from "../sms";
 
 export const sendResetEmail = async (email) => {
@@ -35,7 +32,7 @@ export const sendResetEmail = async (email) => {
     let data = get(result, 'data.update_users_by_pk');
 
     if (data !== undefined) {
-        await sendEmailResetToken(data);
+        await sendEmailResetToken(data.username, data.email, data.email_verify_token);
 
         return true;
     }
@@ -114,23 +111,4 @@ export const resetViaPhone = async (phone, token, password) => {
     const result = await updateUser(user.id, fields)
 
     return get(result, 'data.update_users_by_pk') !== undefined;
-}
-
-const updateUser = async (userId, fields) => {
-    return hasuraQuery(
-        gql`
-            ${UserRegistrationFragment}
-            mutation ($user: users_set_input, $id: users_pk_columns_input!) {
-                update_users_by_pk(_set: $user, pk_columns: $id) {
-                    ...User
-                }
-            }
-        `,
-        {
-            user: fields,
-            id: {
-                id: userId,
-            }
-        }
-    );
 }

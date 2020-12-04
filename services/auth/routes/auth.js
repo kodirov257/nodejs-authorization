@@ -1,9 +1,7 @@
-import {getUserByEmailVerifyToken, hasuraQuery} from "../services";
-import gql from "graphql-tag";
-import {UserRegistrationFragment} from "../fragments";
 import * as constants from "../helpers/values";
 import get from "lodash/get";
-import fetch from "node-fetch";
+
+import { getUserByEmailVerifyToken, updateUser } from "../services";
 
 let express = require('express');
 let router = express.Router();
@@ -16,26 +14,13 @@ router.get('/verify-email/:token', async (req, res) => {
             throw new Error('Invalid token');
         }
 
-        const result = await hasuraQuery(
-            gql`
-                ${UserRegistrationFragment}
-                mutation ($user: users_set_input, $id: users_pk_columns_input!) {
-                    update_users_by_pk(_set: $user, pk_columns: $id) {
-                        ...User
-                    }
-                }
-            `,
-            {
-                user: {
-                    email_verified: true,
-                    email_verify_token: null,
-                    status: constants.STATUS_ACTIVE,
-                },
-                id: {
-                    id: user.id,
-                }
-            }
-        );
+        const fields = {
+            email_verified: true,
+            email_verify_token: null,
+            status: constants.STATUS_ACTIVE,
+        };
+
+        const result = updateUser(user.id, fields);
 
         const data = get(result, 'data.update_users_by_pk');
 

@@ -38,8 +38,8 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        auth_login(username_email_or_phone: String!, password: String!): AuthPayload
-        auth_register(username: String!, email_or_phone: String!, password: String!): Boolean
+        login(username_email_or_phone: String!, password: String!): AuthPayload
+        register(username: String!, email_or_phone: String!, password: String!): Boolean
         verify_email(token: String!): Boolean
         verify_phone(phone: String!, token: String!): Boolean
         resend_email(email: String!): Boolean
@@ -48,9 +48,8 @@ export const typeDefs = gql`
         send_reset_phone(phone: String!): Boolean
         reset_via_email(token: String!, password: String!): Boolean
         reset_via_phone(phone: String!, token: String!, password: String!): Boolean
-        auth_change_password(user_id: ID!, new_password: String!): Boolean
-        auth_activate_account(username: ID!, secret_token: String!): Boolean
-        auth_refresh_token: AuthPayload
+        change_password(old_password: String!, new_password: String!): Boolean
+        refresh_token: AuthPayload
     }
 
     schema {

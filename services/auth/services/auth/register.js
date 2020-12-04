@@ -78,9 +78,9 @@ export const register = async (username, emailOrPhone, password) => {
     let data = get(result, 'data.insert_users.returning');
     if (data !== undefined && (data = data[0]) !== undefined) {
         if (data.email) {
-            await sendEmailVerifyToken(data);
+            await sendEmailVerifyToken(data.username, data.email, data.email_verify_token);
         } else {
-            await sendSmsVerifyToken(data);
+            await sendSmsVerifyToken(data.phone, data.phone_verify_token);
         }
 
         return true;

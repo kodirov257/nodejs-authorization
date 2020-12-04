@@ -78,7 +78,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    auth_register: async (_, {username, email_or_phone, password}) => {
+    register: async (_, {username, email_or_phone, password}) => {
       return register(username, email_or_phone, password)
     },
     verify_email: async (_, {token}, ctx) => {
@@ -87,7 +87,7 @@ const resolvers = {
     verify_phone: async (_, {phone, token}, ctx) => {
       return verifyPhone(phone, token);
     },
-    auth_login: async (_, {username_email_or_phone, password}, ctx) => {
+    login: async (_, {username_email_or_phone, password}, ctx) => {
       return login(username_email_or_phone, password, ctx);
     },
     resend_email: async (_, {email}) => {

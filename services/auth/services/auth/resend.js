@@ -7,6 +7,7 @@ import { UserRegistrationFragment } from "../../fragments";
 import { getUserByEmail } from "../hasura/get-user";
 import { sendEmailVerifyToken } from "../mail";
 import { hasuraQuery } from "../client";
+import {updateUser} from "../hasura/update-user";
 
 export const resendEmail = async (email) => {
     const value = validateEmail(email);
@@ -18,30 +19,17 @@ export const resendEmail = async (email) => {
         throw new Error('Invalid email provided');
     }
 
-    const result = await hasuraQuery(
-        gql`
-            ${UserRegistrationFragment}
-            mutation ($user: users_set_input, $id: users_pk_columns_input!) {
-                update_users_by_pk(_set: $user, pk_columns: $id) {
-                    ...User
-                }
-            }
-        `,
-        {
-            user: {
-                email_verified: false,
-                email_verify_token: uuidv4() + '-' + (+new Date()),
-            },
-            id: {
-                id: user.id,
-            }
-        }
-    );
+    const fields = {
+        email_verified: false,
+        email_verify_token: uuidv4() + '-' + (+new Date()),
+    };
+
+    const result = updateUser(user.id, fields);
 
     let data = get(result, 'data.update_users_by_pk');
 
     if (data !== undefined) {
-        await sendEmailVerifyToken(data);
+        await sendEmailVerifyToken(data.username, data.email, data.email_verify_token);
 
         return true;
     }
