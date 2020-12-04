@@ -21,7 +21,7 @@ import {
   login,
   register,
   resendEmail,
-  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone,
+  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword,
 } from "./services";
 import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
 import * as constants from './helpers/values';
@@ -108,6 +108,9 @@ const resolvers = {
     reset_via_phone: async (_, {phone, token, password}) => {
       return resetViaPhone(phone, token, password);
     },
+    change_password: async (_, {old_password, new_password}, ctx) => {
+      return changePassword(old_password, new_password, ctx)
+    }
   }
 };
 

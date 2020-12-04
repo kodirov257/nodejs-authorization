@@ -1,9 +1,11 @@
 import gql from "graphql-tag";
+const moment = require('moment');
 
 import { UserRegistrationFragment } from "../../fragments";
 import { hasuraQuery } from "../client";
 
 export const updateUser = async (userId, fields) => {
+    fields.updated_at = moment().format('Y-M-D H:mm:ss');
     return hasuraQuery(
         gql`
             ${UserRegistrationFragment}

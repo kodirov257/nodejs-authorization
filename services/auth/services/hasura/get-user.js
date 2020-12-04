@@ -8,12 +8,16 @@ import { isEmail, isPhone } from "../../validators";
 import * as constants from '../../helpers/values';
 
 export const getUserByCredentials = async (usernameEmailOrPhone, password) => {
-    let user = null;
+    let user;
+    let searchType;
     if (isEmail(usernameEmailOrPhone)) {
+        searchType = 'email';
         user = await getUserByEmail(usernameEmailOrPhone);
     } else if (isPhone(usernameEmailOrPhone)) {
+        searchType = 'phone';
         user = await getUserByPhone(usernameEmailOrPhone);
     } else {
+        searchType = 'username';
         user = await getUserByUsername(usernameEmailOrPhone);
     }
 
@@ -21,7 +25,9 @@ export const getUserByCredentials = async (usernameEmailOrPhone, password) => {
         throw new Error('Invalid "username" or "password"');
     }
 
-    if (user.status !== constants.STATUS_ACTIVE) {
+    if (user.status !== constants.STATUS_ACTIVE
+        || (searchType === 'email' && !user.email_verified)
+        || (searchType === 'phone' && !user.phone_verified)) {
         throw new Error('User not activated.');
     }
 
@@ -47,7 +53,7 @@ export const getUserByEmail = async (email) => {
 }
 
 export const getUserByPhone = async (phone) => {
-    return getUser('phone', phone);
+    return getUser('phone', phone.replace(/^\++/, ''));
 }
 
 export const getUserByPhoneVerifyToken = async (phone) => {

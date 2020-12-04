@@ -49,6 +49,13 @@ export const validateResetViaPhone = (phone, token, password) => {
     }, 'Failed to reset password.');
 }
 
+export const validateChangePassword = (oldPassword, newPassword) => {
+    return validateGeneral({oldPassword, newPassword}, {
+        oldPassword: Joi.string().min(5).max(50).required(),
+        newPassword: Joi.string().min(5).max(50).required(),
+    }, 'Failed to change password.');
+}
+
 const validateGeneral = (payload, validator, errorMessage) => {
     const schema = Joi.object(validator);
 
