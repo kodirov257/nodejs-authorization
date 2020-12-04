@@ -11,55 +11,23 @@ let JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 import { GraphQLLocalStrategy, buildContext } from 'graphql-passport';
 require('custom-env').env();
-const Joi = require('@hapi/joi');
 
 import { generateClaimsJwtToken, generateJwtRefreshToken } from './helpers/auth-tools';
-import { UserFragment, UserSessionFragment } from './fragments';
+import { UserFragment, UserSessionFragment, UserRegistrationFragment } from './fragments';
 import {
-  createUserSession,
   getCurrentUserId,
-  getUserByUsername,
   isAuthenticated,
   getUserById,
-  getUserByEmail,
-  getUserByPhone,
-  hasuraQuery,
+  verifyEmail,
+  verifyPhone,
+  login,
+  register,
+  resendEmail,
+  resendPhone,
 } from "./services";
-import { isEmail, isPhone } from './validators';
-
-const STATUS_INACTIVE = 1;
-const STATUS_ACTIVE = 5;
-
-const ROLE_USER = 'user';
-const ROLE_ADMIN = 'admin';
-const ROLE_MODERATOR = 'moderator';
-
-async function getUserByCredentials(usernameEmailOrPhone, password) {
-  let user = null;
-  if (isEmail(usernameEmailOrPhone)) {
-    user = await getUserByEmail(usernameEmailOrPhone);
-  } else if (isPhone(usernameEmailOrPhone)) {
-    user = await getUserByPhone(usernameEmailOrPhone);
-  } else {
-    user = await getUserByUsername(usernameEmailOrPhone);
-  }
-
-  if (!user) {
-    throw new Error('Invalid "username" or "password"');
-  }
-
-  if (user.status !== STATUS_ACTIVE) {
-    throw new Error('User not activated.');
-  }
-
-  const passwordMatch = await bcrypt.compare(password, user.password);
-
-  if (!passwordMatch) {
-    throw new Error('Invalid "email" or "password"');
-  }
-
-  return user;
-}
+import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
+import * as constants from './helpers/values';
+const authRouter = require('./routes/auth');
 
 let opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -109,89 +77,26 @@ const resolvers = {
       } catch (e) {
         throw new Error('Not logged in');
       }
-    }
+    },
   },
   Mutation: {
-    async auth_register (_, {username, email_or_phone, password}) {
-      const schema = Joi.object({
-        username: Joi.string().alphanum().min(3).max(30).required(),
-        email_or_phone: Joi.string().min(5).max(50).required(),
-        password: Joi.string().min(5).max(50).required(),
-      });
-
-      const { value, error } = schema.validate({ username, email_or_phone, password }, { abortEarly: false });
-      if (error) {
-        throw new UserInputError('Failed to register the user.', {
-          validationErrors: error.details
-        });
-      }
-
-      let user = await getUserByUsername(value.username);
-
-      if (user) {
-        throw new Error('Username already registered');
-      }
-
-      if (isEmail(value.email_or_phone)) {
-        user = await getUserByEmail(value.email_or_phone);
-      } else if (isPhone(value.email_or_phone)) {
-        user = await getUserByPhone(value.email_or_phone);
-      } else {
-        throw new ValidationError('Wrong email or phone is given.');
-      }
-
-      if (user) {
-        throw new Error('Username already registered');
-      }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      const result = await hasuraQuery(
-          gql`
-            ${UserFragment}
-            mutation ($user: users_insert_input!) {
-              insert_users(objects: [$user]) {
-                returning {
-                  ...User
-                }
-              }
-            }
-          `,
-          {
-            user: {
-              username: username.replace(/ /g, ''),
-              email: isEmail(value.email_or_phone) ? value.email_or_phone : null,
-              phone: isPhone(value.email_or_phone) ? value.email_or_phone : null,
-              password: passwordHash,
-              role: ROLE_USER,
-              secret_token: uuidv4(),
-              status: STATUS_ACTIVE,
-            }
-          }
-      );
-
-      const data = get(result, 'data.insert_users.returning');
-
-      return data !== undefined;
+    auth_register: async (_, {username, email_or_phone, password}) => {
+      return register(username, email_or_phone, password)
     },
-    async auth_login (_, {username_email_or_phone, password}, ctx) {
-      const user = await getUserByCredentials(username_email_or_phone, password);
-
-      const ipAddress = (
-          ctx.req.headers['x-forwarded-for'] || ctx.req.connection.remoteAddress || ''
-      ).split(',')[0].trim();
-
-      const [refreshToken, sessionId] = await createUserSession(user, ctx.req.headers['user-agent'], ipAddress);
-
-      const accessToken = await generateClaimsJwtToken(user, sessionId);
-
-      return {
-        access_token: accessToken,
-        refresh_token: generateJwtRefreshToken({
-          token: refreshToken,
-        }),
-        user_id: user.id,
-      };
+    verify_email: async (_, {token}, ctx) => {
+      return verifyEmail(token)
+    },
+    verify_phone: async (_, {phone, token}, ctx) => {
+      return verifyPhone(phone, token);
+    },
+    auth_login: async (_, {username_email_or_phone, password}, ctx) => {
+      return login(username_email_or_phone, password, ctx);
+    },
+    resend_email: async (_, {email}) => {
+      return resendEmail(email);
+    },
+    resend_phone: async (_, {phone}) => {
+      return resendPhone(phone);
     },
   }
 };
@@ -204,6 +109,7 @@ const server = new ApolloServer({
 
 const app = express();
 app.use(passport.initialize());
+app.use('/', authRouter);
 server.applyMiddleware({ app });
 
 // const port = process.env.PORT;
