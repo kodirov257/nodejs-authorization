@@ -33,10 +33,40 @@ export const sendEmailVerifyToken = async (user) => {
 
     await transporter.sendMail(mailData, (error, info) => {
         if (error) {
-            console.log(error);
-            // throw new Error('The email don`t sent', {
-            //     'error': error,
-            // });
+            throw new Error('The email is not sent', {
+                'error': error,
+            });
+        }
+        return true;
+    });
+}
+
+export const sendEmailResetToken = async (user) => {
+    const mailData = {
+        from: process.env.MAIL_FROM_ADDRESS,
+        to: user.email,
+        subject: 'Reset password',
+        text: `Thanks for using our service!
+            \nPlease refer to the following link:
+            \n${process.env.BASE_URL}/user/reset-password/${user.email_verify_token}
+            \nThank you,
+            \n${user.username}
+        `,
+        html: `<b>Thanks for using our service!</b>
+            <br>Please refer to the following link:<br/>
+            <p><a href="${process.env.BASE_URL}/user/reset-password/${user.email_verify_token}">Reset password</a></p>
+            Thank you,<br>
+            ${user.username}
+        `,
+    };
+
+    console.log(mailData);
+
+    await transporter.sendMail(mailData, (error, info) => {
+        if (error) {
+            throw new Error('The email is not sent', {
+                'error': error,
+            });
         }
         return true;
     });

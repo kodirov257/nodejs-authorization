@@ -9,11 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import passport from 'passport';
 let JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
-import { GraphQLLocalStrategy, buildContext } from 'graphql-passport';
-require('custom-env').env();
+import { buildContext } from 'graphql-passport';
 
-import { generateClaimsJwtToken, generateJwtRefreshToken } from './helpers/auth-tools';
-import { UserFragment, UserSessionFragment, UserRegistrationFragment } from './fragments';
+require('custom-env').env();
 import {
   getCurrentUserId,
   isAuthenticated,

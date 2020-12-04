@@ -1,13 +1,14 @@
-import { validateResendEmail, validateResendPhone } from "../../validators";
-import { getUserByEmail } from "../hasura/get-user";
-import {hasuraQuery} from "../client";
 import gql from "graphql-tag";
-import {UserRegistrationFragment} from "../../fragments";
-import * as constants from "../../helpers/values";
 import get from "lodash/get";
 
+import { validateEmail, validatePhone } from "../../validators";
+import { UserRegistrationFragment } from "../../fragments";
+import { getUserByEmail } from "../hasura/get-user";
+import { sendEmailVerifyToken } from "../mail";
+import { hasuraQuery } from "../client";
+
 export const resendEmail = async (email) => {
-    const value = validateResendEmail(email);
+    const value = validateEmail(email);
     email = value.email;
 
     let user = await getUserByEmail(email);
@@ -36,9 +37,17 @@ export const resendEmail = async (email) => {
         }
     );
 
-    return get(result, 'data.update_users_by_pk') !== undefined;
+    let data = get(result, 'data.update_users_by_pk');
+
+    if (data !== undefined) {
+        await sendEmailVerifyToken(data);
+
+        return true;
+    }
+
+    return false;
 }
 
 export const resendPhone = async (phone) => {
-    const value = validateResendPhone(phone);
+    const value = validatePhone(phone);
 }

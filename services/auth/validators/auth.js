@@ -22,13 +22,13 @@ export const validateVerifyPhone = (phone, token) => {
     }, 'Failed to verify phone.');
 }
 
-export const validateResendEmail = (email) => {
+export const validateEmail = (email) => {
     return validateGeneral({email}, {
         email: Joi.required().string().min(5).max(50).regex(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/),
     }, 'Failed to register the user.');
 }
 
-export const validateResendPhone = (phone) => {
+export const validatePhone = (phone) => {
     return validateGeneral({phone}, {
         phone: Joi.required().string().regex(/\+?998[0-9]{9}$/),
     }, 'Failed to register the user.');
