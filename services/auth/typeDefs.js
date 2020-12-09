@@ -7,6 +7,10 @@ export const typeDefs = gql`
         user_id: ID!
     }
     
+    type RefreshPayload {
+        access_token: String!
+    }
+    
     type User {
         id: Int
         username: String
@@ -49,7 +53,7 @@ export const typeDefs = gql`
         reset_via_email(token: String!, password: String!): Boolean
         reset_via_phone(phone: String!, token: String!, password: String!): Boolean
         change_password(old_password: String!, new_password: String!): Boolean
-        refresh_token: AuthPayload
+        refresh_token(refresh_token: String!): RefreshPayload
     }
 
     schema {

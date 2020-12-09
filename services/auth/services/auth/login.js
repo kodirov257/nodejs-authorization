@@ -7,7 +7,7 @@ import {getUserByCredentials} from "..";
 import {generateClaimsJwtToken, generateJwtRefreshToken} from "../../helpers/auth-tools";
 
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {
-    const refreshToken = uuidv4();
+    const refreshToken = uuidv4() + '-' + (+new Date());
     try {
         const expiresAt = getExpiresDate();
 
@@ -46,11 +46,15 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
 export const login = async (usernameEmailOrPhone, password, ctx) => {
     const user = await getUserByCredentials(usernameEmailOrPhone, password);
 
+    return generateTokens(user, ctx.req);
+}
+
+export const generateTokens = async (user, request) => {
     const ipAddress = (
-        ctx.req.headers['x-forwarded-for'] || ctx.req.connection.remoteAddress || ''
+        request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
     ).split(',')[0].trim();
 
-    const [refreshToken, sessionId] = await createUserSession(user, ctx.req.headers['user-agent'], ipAddress);
+    const [refreshToken, sessionId] = await createUserSession(user, request.headers['user-agent'], ipAddress);
 
     const accessToken = await generateClaimsJwtToken(user, sessionId);
 

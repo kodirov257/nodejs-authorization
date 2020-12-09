@@ -11,3 +11,4 @@ export * from './sms';
 export * from './hasura/get-user';
 export * from './hasura/get-user-by-id';
 export * from './hasura/update-user';
+export * from './hasura/get-user-session';

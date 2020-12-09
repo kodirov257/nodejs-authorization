@@ -8,6 +8,7 @@ export const UserRegistrationFragment = gql`
         phone
         role
         status
+        password
         email_verify_token
         email_verified
         phone_verify_token

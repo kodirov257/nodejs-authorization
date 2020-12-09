@@ -12,10 +12,10 @@ export const getUserByCredentials = async (usernameEmailOrPhone, password) => {
     let searchType;
     if (isEmail(usernameEmailOrPhone)) {
         searchType = 'email';
-        user = await getUserByEmail(usernameEmailOrPhone);
+        user = await getUserByEmail(usernameEmailOrPhone, UserRegistrationFragment);
     } else if (isPhone(usernameEmailOrPhone)) {
         searchType = 'phone';
-        user = await getUserByPhone(usernameEmailOrPhone);
+        user = await getUserByPhone(usernameEmailOrPhone, UserRegistrationFragment);
     } else {
         searchType = 'username';
         user = await getUserByUsername(usernameEmailOrPhone);
@@ -40,20 +40,20 @@ export const getUserByCredentials = async (usernameEmailOrPhone, password) => {
     return user;
 }
 
-export const getUserByUsername = async (username) => {
-    return getUser('username', username);
+export const getUserByUsername = async (username, fragment = UserFragment) => {
+    return getUser('username', username, fragment);
 }
 
-export const getUserByEmailVerifyToken = async (token) => {
-    return getUser('email_verify_token', token, UserRegistrationFragment);
+export const getUserByEmailVerifyToken = async (token, fragment = UserRegistrationFragment) => {
+    return getUser('email_verify_token', token, fragment);
 }
 
 export const getUserByEmail = async (email) => {
     return getUser('email', email);
 }
 
-export const getUserByPhone = async (phone) => {
-    return getUser('phone', phone.replace(/^\++/, ''));
+export const getUserByPhone = async (phone, fragment = UserFragment) => {
+    return getUser('phone', phone.replace(/^\++/, ''), fragment);
 }
 
 export const getUserByPhoneVerifyToken = async (phone) => {

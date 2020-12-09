@@ -1,11 +1,6 @@
 import express from 'express';
-import { ApolloServer, UserInputError, ValidationError } from 'apollo-server-express';
-import gql from 'graphql-tag';
+import { ApolloServer } from 'apollo-server-express';
 import { typeDefs } from './typeDefs';
-import get from 'lodash/get';
-import fetch from 'node-fetch';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import passport from 'passport';
 let JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -23,18 +18,16 @@ import {
   resendEmail,
   resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword, refreshToken,
 } from "./services";
-import { isEmail, isPhone, validateRegistration, validateVerifyEmail, validateVerifyPhone } from './validators';
-import * as constants from './helpers/values';
 const authRouter = require('./routes/auth');
 
-let opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_PRIVATE_KEY,
-  algorithms: [process.env.JWT_ALGORITHM],
-};
-passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-
-}));
+// let opts = {
+//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+//   secretOrKey: process.env.JWT_PRIVATE_KEY,
+//   algorithms: [process.env.JWT_ALGORITHM],
+// };
+// passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
+//
+// }));
 
 /*passport.use('api', new OAuth2Strategy({
       authorizationURL: 'https://www.provider.com/oauth2/authorize',
@@ -115,7 +108,7 @@ const resolvers = {
       if (!refresh_token) {
         throw new Error('Refresh token is not provided.');
       }
-      return refreshToken(refresh_token);
+      return refreshToken(refresh_token, ctx);
     }
   }
 };
