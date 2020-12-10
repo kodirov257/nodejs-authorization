@@ -3,15 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi"
+    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi",
+    "test": "jest"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "apollo-server-express": "^2.19.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
-    "custom-env": "^2.0.1",
     "debug": "~2.6.9",
+    "dotenv-flow": "^3.2.0",
     "esm": "^3.2.25",
     "express": "~4.16.1",
     "express-graphql": "^0.11.0",
@@ -32,6 +33,9 @@
     "uuid": "^8.3.1"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.18",
+    "babel-jest": "^26.6.3",
+    "jest": "^26.6.3",
     "nodemon": "^2.0.6"
   }
 }
