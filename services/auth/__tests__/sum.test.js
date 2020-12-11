@@ -5,9 +5,10 @@ const fetch = require('node-fetch');
 const gql = require('graphql-tag');
 const dotEnvFlow = require('dotenv-flow');
 const dotEnv = require('dotenv');
+const path = require('path');
 const fs = require('fs');
 
-const envConfig = dotEnv.parse(fs.readFileSync('.env.test'))
+const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../.env.test')));
 for (const k in envConfig) {
     process.env[k] = envConfig[k]
 }
@@ -66,7 +67,7 @@ test('createUser calls fetch with the right args and returns the user id', async
     `;
 
     const response = await mockFetch(USER_QUERY, { id: 2 });
-    console.log(response.data.users);
+    // console.log(response.data.users);
 
     expect(fetch).toHaveBeenCalledTimes(1);
 
