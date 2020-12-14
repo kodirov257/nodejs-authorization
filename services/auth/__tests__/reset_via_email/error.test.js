@@ -13,8 +13,8 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-    phone: '+998997776611',
-    token: '14789',
+    token: 'wrong-token',
+    password: "password",
 }
 
 const serverResponseData = {
@@ -23,19 +23,19 @@ const serverResponseData = {
             message: 'Invalid token',
             locations: [
                 {
-                    line: 22,
+                    line: 2,
                     column: 3,
                 }
             ],
             path: [
-                'verify_phone'
+                'reset_via_email'
             ],
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
                         "Error: Invalid token",
-                        "    at verifyPhone (/app/services/auth/verify.js:39:15)",
+                        "    at resetViaEmail (/app/services/auth/reset_password.js:77:15)",
                         "    at process._tickCallback (internal/process/next_tick.js:68:7)",
                     ],
                 },
@@ -43,7 +43,7 @@ const serverResponseData = {
         },
     ],
     data: {
-        verify_phone: null,
+        reset_via_email: null,
     }
 }
 
@@ -61,9 +61,9 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_phone(
-                phone: ${sendData.phone}
+            reset_via_email(
                 token: ${sendData.token}
+                password: ${sendData.password}
             )
         }`,
     });
@@ -77,9 +77,9 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('verify_phone');
-    expect(response.data.verify_phone).toBeDefined();
-    expect(response.data.verify_phone).toBeNull();
+    expect(response.data).toHaveProperty('reset_via_email');
+    expect(response.data.reset_via_email).toBeDefined();
+    expect(response.data.reset_via_email).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -92,9 +92,9 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_phone(
-                phone: ${sendData.phone}
+            reset_via_email(
                 token: ${sendData.token}
+                password: ${sendData.password}
             )
         }`,
     });

@@ -14,17 +14,18 @@ const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
     token: 'right-token',
+    password: "password",
 }
 
 const responseData = {
     data: {
-        verify_email: true,
+        reset_via_email: true,
     },
 };
 
 const serverResponseData = {
     data: {
-        verify_email: true,
+        reset_via_email: true,
     },
 }
 
@@ -44,16 +45,17 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(
+            reset_via_email(
                 token: ${sendData.token}
+                password: ${sendData.password}
             )
         }`,
     });
 
     expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('verify_email');
-    expect(response.data.verify_email).toBeDefined();
-    expect(response.data.verify_email).toBeTruthy();
+    expect(response.data).toHaveProperty('reset_via_email');
+    expect(response.data.reset_via_email).toBeDefined();
+    expect(response.data.reset_via_email).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 
@@ -65,8 +67,9 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(
+            reset_via_email(
                 token: ${sendData.token}
+                password: ${sendData.password}
             )
         }`,
     });

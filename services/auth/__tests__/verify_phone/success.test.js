@@ -13,7 +13,8 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-    token: '14789',
+    phone: '+998997776611',
+    token: '14790',
 }
 
 const responseData = {
@@ -44,7 +45,9 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_phone(token: ${sendData.token}
+            verify_phone(
+                phone: ${sendData.phone}
+                token: ${sendData.token}
             )
         }`,
     });
@@ -64,7 +67,9 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_phone(token: ${sendData.token}
+            verify_phone(
+                phone: ${sendData.phone}
+                token: ${sendData.token}
             )
         }`,
     });
