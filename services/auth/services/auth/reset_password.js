@@ -44,14 +44,14 @@ export const sendResetPhone = async (phone) => {
     const value = validatePhone(phone);
     phone = value.phone
 
-    let user = await getUserByEmail(phone);
+    let user = await getUserByPhone(phone);
 
     if (!user) {
-        throw new Error('Invalid email provided');
+        throw new Error('Invalid phone provided');
     }
 
     const fields = {
-        phone_verify_token: Math.floor(Math.random() * 99999) + 10000,
+        phone_verify_token: (Math.floor(Math.random() * 99999) + 10000).toString(),
         phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
     };
 
@@ -60,7 +60,7 @@ export const sendResetPhone = async (phone) => {
     let data = get(result, 'data.update_users_by_pk');
 
     if (data !== undefined) {
-        await sendSmsResetToken(data);
+        await sendSmsResetToken(data.phone, data.phone_verify_token);
 
         return true;
     }

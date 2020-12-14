@@ -1,9 +1,9 @@
+const moment = require('moment');
 import { ValidationError } from "apollo-server-express";
 import bcrypt from "bcryptjs";
 import {v4 as uuidv4} from "uuid";
 import gql from "graphql-tag";
 import get from "lodash/get";
-const moment = require('moment');
 
 import * as constants from "../../helpers/values";
 import { UserRegistrationFragment } from "../../fragments";
