@@ -13,9 +13,7 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-    username: 'test',
-    email_or_phone: 'test@gmail.com',
-    password: 'test_password',
+    token: 'wrong-token',
 }
 
 const responseData = {
@@ -46,7 +44,8 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(token: ${sendData.token}
+            verify_email(
+                token: ${sendData.token}
             )
         }`,
     });
@@ -66,7 +65,8 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(token: ${sendData.token}
+            verify_email(
+                token: ${sendData.token}
             )
         }`,
     });

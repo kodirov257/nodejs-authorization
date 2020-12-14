@@ -13,20 +13,18 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-    username: 'test',
-    email_or_phone: 'test@gmail.com',
-    password: 'test_password',
+    token: '14789',
 }
 
 const responseData = {
     data: {
-        register: true,
+        verify_phone: true,
     },
 };
 
 const serverResponseData = {
     data: {
-        register: true,
+        verify_phone: true,
     },
 }
 
@@ -46,18 +44,15 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Accept: 'application/json',
         },
         body: `mutation {
-            register(
-                username: ${sendData.username},
-                email_or_phone: ${sendData.email_or_phone},
-                password: ${sendData.password}
+            verify_phone(token: ${sendData.token}
             )
         }`,
     });
 
     expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('register');
-    expect(response.data.register).toBeDefined();
-    expect(response.data.register).toBeTruthy();
+    expect(response.data).toHaveProperty('verify_phone');
+    expect(response.data.verify_phone).toBeDefined();
+    expect(response.data.verify_phone).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 
@@ -69,10 +64,7 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            register(
-                username: ${sendData.username},
-                email_or_phone: ${sendData.email_or_phone},
-                password: ${sendData.password}
+            verify_phone(token: ${sendData.token}
             )
         }`,
     });

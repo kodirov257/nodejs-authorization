@@ -60,7 +60,8 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(token: ${sendData.token}
+            verify_email(
+                token: ${sendData.token}
             )
         }`,
     });
@@ -89,7 +90,8 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            verify_email(token: ${sendData.token}
+            verify_email(
+                token: ${sendData.token}
             )
         }`,
     });

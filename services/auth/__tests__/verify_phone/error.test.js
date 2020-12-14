@@ -13,30 +13,28 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-    username: 'test',
-    email_or_phone: 'test@gmail.com',
-    password: 'test_password',
+    token: '14789',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Username already registered',
+            message: 'Invalid token',
             locations: [
                 {
-                    line: 2,
+                    line: 22,
                     column: 3,
                 }
             ],
             path: [
-                'register'
+                'verify_phone'
             ],
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
-                        "Error: Username already registered",
-                        "    at register (/app/services/auth/register.js:27:15)",
+                        "Error: Invalid token",
+                        "    at verifyPhone (/app/services/auth/verify.js:39:15)",
                         "    at process._tickCallback (internal/process/next_tick.js:68:7)",
                     ],
                 },
@@ -44,7 +42,7 @@ const serverResponseData = {
         },
     ],
     data: {
-        register: null,
+        verify_phone: null,
     }
 }
 
@@ -62,10 +60,9 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Accept: 'application/json',
         },
         body: `mutation {
-            register(
-                username: ${sendData.username},
-                email_or_phone: ${sendData.email_or_phone},
-                password: ${sendData.password}
+            verify_phone(
+            phone: ${sendData.phone},
+            token: ${sendData.token}
             )
         }`,
     });
@@ -79,9 +76,9 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('register');
-    expect(response.data.register).toBeDefined();
-    expect(response.data.register).toBeNull();
+    expect(response.data).toHaveProperty('verify_phone');
+    expect(response.data.verify_phone).toBeDefined();
+    expect(response.data.verify_phone).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -94,10 +91,9 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            register(
-                username: ${sendData.username},
-                email_or_phone: ${sendData.email_or_phone},
-                password: ${sendData.password}
+            verify_phone(
+            phone: ${sendData.phone},
+            token: ${sendData.token}
             )
         }`,
     });
