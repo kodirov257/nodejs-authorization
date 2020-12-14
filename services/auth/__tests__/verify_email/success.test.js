@@ -20,13 +20,13 @@ const sendData = {
 
 const responseData = {
     data: {
-        register: true,
+        verify_email: true,
     },
 };
 
 const serverResponseData = {
     data: {
-        register: true,
+        verify_email: true,
     },
 }
 
@@ -46,17 +46,15 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Accept: 'application/json',
         },
         body: `mutation {
-            register(username: ${sendData.username},
-            email_or_phone: ${sendData.email_or_phone},
-            password: ${sendData.password}
+            verify_email(token: ${sendData.token}
             )
         }`,
     });
 
     expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('register');
-    expect(response.data.register).toBeDefined();
-    expect(response.data.register).toBeTruthy();
+    expect(response.data).toHaveProperty('verify_email');
+    expect(response.data.verify_email).toBeDefined();
+    expect(response.data.verify_email).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 
@@ -68,9 +66,7 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            register(username: ${sendData.username},
-            email_or_phone: ${sendData.email_or_phone},
-            password: ${sendData.password}
+            verify_email(token: ${sendData.token}
             )
         }`,
     });
