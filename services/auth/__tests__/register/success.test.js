@@ -49,6 +49,9 @@ test('register calls fetch with the right arguments and returns boolean true', a
         }`,
     });
 
+    expect(response).toHaveProperty('data');
+    expect(response.data).toBeDefined();
+    expect(response.data).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 

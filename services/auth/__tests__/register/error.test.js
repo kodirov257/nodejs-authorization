@@ -18,7 +18,7 @@ const sendData = {
     password: 'test_password',
 }
 
-const responseData = {
+const serverResponseData = {
     errors: [
         {
             message: 'Username already registered',
@@ -46,18 +46,12 @@ const responseData = {
     data: {
         register: null,
     }
-};
-
-const serverResponseData = {
-    errors: true,
 }
 
-test('register calls fetch with the right arguments and returns boolean true', async () => {
+test('register calls fetch with the wrong arguments and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
     const response = await mockFetch(sendData);
-
-    console.log(response);
 
     expect(fetch).toHaveBeenCalledTimes(1);
 
@@ -75,7 +69,20 @@ test('register calls fetch with the right arguments and returns boolean true', a
         }`,
     });
 
-    expect(response).toEqual(responseData);
+    expect(response).toHaveProperty('errors');
+    expect(response).toHaveProperty('data');
+    expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0]).toHaveProperty('locations');
+    expect(response.errors[0]).toHaveProperty('path');
+    expect(response.errors[0]).toHaveProperty('extensions');
+    expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions).toHaveProperty('exception');
+    expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
+    expect(response.data).toHaveProperty('register');
+    expect(response.data.register).toBeDefined();
+    expect(response.data.register).toBeNull();
+
+    // expect(response).toEqual(responseData);
 });
 
 async function mockFetch(sendData) {
