@@ -3,8 +3,8 @@ import gql from "graphql-tag";
 import get from "lodash/get";
 
 import { hasuraQuery } from "../client";
-import {getUserByCredentials} from "..";
-import {generateClaimsJwtToken, generateJwtRefreshToken} from "../../helpers/auth-tools";
+import { getUserByCredentials } from "..";
+import { generateClaimsJwtToken, generateJwtRefreshToken } from "../../helpers/auth-tools";
 
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {
     const refreshToken = uuidv4() + '-' + (+new Date());
@@ -70,3 +70,4 @@ export const generateTokens = async (user, request) => {
 export const getExpiresDate = () => {
     return new Date(Date.now() + process.env.REFRESH_TOKEN_EXPIRES_IN * 60 * 1000);
 };
+

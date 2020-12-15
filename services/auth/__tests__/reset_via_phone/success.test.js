@@ -35,8 +35,6 @@ test('register calls fetch with the right arguments and returns boolean true', a
 
     const response = await mockFetch(sendData);
 
-    console.log(response);
-
     expect(fetch).toHaveBeenCalledTimes(1);
 
     expect(fetch).toHaveBeenCalledWith(expect.any(String), {

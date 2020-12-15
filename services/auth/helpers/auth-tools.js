@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const generateJwtAccessToken = (payload) => {
+const generateJwtAccessToken = (payload) => {
     const jwtOptions = {
         algorithm: process.env.JWT_ALGORITHM,
         expiresIn: `${process.env.JWT_TOKEN_EXPIRES_MIN}m`,
