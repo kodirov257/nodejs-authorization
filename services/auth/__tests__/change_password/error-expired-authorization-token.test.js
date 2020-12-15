@@ -80,6 +80,8 @@ test('register calls fetch with the expired authorization token and returns erro
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('path');
     expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
+    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
 
     expect(response).toEqual(responseData);
 });

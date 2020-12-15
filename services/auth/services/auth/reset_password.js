@@ -101,6 +101,11 @@ export const resetViaPhone = async (phone, token, password) => {
         throw new Error('Invalid token');
     }
 
+    const expireData = moment(user.phone_verify_token_expire);
+    if (expireData.isBefore()) {
+        throw new Error('Phone reset token is expired.');
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const fields = {
         phone_verify_token: null,

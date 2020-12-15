@@ -40,6 +40,11 @@ export const verifyPhone = async (phone, token) => {
         throw new Error('Invalid token');
     }
 
+    const expireData = moment(user.phone_verify_token_expire);
+    if (expireData.isBefore()) {
+        throw new Error('Phone verify token is expired.');
+    }
+
     const fields = {
         phone_verified: true,
         phone_verify_token: null,
