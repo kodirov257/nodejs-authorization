@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
 const generateJwtAccessToken = (payload) => {
     const jwtOptions = {
@@ -9,16 +9,7 @@ const generateJwtAccessToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, jwtOptions);
 }
 
-export const generateJwtRefreshToken = (payload) => {
-    const jwtOptions = {
-        algorithm: process.env.JWT_ALGORITHM,
-        expiresIn: `${process.env.REFRESH_TOKEN_EXPIRES_IN_MIN}m`,
-    };
-
-    return jwt.sign(payload, process.env.JWT_PRIVATE_REFRESH_KEY, jwtOptions);
-};
-
-export const generateClaimsJwtToken = (user, sessionId = null) => {
+const generateClaimsJwtToken = (user, sessionId = null) => {
     const headerPrefix = process.env.HASURA_GRAPHQL_HEADER_PREFIX;
 
     let today = new Date();
@@ -39,3 +30,8 @@ export const generateClaimsJwtToken = (user, sessionId = null) => {
 
     return generateJwtAccessToken(payload);
 };
+
+module.exports = {
+    generateClaimsJwtToken,
+    generateJwtAccessToken,
+}

@@ -1,5 +1,5 @@
+const moment = require('moment');
 import get from "lodash/get";
-import gql from "graphql-tag";
 
 import { validateVerifyEmail, validateVerifyPhone } from "../../validators";
 import { getUserByEmailVerifyToken, getUserByPhoneVerifyToken, updateUser } from "..";
@@ -18,6 +18,7 @@ export const verifyEmail = async (token) => {
         email_verified: true,
         email_verify_token: null,
         status: constants.STATUS_ACTIVE,
+        updated_at: moment().format('Y-M-D H:mm:ss'),
     };
 
     const result = await updateUser(user.id, fields);
@@ -39,16 +40,20 @@ export const verifyPhone = async (phone, token) => {
         throw new Error('Invalid token');
     }
 
+    const expireData = moment(user.phone_verify_token_expire);
+    if (expireData.isBefore()) {
+        throw new Error('Phone verify token is expired.');
+    }
+
     const fields = {
         phone_verified: true,
         phone_verify_token: null,
         phone_verify_token_expire: null,
         status: constants.STATUS_ACTIVE,
+        updated_at: moment().format('Y-M-D H:mm:ss'),
     };
 
     const result = await updateUser(user.id, fields);
-    console.log(result);
-    console.log(get(result, 'data.update_users_by_pk'));
 
     return get(result, 'data.update_users_by_pk') !== undefined;
 }

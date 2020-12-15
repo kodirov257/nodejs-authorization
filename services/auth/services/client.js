@@ -1,7 +1,7 @@
 import { memoize } from "lodash";
 import fetch from "node-fetch";
 import { print } from "graphql/language/printer";
-require('custom-env').env();
+require('dotenv-flow').config();
 
 const getDefaultHeaders = memoize(() => {
     const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;

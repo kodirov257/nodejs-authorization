@@ -6,7 +6,7 @@ let JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 import { buildContext } from 'graphql-passport';
 
-require('custom-env').env();
+require('dotenv-flow').config();
 import {
   getCurrentUserId,
   isAuthenticated,

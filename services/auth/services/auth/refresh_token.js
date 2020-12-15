@@ -1,3 +1,4 @@
+const moment = require('moment');
 import jwt from 'jsonwebtoken';
 import get from 'lodash/get';
 import {v4 as uuidv4} from "uuid";
@@ -7,9 +8,19 @@ import { generateClaimsJwtToken } from "../../helpers/auth-tools";
 
 export const refreshToken = async (signedRefreshToken) => {
     const refreshToken = getToken(signedRefreshToken);
-    console.log(refreshToken);
 
     const userSession = await getUserSession(refreshToken);
+
+    const expireData = moment(userSession.expires_at);
+    const currentTime = moment();
+    console.log(expireData);
+    console.log(currentTime);
+    console.log(expireData.isBefore());
+    console.log(expireData.isAfter());
+    if (!expireData.isAfter()) {
+        throw new Error('Session is expired.');
+    }
+
     const user = await getUserById(userSession.user_id);
     const accessToken = await generateClaimsJwtToken(user, uuidv4() + '-' + (+new Date()));
 
