@@ -43,7 +43,7 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
     }
 }
 
-export const login = async (usernameEmailOrPhone, password, ctx) => {
+export const singin = async (usernameEmailOrPhone, password, ctx) => {
     const user = await getUserByCredentials(usernameEmailOrPhone, password);
 
     return generateTokens(user, ctx.req);

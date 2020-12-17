@@ -13,11 +13,12 @@ import {
   getUserById,
   verifyEmail,
   verifyPhone,
-  login,
+  singin,
   register,
   resendEmail,
   resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword, refreshToken,
 } from "./services";
+import { log } from "./services/log";
 const authRouter = require('./routes/auth');
 
 // let opts = {
@@ -65,50 +66,111 @@ const resolvers = {
         const currentUserId = getCurrentUserId(ctx.req);
 
         return await getUserById(currentUserId);
-      } catch (e) {
+      } catch (error) {
         throw new Error('Not logged in');
       }
     },
   },
   Mutation: {
     register: async (_, {username, email_or_phone, password}) => {
-      return register(username, email_or_phone, password)
+      try {
+        return register(username, email_or_phone, password);
+      } catch (error) {
+        throw error;
+      }
     },
     verify_email: async (_, {token}, ctx) => {
-      return verifyEmail(token)
+      try {
+        return verifyEmail(token);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     verify_phone: async (_, {phone, token}, ctx) => {
-      return verifyPhone(phone, token);
+      try {
+        // await log(new Error('Refresh token is not provided.'));
+        return verifyPhone(phone, token);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
-    login: async (_, {username_email_or_phone, password}, ctx) => {
-      return login(username_email_or_phone, password, ctx);
+    signin: async (_, {login, password}, ctx) => {
+      try {
+        return singin(login, password, ctx);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     resend_email: async (_, {email}) => {
-      return resendEmail(email);
+      try {
+        return resendEmail(email);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     resend_phone: async (_, {phone}) => {
-      return resendPhone(phone);
+      try {
+        return resendPhone(phone);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     send_reset_email: async (_, {email}) => {
-      return sendResetEmail(email);
+      try {
+        return sendResetEmail(email);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     send_reset_phone: async (_, {phone}) => {
-      return sendResetPhone(phone);
+      try {
+        return sendResetPhone(phone);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     reset_via_email: async (_, {token, password}) => {
-      return resetViaEmail(token, password);
+      try {
+        return resetViaEmail(token, password);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     reset_via_phone: async (_, {phone, token, password}) => {
-      return resetViaPhone(phone, token, password);
+      try {
+        return resetViaPhone(phone, token, password);
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     change_password: async (_, {old_password, new_password}, ctx) => {
-      return changePassword(old_password, new_password, ctx)
+      try {
+        return changePassword(old_password, new_password, ctx)
+      } catch (error) {
+        await log(error);
+        throw error;
+      }
     },
     refresh_token: async (_, {refresh_token}, ctx) => {
-      if (!refresh_token) {
-        throw new Error('Refresh token is not provided.');
+      try {
+        if (!refresh_token) {
+          throw new Error('Refresh token is not provided.');
+        }
+
+        return refreshToken(refresh_token, ctx);
+      } catch (error) {
+        await log(error);
+        throw error;
       }
-      return refreshToken(refresh_token, ctx);
     }
   }
 };
@@ -116,7 +178,11 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req, res }) => buildContext({ req, res })
+  context: ({ req, res }) => buildContext({ req, res }),
+  formatError: (error) => {
+    log(error);
+    throw error;
+  },
 });
 
 const app = express();

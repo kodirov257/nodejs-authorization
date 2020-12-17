@@ -1,7 +1,7 @@
 const moment = require('moment');
 import { ValidationError } from "apollo-server-express";
 import bcrypt from "bcryptjs";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import gql from "graphql-tag";
 import get from "lodash/get";
 
@@ -75,7 +75,10 @@ export const register = async (username, emailOrPhone, password) => {
         }
     );
 
-    console.log(result);
+    // console.log(result);
+    // console.log(JSON.stringify(result));
+    // console.log(result.errors[0].extensions.internal.statement);
+    // console.log(result.errors[0]);
 
     let data = get(result, 'data.insert_users.returning');
     if (data !== undefined && (data = data[0]) !== undefined) {
