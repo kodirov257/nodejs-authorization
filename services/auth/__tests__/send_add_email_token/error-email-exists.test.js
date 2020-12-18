@@ -23,38 +23,43 @@ const user = {
 };
 
 const sendData = {
-    old_password: 'old-password',
+    old_password: 'wrong-old-password',
     new_password: 'new-password',
 }
 
 const serverResponseData = {
     errors: [
         {
+            message: 'Invalid "password".',
+            locations: [
+                {
+                    line: 45,
+                    column: 3,
+                }
+            ],
+            path: [
+                'change_password'
+            ],
             extensions: {
-                path: '$',
-                code: 'invalid-jwt',
+                code: 'INTERNAL_SERVER_ERROR',
+                exception: {
+                    stacktrace: [
+                        "Error: Invalid \"password\".",
+                        "    at changePassword (/app/services/user.js:30:15)",
+                    ],
+                },
             },
-            message: 'Could not verify JWT: JWTExpired',
         },
     ],
+    data: {
+        change_password: null,
+    }
 }
 
-const responseData = {
-    errors: [
-        {
-            extensions: {
-                path: '$',
-                code: 'invalid-jwt',
-            },
-            message: 'Could not verify JWT: JWTExpired',
-        },
-    ],
-}
-
-test('register calls fetch with the expired authorization token and returns error', async () => {
+test('register calls fetch with the wrong arguments and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-    const accessToken = (await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()))).slice(1);
+    const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
 
     const response = await mockFetch(sendData, accessToken);
 
@@ -76,14 +81,19 @@ test('register calls fetch with the expired authorization token and returns erro
     });
 
     expect(response).toHaveProperty('errors');
+    expect(response).toHaveProperty('data');
     expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0]).toHaveProperty('locations');
+    expect(response.errors[0]).toHaveProperty('path');
     expect(response.errors[0]).toHaveProperty('extensions');
-    expect(response.errors[0].extensions).toHaveProperty('path');
     expect(response.errors[0].extensions).toHaveProperty('code');
-    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
-    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
+    expect(response.errors[0].extensions).toHaveProperty('exception');
+    expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
+    expect(response.data).toHaveProperty('change_password');
+    expect(response.data.change_password).toBeDefined();
+    expect(response.data.change_password).toBeNull();
 
-    expect(response).toEqual(responseData);
+    // expect(response).toEqual(responseData);
 });
 
 async function mockFetch(sendData, accessToken) {

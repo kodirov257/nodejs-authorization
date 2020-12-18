@@ -20,24 +20,24 @@ const { Response } = jest.requireActual('node-fetch');
 const user = {
     id: 1,
     username: 'test',
-    email: 'test@gmail.com',
+    email: null,
+    phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    old_password: 'old-password',
-    new_password: 'new-password',
+    email: 'test@gmail.com',
 }
 
 const responseData = {
     data: {
-        change_password: true,
+        send_add_email_token: true,
     },
 };
 
 const serverResponseData = {
     data: {
-        change_password: true,
+        send_add_email_token: true,
     },
 }
 
@@ -58,17 +58,16 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
 
     expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('change_password');
-    expect(response.data.change_password).toBeDefined();
-    expect(response.data.change_password).toBeTruthy();
+    expect(response.data).toHaveProperty('send_add_email_token');
+    expect(response.data.send_add_email_token).toBeDefined();
+    expect(response.data.send_add_email_token).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 
@@ -81,9 +80,8 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });

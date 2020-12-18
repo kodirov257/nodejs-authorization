@@ -16,7 +16,14 @@ import {
   singin,
   register,
   resendEmail,
-  resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword, refreshToken,
+  resendPhone,
+  sendResetEmail,
+  sendResetPhone,
+  resetViaEmail,
+  resetViaPhone,
+  changePassword,
+  refreshToken,
+  sendToken,
 } from "./services";
 import { log } from "./services/log";
 const authRouter = require('./routes/auth');
@@ -111,6 +118,9 @@ const resolvers = {
       }
 
       return refreshToken(refresh_token, ctx);
+    },
+    send_add_email_token: async (_, { email }, ctx) => {
+      return sendToken(email, ctx);
     }
   }
 };

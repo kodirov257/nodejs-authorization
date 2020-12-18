@@ -18,13 +18,13 @@ const { Response } = jest.requireActual('node-fetch');
 const user = {
     id: 1,
     username: 'test',
-    email: 'test@gmail.com',
+    email: null,
+    phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    old_password: 'old-password',
-    new_password: 'new-password',
+    email: 'test@gmail.com',
 }
 
 const serverResponseData = {
@@ -34,7 +34,7 @@ const serverResponseData = {
                 path: '$',
                 code: 'invalid-jwt',
             },
-            message: 'Could not verify JWT: JWSError (JSONDecodeError "protected header contains invalid JSON")',
+            message: 'Could not verify JWT: JWTExpired',
         },
     ],
 }
@@ -46,12 +46,12 @@ const responseData = {
                 path: '$',
                 code: 'invalid-jwt',
             },
-            message: 'Could not verify JWT: JWSError (JSONDecodeError "protected header contains invalid JSON")',
+            message: 'Could not verify JWT: JWTExpired',
         },
     ],
 }
 
-test('register calls fetch with the wrong authorization and returns error', async () => {
+test('register calls fetch with the expired authorization token and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
     const accessToken = (await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()))).slice(1);
@@ -68,9 +68,8 @@ test('register calls fetch with the wrong authorization and returns error', asyn
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
@@ -80,6 +79,8 @@ test('register calls fetch with the wrong authorization and returns error', asyn
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('path');
     expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
+    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
 
     expect(response).toEqual(responseData);
 });
@@ -93,9 +94,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
