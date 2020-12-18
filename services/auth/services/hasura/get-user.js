@@ -57,7 +57,7 @@ export const getUserByPhone = async (phone, fragment = UserFragment) => {
 }
 
 export const getUserByPhoneVerifyToken = async (phone) => {
-    return getUser('phone', phone, UserRegistrationFragment);
+    return getUser('phone', phone.replace(/^\++/, ''), UserRegistrationFragment);
 }
 
 const getUser = async (attribute, value, fragment = UserFragment) => {

@@ -8,13 +8,16 @@ import { hasuraQuery } from "./client";
 
 export const log = (exception) => {
     const message = exception.message;
-    const code = 200;
+    let code = 200;
     const serviceType = SERVICE_AUTH;
     let stacktrace = null;
     if (has(exception, 'extensions.exception')) {
         stacktrace = get(exception, 'extensions.exception');
-    } else if (has(exception, 'error')) {
-
+    } else if (has(exception, 'extensions.internal.error')) {
+        stacktrace = get(exception, 'extensions.internal.error');
+        code = has(exception, 'extensions.internal.error.status_code') ? get(exception, 'extensions.internal.error.status_code') : code;
+    } else {
+        code = has(exception, 'extensions.code') ? get(exception, 'extensions.code') : code;
     }
 
     const response = send(serviceType, code, message, stacktrace);

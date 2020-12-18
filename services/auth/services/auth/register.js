@@ -55,7 +55,7 @@ export const register = async (username, emailOrPhone, password) => {
         params.email_verify_token = uuidv4() + '-' + (+new Date());
     } else {
         params.phone = emailOrPhone.replace(/^\++/, '');
-        params.phone_verify_token = (Math.floor(Math.random() * 99999) + 10000).toString();
+        params.phone_verify_token = (Math.floor(Math.random() * 90000) + 10000).toString();
         params.phone_verify_token_expire = moment().add(5, 'minutes').format('Y-M-D H:mm:ss');
     }
 
@@ -76,6 +76,7 @@ export const register = async (username, emailOrPhone, password) => {
     );
 
     // console.log(result);
+    // console.log(result.errors[0].extensions);
     // console.log(JSON.stringify(result));
     // console.log(result.errors[0].extensions.internal.statement);
     // console.log(result.errors[0]);
@@ -90,6 +91,8 @@ export const register = async (username, emailOrPhone, password) => {
 
         return true;
     }
+
+    // throw new Error();
 
     return false;
 }

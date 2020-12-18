@@ -9,7 +9,7 @@ import {
     validateResetViaEmail,
     validateResetViaPhone,
 } from "../../validators";
-import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone, updateUser } from "..";
+import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone, getUserByPhoneVerifyToken, updateUser } from "..";
 import { sendEmailResetToken } from "../mail";
 import { sendSmsResetToken } from "../sms";
 
@@ -51,7 +51,7 @@ export const sendResetPhone = async (phone) => {
     }
 
     const fields = {
-        phone_verify_token: (Math.floor(Math.random() * 99999) + 10000).toString(),
+        phone_verify_token: (Math.floor(Math.random() * 90000) + 10000).toString(),
         phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
     };
 
@@ -91,11 +91,14 @@ export const resetViaEmail = async (token, password) => {
 export const resetViaPhone = async (phone, token, password) => {
     validateResetViaPhone(phone, token, password);
 
-    let user = await getUserByPhone(phone);
+    let user = await getUserByPhoneVerifyToken(phone);
 
     if (!user) {
         throw new Error('Invalid phone');
     }
+
+    console.log(user.phone_verify_token);
+    console.log(token);
 
     if (user.phone_verify_token !== token) {
         throw new Error('Invalid token');
