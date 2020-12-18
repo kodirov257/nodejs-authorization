@@ -73,104 +73,44 @@ const resolvers = {
   },
   Mutation: {
     register: async (_, {username, email_or_phone, password}) => {
-      try {
-        return register(username, email_or_phone, password);
-      } catch (error) {
-        throw error;
-      }
+      return register(username, email_or_phone, password);
     },
     verify_email: async (_, {token}, ctx) => {
-      try {
-        return verifyEmail(token);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return verifyEmail(token);
     },
     verify_phone: async (_, {phone, token}, ctx) => {
-      try {
-        // await log(new Error('Refresh token is not provided.'));
-        return verifyPhone(phone, token);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return verifyPhone(phone, token);
     },
     signin: async (_, {login, password}, ctx) => {
-      try {
-        return singin(login, password, ctx);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return singin(login, password, ctx);
     },
     resend_email: async (_, {email}) => {
-      try {
-        return resendEmail(email);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return resendEmail(email);
     },
     resend_phone: async (_, {phone}) => {
-      try {
-        return resendPhone(phone);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return resendPhone(phone);
     },
     send_reset_email: async (_, {email}) => {
-      try {
-        return sendResetEmail(email);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return sendResetEmail(email);
     },
     send_reset_phone: async (_, {phone}) => {
-      try {
-        return sendResetPhone(phone);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return sendResetPhone(phone);
     },
     reset_via_email: async (_, {token, password}) => {
-      try {
-        return resetViaEmail(token, password);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return resetViaEmail(token, password);
     },
     reset_via_phone: async (_, {phone, token, password}) => {
-      try {
-        return resetViaPhone(phone, token, password);
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return resetViaPhone(phone, token, password);
     },
     change_password: async (_, {old_password, new_password}, ctx) => {
-      try {
-        return changePassword(old_password, new_password, ctx)
-      } catch (error) {
-        await log(error);
-        throw error;
-      }
+      return changePassword(old_password, new_password, ctx)
     },
     refresh_token: async (_, {refresh_token}, ctx) => {
-      try {
-        if (!refresh_token) {
-          throw new Error('Refresh token is not provided.');
-        }
-
-        return refreshToken(refresh_token, ctx);
-      } catch (error) {
-        await log(error);
-        throw error;
+      if (!refresh_token) {
+        throw new Error('Refresh token is not provided.');
       }
+
+      return refreshToken(refresh_token, ctx);
     }
   }
 };
