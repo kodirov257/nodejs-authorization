@@ -13,11 +13,12 @@ import {
   getUserById,
   verifyEmail,
   verifyPhone,
-  login,
+  singin,
   register,
   resendEmail,
   resendPhone, sendResetEmail, sendResetPhone, resetViaEmail, resetViaPhone, changePassword, refreshToken,
 } from "./services";
+import { log } from "./services/log";
 const authRouter = require('./routes/auth');
 
 // let opts = {
@@ -65,23 +66,23 @@ const resolvers = {
         const currentUserId = getCurrentUserId(ctx.req);
 
         return await getUserById(currentUserId);
-      } catch (e) {
+      } catch (error) {
         throw new Error('Not logged in');
       }
     },
   },
   Mutation: {
     register: async (_, {username, email_or_phone, password}) => {
-      return register(username, email_or_phone, password)
+      return register(username, email_or_phone, password);
     },
     verify_email: async (_, {token}, ctx) => {
-      return verifyEmail(token)
+      return verifyEmail(token);
     },
     verify_phone: async (_, {phone, token}, ctx) => {
       return verifyPhone(phone, token);
     },
-    login: async (_, {username_email_or_phone, password}, ctx) => {
-      return login(username_email_or_phone, password, ctx);
+    signin: async (_, {login, password}, ctx) => {
+      return singin(login, password, ctx);
     },
     resend_email: async (_, {email}) => {
       return resendEmail(email);
@@ -108,6 +109,7 @@ const resolvers = {
       if (!refresh_token) {
         throw new Error('Refresh token is not provided.');
       }
+
       return refreshToken(refresh_token, ctx);
     }
   }
@@ -116,7 +118,11 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req, res }) => buildContext({ req, res })
+  context: ({ req, res }) => buildContext({ req, res }),
+  formatError: (error) => {
+    log(error);
+    throw error;
+  },
 });
 
 const app = express();
