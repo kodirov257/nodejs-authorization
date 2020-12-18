@@ -1,0 +1,23 @@
+version: '3.6'
+services:
+  hasura-auth:
+    build:
+      context: ./services/auth
+    depends_on:
+      - "graphql-engine"
+    restart: always
+    volumes:
+      - ./services/auth:/app
+    ports:
+      - "4004:4000"
+    environment:
+      PORT: 4000
+      HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}" # change this with your strong password
+      JWT_ALGORITHM: HS256
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "3EK6FD+o0+c7tzBNVfjpMkNDi2yARAAKzQlk8O2IKoxQu4nF7EdAh8s3TwpHwrdWT6R"}'
+      # change the jwt private key
+      JWT_PRIVATE_KEY: 9e519add75013cd5e159e9ee57475ea4db626c86dc51311a6e5b46ef1349530b
+      REFRESH_TOKEN_EXPIRES_IN: 54000
+
+

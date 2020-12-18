@@ -1,0 +1,6 @@
+{
+	"migrations":true,
+	"services":true,
+	"components":true,
+	"metadata":true	
+}

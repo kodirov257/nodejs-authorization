@@ -1,0 +1,47 @@
+- table:
+    schema: public
+    name: categories
+  object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: parent_id
+  array_relationships:
+  - name: categories
+    using:
+      foreign_key_constraint_on:
+        column: parent_id
+        table:
+          schema: public
+          name: categories
+  - name: category_locales
+    using:
+      foreign_key_constraint_on:
+        column: category_id
+        table:
+          schema: public
+          name: category_locales
+- table:
+    schema: public
+    name: category_locales
+  object_relationships:
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: locale
+    using:
+      foreign_key_constraint_on: code
+- table:
+    schema: public
+    name: locales
+  object_relationships:
+  - name: locale_code
+    using:
+      foreign_key_constraint_on: value
+  array_relationships:
+  - name: category_locales
+    using:
+      foreign_key_constraint_on:
+        column: code
+        table:
+          schema: public
+          name: category_locales
