@@ -23,7 +23,7 @@ import {
   resetViaPhone,
   changePassword,
   refreshToken,
-  sendToken,
+  sendToken, addEmail,
 } from "./services";
 import { log } from "./services/log";
 const authRouter = require('./routes/auth');
@@ -121,7 +121,10 @@ const resolvers = {
     },
     send_add_email_token: async (_, { email }, ctx) => {
       return sendToken(email, ctx);
-    }
+    },
+    add_email: async (_, {token}, ctx) => {
+      return addEmail(token, ctx);
+    },
   }
 };
 
