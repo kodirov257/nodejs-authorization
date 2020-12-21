@@ -8,22 +8,22 @@ import { buildContext } from 'graphql-passport';
 
 require('dotenv-flow').config();
 import {
-  getCurrentUserId,
-  isAuthenticated,
-  getUserById,
-  verifyEmail,
-  verifyPhone,
-  singin,
-  register,
-  resendEmail,
-  resendPhone,
-  sendResetEmail,
-  sendResetPhone,
-  resetViaEmail,
-  resetViaPhone,
-  changePassword,
-  refreshToken,
-  sendToken,
+	getCurrentUserId,
+	isAuthenticated,
+	getUserById,
+	verifyEmail,
+	verifyPhone,
+	singin,
+	register,
+	resendEmail,
+	resendPhone,
+	sendResetEmail,
+	sendResetPhone,
+	resetViaEmail,
+	resetViaPhone,
+	changePassword,
+	refreshToken,
+	sendToken, addEmail,
 } from "./services";
 import { log } from "./services/log";
 const authRouter = require('./routes/auth');
@@ -121,7 +121,10 @@ const resolvers = {
     },
     send_add_email_token: async (_, { email }, ctx) => {
       return sendToken(email, ctx);
-    }
+    },
+    add_email: async (_, {token}, ctx) => {
+    	return addEmail(token, ctx);
+	},
   }
 };
 

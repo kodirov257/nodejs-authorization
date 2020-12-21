@@ -4,10 +4,10 @@ import get from "lodash/get";
 
 import { getCurrentUserId, isAuthenticated } from "./user";
 import { getUserById } from "../hasura/get-user-by-id";
-import {getUserByEmail, getUserByEmailVerifyToken} from "../hasura/get-user";
+import { getUserByEmail, getUserByEmailVerifyToken } from "../hasura/get-user";
 import { updateUser } from "../hasura/update-user";
-import {validateEmail, validateVerifyEmail} from "../../validators";
-import { sendEmailResetToken } from "../mail";
+import { validateEmail, validateVerifyEmail } from "../../validators";
+import { sendAddEmailToken } from "../mail";
 
 export const sendToken = async (email, ctx) => {
     const value = validateEmail(email);
@@ -48,7 +48,7 @@ export const sendToken = async (email, ctx) => {
     let data = get(result, 'data.update_users_by_pk');
 
     if (data !== undefined) {
-        await sendEmailResetToken(data.username, data.email, data.email_verify_token);
+        await sendAddEmailToken(data.username, data.email, data.email_verify_token);
 
         return true;
     }
@@ -64,9 +64,22 @@ export const addEmail = async (token, ctx) => {
         throw new Error('Authorization token has not provided');
     }
 
-    const user = getUserByEmailVerifyToken(token);
+    const user = await getUserByEmailVerifyToken(token);
 
     if (!user) {
-
+		throw new Error('Wrong token is provided.');
     }
+
+    if (user.email_verify_token !== token) {
+    	throw new Error('Provided token is not equal to the current user.');
+	}
+
+    const fields = {
+    	email_verify_token: null,
+		email_verified: true,
+	};
+
+    const result = await updateUser(user.id, fields);
+
+    return get(result, 'data.update_users_by_pk') !== undefined;
 }
