@@ -4,9 +4,9 @@ import get from "lodash/get";
 
 import { getCurrentUserId, isAuthenticated } from "./user";
 import { getUserById } from "../hasura/get-user-by-id";
-import { getUserByEmail } from "../hasura/get-user";
+import {getUserByEmail, getUserByEmailVerifyToken} from "../hasura/get-user";
 import { updateUser } from "../hasura/update-user";
-import { validateEmail } from "../../validators";
+import {validateEmail, validateVerifyEmail} from "../../validators";
 import { sendEmailResetToken } from "../mail";
 
 export const sendToken = async (email, ctx) => {
@@ -33,7 +33,6 @@ export const sendToken = async (email, ctx) => {
     }
 
     const anotherUser = await getUserByEmail(email);
-    console.log(anotherUser);
 
     if (anotherUser) {
         throw new Error('There is already active user with this email.');
@@ -55,4 +54,19 @@ export const sendToken = async (email, ctx) => {
     }
 
     return false;
+}
+
+export const addEmail = async (token, ctx) => {
+    const value = validateVerifyEmail(token);
+    token = value.token;
+
+    if (!isAuthenticated(ctx.req)) {
+        throw new Error('Authorization token has not provided');
+    }
+
+    const user = getUserByEmailVerifyToken(token);
+
+    if (!user) {
+
+    }
 }
