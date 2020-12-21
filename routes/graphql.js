@@ -1,7 +1,7 @@
 let express = require('express');
 let router = express.Router();
 let { graphqlHTTP } = require('express-graphql');
-let { buildSchema } = require('graphql');
+let { buildSchema } = require('routes/graphql');
 
 // Construct a schema, using GraphQL schema language
 let schema = buildSchema(`

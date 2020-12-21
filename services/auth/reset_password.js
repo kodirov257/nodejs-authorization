@@ -9,7 +9,7 @@ import {
     validateResetViaEmail,
     validateResetViaPhone,
 } from "../../validators";
-import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone, getUserByPhoneVerifyToken, updateUser } from "..";
+import { getUserByEmail, getUserByEmailVerifyToken, getUserByPhone, getUserByPhoneVerifyToken, updateUser } from "../index";
 import { sendEmailResetToken } from "../mail";
 import { sendSmsResetToken } from "../sms";
 

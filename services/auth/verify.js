@@ -2,7 +2,7 @@ const moment = require('moment');
 import get from "lodash/get";
 
 import { validateVerifyEmail, validateVerifyPhone } from "../../validators";
-import { getUserByEmailVerifyToken, getUserByPhoneVerifyToken, updateUser } from "..";
+import { getUserByEmailVerifyToken, getUserByPhoneVerifyToken, updateUser } from "../index";
 import * as constants from "../../helpers/values";
 
 export const verifyEmail = async (token) => {

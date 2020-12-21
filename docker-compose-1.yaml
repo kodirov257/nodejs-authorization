@@ -2,7 +2,7 @@ version: '3.6'
 services:
   hasura-auth:
     build:
-      context: ./services/auth
+      context: services/auth
     depends_on:
       - "graphql-engine"
     restart: always

@@ -15,7 +15,7 @@ import {
     hasuraQuery,
     sendEmailVerifyToken,
     sendSmsVerifyToken
-} from "..";
+} from "../index";
 
 export const register = async (username, emailOrPhone, password) => {
     const value = validateRegistration(username, emailOrPhone, password);

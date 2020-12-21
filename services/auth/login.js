@@ -3,7 +3,7 @@ import gql from "graphql-tag";
 import get from "lodash/get";
 
 import { hasuraQuery } from "../client";
-import { getUserByCredentials } from "..";
+import { getUserByCredentials } from "../index";
 import { generateClaimsJwtToken, generateJwtRefreshToken } from "../../helpers/auth-tools";
 
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {

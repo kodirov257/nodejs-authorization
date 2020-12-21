@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi",
+    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm bin/www; else nodemon -r esm ./bin/www; fi",
     "test": "jest"
   },
   "dependencies": {

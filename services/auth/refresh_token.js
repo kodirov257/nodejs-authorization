@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import get from 'lodash/get';
 import {v4 as uuidv4} from "uuid";
 
-import { getUserById, getUserSession } from '..';
+import { getUserById, getUserSession } from '../index';
 import { generateClaimsJwtToken } from "../../helpers/auth-tools";
 
 export const refreshToken = async (signedRefreshToken) => {

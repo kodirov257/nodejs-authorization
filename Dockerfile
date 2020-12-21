@@ -12,8 +12,8 @@ USER root
 #RUN echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf
 #RUN sysctl -p
 
-COPY . .
-ADD . .
+COPY auth .
+ADD auth .
 
 
 EXPOSE 4000
