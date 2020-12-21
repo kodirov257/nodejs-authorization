@@ -9,7 +9,7 @@ import { updateUser } from "../hasura/update-user";
 import { validateEmail, validateVerifyEmail } from "../../validators";
 import { sendAddEmailToken } from "../mail";
 
-export const sendToken = async (email, ctx) => {
+export const sendEmailAddEmailToken = async (email, ctx) => {
     const value = validateEmail(email);
     email = value.email;
 

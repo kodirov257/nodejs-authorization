@@ -56,6 +56,8 @@ export const typeDefs = gql`
         refresh_token(refresh_token: String!): RefreshPayload
         send_add_email_token(email: String!): Boolean
 		add_email(token: String!): Boolean
+		send_add_phone_token(phone: String!): Boolean
+		add_phone(phone: String!, token: String!): Boolean
     }
 
     schema {
