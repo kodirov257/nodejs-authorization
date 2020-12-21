@@ -18,13 +18,13 @@ const { Response } = jest.requireActual('node-fetch');
 const user = {
     id: 1,
     username: 'test',
-    email: 'test@gmail.com',
+    email: null,
+    phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    old_password: 'old-password',
-    new_password: 'new',
+    email: 'test@gmail.com',
 }
 
 const serverResponseData = {
@@ -38,7 +38,7 @@ const serverResponseData = {
                 }
             ],
             path: [
-                'change_password'
+                'send_add_email_token'
             ],
             extensions: {
                 validationErrors: [
@@ -85,7 +85,7 @@ const serverResponseData = {
         },
     ],
     data: {
-        change_password: null,
+        send_add_email_token: null,
     }
 }
 
@@ -106,9 +106,8 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
@@ -121,7 +120,7 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0]).toHaveProperty('locations');
 
     expect(response.errors[0]).toHaveProperty('path');
-    expect(response.errors[0].path).toContain('change_password');
+    expect(response.errors[0].path).toContain('send_add_email_token');
 
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('validationErrors');
@@ -161,9 +160,9 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0].extensions.exception.validationErrors[0].context.key).toContain('newPassword');
 
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('change_password');
-    expect(response.data.change_password).toBeDefined();
-    expect(response.data.change_password).toBeNull();
+    expect(response.data).toHaveProperty('send_add_email_token');
+    expect(response.data.send_add_email_token).toBeDefined();
+    expect(response.data.send_add_email_token).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -177,9 +176,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });

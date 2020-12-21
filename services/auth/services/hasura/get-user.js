@@ -48,8 +48,8 @@ export const getUserByEmailVerifyToken = async (token, fragment = UserRegistrati
     return getUser('email_verify_token', token, fragment);
 }
 
-export const getUserByEmail = async (email) => {
-    return getUser('email', email);
+export const getUserByEmail = async (email, fragment = UserFragment) => {
+    return getUser('email', email, fragment);
 }
 
 export const getUserByPhone = async (phone, fragment = UserFragment) => {
@@ -57,7 +57,7 @@ export const getUserByPhone = async (phone, fragment = UserFragment) => {
 }
 
 export const getUserByPhoneVerifyToken = async (phone) => {
-    return getUser('phone', phone, UserRegistrationFragment);
+    return getUser('phone', phone.replace(/^\++/, ''), UserRegistrationFragment);
 }
 
 const getUser = async (attribute, value, fragment = UserFragment) => {

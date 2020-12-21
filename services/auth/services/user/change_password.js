@@ -1,10 +1,11 @@
 import get from 'lodash/get';
 import bcrypt from "bcryptjs";
 
-import * as constants from "../helpers/values";
-import { getUserById } from "./hasura/get-user-by-id";
-import { updateUser } from "./hasura/update-user";
-import { validateChangePassword } from "../validators";
+import * as constants from "../../helpers/values";
+import { getUserById } from "../hasura/get-user-by-id";
+import { updateUser } from "../hasura/update-user";
+import { validateChangePassword } from "../../validators";
+import { getCurrentUserId, isAuthenticated } from "./user";
 
 export const changePassword = async (oldPassword, newPassword, ctx) => {
     if (!isAuthenticated(ctx.req)) {
@@ -35,29 +36,7 @@ export const changePassword = async (oldPassword, newPassword, ctx) => {
         password: passwordHash,
     };
 
-    const result = await updateUser(user.id, fields)
+    const result = await updateUser(user.id, fields);
 
     return get(result, 'data.update_users_by_pk') !== undefined;
 }
-
-export const isAuthenticated = (req) => {
-    const headers = req.headers;
-
-    if (headers === undefined || headers[process.env.HASURA_GRAPHQL_HEADER_PREFIX+'role'] === 'anonymous') {
-        return void 0;
-    }
-
-    return true;
-};
-
-export const getCurrentUserId = (req) =>
-    getFieldFromDataAuthorizationToken(req, 'user-id');
-
-const getFieldFromDataAuthorizationToken = (req, field) => {
-    const headers = req.headers;
-
-    return get(
-        headers,
-        `${process.env.HASURA_GRAPHQL_HEADER_PREFIX}${field}`,
-    );
-};

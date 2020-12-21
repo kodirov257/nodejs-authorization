@@ -161,11 +161,6 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0].extensions.exception.validationErrors[0].context.key).toContain('newPassword');
 
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.errors[0].extensions.exception.stacktrace).toContain("UserInputError: Failed to change password.",
-        "    at validateGeneral (/app/validators/auth.js:65:15)",
-        "    at validateChangePassword (/app/validators/auth.js:53:12)",
-        "    at changePassword (/app/services/user.js:25:5)",
-        "    at process._tickCallback (internal/process/next_tick.js:68:7)");
     expect(response.data).toHaveProperty('change_password');
     expect(response.data.change_password).toBeDefined();
     expect(response.data.change_password).toBeNull();

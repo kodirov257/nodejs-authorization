@@ -12,11 +12,6 @@ export const refreshToken = async (signedRefreshToken) => {
     const userSession = await getUserSession(refreshToken);
 
     const expireData = moment(userSession.expires_at);
-    const currentTime = moment();
-    console.log(expireData);
-    console.log(currentTime);
-    console.log(expireData.isBefore());
-    console.log(expireData.isAfter());
     if (!expireData.isAfter()) {
         throw new Error('Session is expired.');
     }
