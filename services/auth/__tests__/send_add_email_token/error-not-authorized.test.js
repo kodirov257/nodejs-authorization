@@ -45,8 +45,8 @@ const serverResponseData = {
                 exception: {
                     stacktrace: [
                         "Error: Authorization token has not provided",
-                        "    at changePassword (/app/services/user.js:11:15)",
-                        "    at change_password (/app/app.js:105:14)",
+                        "    at sendEmailAddEmailToken (/app/services/user/add_email.js:17:15)",
+                        "    at send_add_email_token (/app/app.js:126:14)",
                         "    at field.resolve (/app/node_modules/graphql-extensions/dist/index.js:134:26)",
                         "    at field.resolve (/app/node_modules/apollo-server-core/dist/utils/schemaInstrumentation.js:52:26)",
                         "    at resolveField (/app/node_modules/graphql/execution/execute.js:466:18)",

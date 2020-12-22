@@ -24,16 +24,16 @@ const user = {
 };
 
 const sendData = {
-    email: 'test@gmail.com',
+    email: 'testgmail.com',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Failed to change password.',
+            message: 'Failed to register the user.',
             locations: [
                 {
-                    line: 45,
+                    line: 16,
                     column: 3,
                 }
             ],
@@ -43,16 +43,16 @@ const serverResponseData = {
             extensions: {
                 validationErrors: [
                     {
-                        message: '\"newPassword\" length must be at least 5 characters long',
+                        message: '\"email\" with value \"abdurahmonkodirov97gmail.com\" fails to match the required pattern: /^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\\\.[a-zA-Z0-9-]+)*$/',
                         path: [
-                            'newPassword',
+                            'email',
                         ],
-                        type: 'string.min',
+                        type: 'string.pattern.base',
                         context: {
-                            limit: 5,
-                            value: 'new',
-                            label: 'newPassword',
-                            key: 'newPassword',
+                            regex: {},
+                            value: 'testgmail.com',
+                            label: 'email',
+                            key: 'email',
                         },
                     },
                 ],
@@ -60,25 +60,31 @@ const serverResponseData = {
                 exception: {
                     validationErrors: [
                         {
-                            message: '\"newPassword\" length must be at least 5 characters long',
+                            message: '\"email\" with value \"abdurahmonkodirov97gmail.com\" fails to match the required pattern: /^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\\\.[a-zA-Z0-9-]+)*$/',
                             path: [
-                                "newPassword"
+                                'email',
                             ],
-                            type: "string.min",
+                            type: 'string.pattern.base',
                             context: {
-                                limit: 5,
-                                value: "new",
-                                label: "newPassword",
-                                key: "newPassword"
-                            }
+                                regex: {},
+                                value: 'testgmail.com',
+                                label: 'email',
+                                key: 'email',
+                            },
                         }
                     ],
                     stacktrace: [
-                        "UserInputError: Failed to change password.",
+                        "UserInputError: Failed to register the user.",
                         "    at validateGeneral (/app/validators/auth.js:65:15)",
-                        "    at validateChangePassword (/app/validators/auth.js:53:12)",
-                        "    at changePassword (/app/services/user.js:25:5)",
-                        "    at process._tickCallback (internal/process/next_tick.js:68:7)",
+                        "    at validateEmail (/app/validators/auth.js:26:12)",
+                        "    at sendEmailAddEmailToken (/app/services/user/add_email.js:13:19)",
+                        "    at send_add_email_token (/app/app.js:126:14)",
+                        "    at field.resolve (/app/node_modules/graphql-extensions/dist/index.js:134:26)",
+                        "    at field.resolve (/app/node_modules/apollo-server-core/dist/utils/schemaInstrumentation.js:52:26)",
+                        "    at resolveField (/app/node_modules/graphql/execution/execute.js:466:18)",
+                        "    at /app/node_modules/graphql/execution/execute.js:263:18",
+                        "    at /app/node_modules/graphql/jsutils/promiseReduce.js:23:10",
+                        "    at Array.reduce (<anonymous>)",
                     ],
                 },
             },
@@ -116,7 +122,7 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response).toHaveProperty('data');
 
     expect(response.errors[0]).toHaveProperty('message');
-    expect(response.errors[0].message).toContain('Failed to change password.');
+    expect(response.errors[0].message).toContain('Failed to register the user.');
     expect(response.errors[0]).toHaveProperty('locations');
 
     expect(response.errors[0]).toHaveProperty('path');
@@ -125,19 +131,20 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('validationErrors');
     expect(response.errors[0].extensions.validationErrors[0]).toHaveProperty('message');
-    expect(response.errors[0].extensions.validationErrors[0].message).toContain('\"newPassword\" length must be at least 5 characters long');
+    expect(response.errors[0].extensions.validationErrors[0].message).toContain(
+        '\"email\" with value \"abdurahmonkodirov97gmail.com\" fails to match the required pattern: /^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\\\.[a-zA-Z0-9-]+)*$/'
+    );
     expect(response.errors[0].extensions.validationErrors[0]).toHaveProperty('path');
-    expect(response.errors[0].extensions.validationErrors[0].path[0]).toContain('newPassword');
+    expect(response.errors[0].extensions.validationErrors[0].path[0]).toContain('email');
     expect(response.errors[0].extensions.validationErrors[0]).toHaveProperty('type');
-    expect(response.errors[0].extensions.validationErrors[0].type).toContain('string.min');
+    expect(response.errors[0].extensions.validationErrors[0].type).toContain('string.pattern.base');
     expect(response.errors[0].extensions.validationErrors[0]).toHaveProperty('context');
-    expect(response.errors[0].extensions.validationErrors[0].context).toHaveProperty('limit');
-    expect(response.errors[0].extensions.validationErrors[0].context.limit).toEqual(5);
+    expect(response.errors[0].extensions.validationErrors[0].context).toHaveProperty('regex');
     expect(response.errors[0].extensions.validationErrors[0].context).toHaveProperty('value');
     expect(response.errors[0].extensions.validationErrors[0].context).toHaveProperty('label');
-    expect(response.errors[0].extensions.validationErrors[0].context.label).toContain('newPassword');
+    expect(response.errors[0].extensions.validationErrors[0].context.label).toContain('email');
     expect(response.errors[0].extensions.validationErrors[0].context).toHaveProperty('key');
-    expect(response.errors[0].extensions.validationErrors[0].context.key).toContain('newPassword');
+    expect(response.errors[0].extensions.validationErrors[0].context.key).toContain('email');
 
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions.code).toContain('BAD_USER_INPUT');
@@ -145,19 +152,20 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('validationErrors');
     expect(response.errors[0].extensions.exception.validationErrors[0]).toHaveProperty('message');
-    expect(response.errors[0].extensions.exception.validationErrors[0].message).toContain('\"newPassword\" length must be at least 5 characters long');
+    expect(response.errors[0].extensions.exception.validationErrors[0].message).toContain(
+        '\"email\" with value \"abdurahmonkodirov97gmail.com\" fails to match the required pattern: /^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\\\.[a-zA-Z0-9-]+)*$/'
+    );
     expect(response.errors[0].extensions.exception.validationErrors[0]).toHaveProperty('path');
-    expect(response.errors[0].extensions.exception.validationErrors[0].path[0]).toContain('newPassword');
+    expect(response.errors[0].extensions.exception.validationErrors[0].path[0]).toContain('email');
     expect(response.errors[0].extensions.exception.validationErrors[0]).toHaveProperty('type');
-    expect(response.errors[0].extensions.exception.validationErrors[0].type).toContain('string.min');
+    expect(response.errors[0].extensions.exception.validationErrors[0].type).toContain('string.pattern.base');
     expect(response.errors[0].extensions.exception.validationErrors[0]).toHaveProperty('context');
-    expect(response.errors[0].extensions.exception.validationErrors[0].context).toHaveProperty('limit');
-    expect(response.errors[0].extensions.exception.validationErrors[0].context.limit).toEqual(5);
+    expect(response.errors[0].extensions.exception.validationErrors[0].context).toHaveProperty('regex');
     expect(response.errors[0].extensions.exception.validationErrors[0].context).toHaveProperty('value');
     expect(response.errors[0].extensions.exception.validationErrors[0].context).toHaveProperty('label');
-    expect(response.errors[0].extensions.exception.validationErrors[0].context.label).toContain('newPassword');
+    expect(response.errors[0].extensions.exception.validationErrors[0].context.label).toContain('email');
     expect(response.errors[0].extensions.exception.validationErrors[0].context).toHaveProperty('key');
-    expect(response.errors[0].extensions.exception.validationErrors[0].context.key).toContain('newPassword');
+    expect(response.errors[0].extensions.exception.validationErrors[0].context.key).toContain('email');
 
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
     expect(response.data).toHaveProperty('send_add_email_token');

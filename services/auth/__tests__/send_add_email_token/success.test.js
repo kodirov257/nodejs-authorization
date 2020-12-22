@@ -71,7 +71,7 @@ test('register calls fetch with the right arguments and returns boolean true', a
     expect(response).toEqual(responseData);
 });
 
-    async function mockFetch(sendData, accessToken) {
+async function mockFetch(sendData, accessToken) {
     const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
