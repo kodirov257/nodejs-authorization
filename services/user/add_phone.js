@@ -1,3 +1,5 @@
+import {UserRegistrationFragment} from "../../fragments";
+
 const moment = require('moment');
 import {getUserByPhone, getUserByPhoneVerifyToken} from "../hasura/get-user";
 import { validatePhone, validateVerifyPhone } from "../../validators";
@@ -17,7 +19,7 @@ export const sendAddPhoneToken = async (phone, ctx) => {
 	}
 
 	const currentUserId = getCurrentUserId(ctx.req);
-	const user = await getUserById(currentUserId);
+	const user = await getUserById(currentUserId, UserRegistrationFragment);
 
 	if (!user) {
 		throw new Error('User not found.');
@@ -27,16 +29,22 @@ export const sendAddPhoneToken = async (phone, ctx) => {
 		throw new Error('User not activated.');
 	}
 
-	if (user.phone) {
+	if (user.phone && user.phone === phone && user.phone_verified === false) {
+		return updateAddPhone(user.id, phone);
+	} else if (user.phone && user.phone_verified === true) {
 		throw new Error('Phone number is already set.');
 	}
 
 	const anotherUser = await getUserByPhone(phone);
 
-	if (anotherUser) {
-		throw new Error('There is already active user with this email.');
+	if (anotherUser && anotherUser.id !== user.id) {
+		throw new Error('There is already active user with this phone number.');
 	}
 
+	return updateAddPhone(user.id, phone);
+}
+
+const updateAddPhone = async (userId, phone) => {
 	const fields = {
 		phone: phone,
 		phone_verify_token: (Math.floor(Math.random() * 90000) + 10000).toString(),
@@ -44,7 +52,7 @@ export const sendAddPhoneToken = async (phone, ctx) => {
 		phone_verified: false,
 	};
 
-	const result = await updateUser(user.id, fields);
+	const result = await updateUser(userId, fields);
 	let data = get(result, 'data.update_users_by_pk');
 
 	if (data !== undefined) {

@@ -8,6 +8,7 @@ import { getUserByEmail, getUserByEmailVerifyToken } from "../hasura/get-user";
 import { updateUser } from "../hasura/update-user";
 import { validateEmail, validateVerifyEmail } from "../../validators";
 import { sendAddEmailToken } from "../mail";
+import {UserRegistrationFragment} from "../../fragments";
 
 export const sendEmailAddEmailToken = async (email, ctx) => {
     const value = validateEmail(email);
@@ -18,7 +19,7 @@ export const sendEmailAddEmailToken = async (email, ctx) => {
     }
 
     const currentUserId = getCurrentUserId(ctx.req);
-    const user = await getUserById(currentUserId);
+    const user = await getUserById(currentUserId, UserRegistrationFragment);
 
     if (!user) {
         throw new Error('User not found.');
@@ -28,13 +29,15 @@ export const sendEmailAddEmailToken = async (email, ctx) => {
         throw new Error('User not activated.');
     }
 
-    if (user.email) {
+    if (user.email && user.email === email && user.email_verified === false) {
+		return true;
+	} else if (user.email && user.email_verified === true) {
         throw new Error('Email is already set.');
     }
 
     const anotherUser = await getUserByEmail(email);
 
-    if (anotherUser) {
+    if (anotherUser && anotherUser.id !== user.id) {
         throw new Error('There is already active user with this email.');
     }
 
