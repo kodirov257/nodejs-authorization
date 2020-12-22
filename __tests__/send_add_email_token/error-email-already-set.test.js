@@ -16,47 +16,48 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const user = {
-    id: 1,
-    username: 'test',
-    email: 'test@gmail.com',
-    role: 'user',
+	id: 1,
+	username: 'test',
+	email: null,
+	phone: '998997776611',
+	role: 'user',
 };
 
 const sendData = {
-    old_password: 'wrong-old-password',
-    new_password: 'new-password',
+	email: 'test@gmail.com',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Invalid "password".',
+            message: 'Email is already set.',
             locations: [
                 {
-                    line: 45,
+                    line: 16,
                     column: 3,
                 }
             ],
             path: [
-                'change_password'
+                'send_add_email_token'
             ],
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
-                        "Error: Invalid \"password\".",
-                        "    at changePassword (/app/services/user.js:30:15)",
+						"Error: Email is already set.",
+						"    at sendEmailAddEmailToken (/app/services/user/add_email.js:32:15)",
+						"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
                     ],
                 },
             },
         },
     ],
     data: {
-        change_password: null,
+        send_add_email_token: null,
     }
 }
 
-test('register calls fetch with the wrong arguments and returns error', async () => {
+test('register calls fetch with already set values and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
     const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
@@ -73,9 +74,8 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
@@ -83,15 +83,16 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response).toHaveProperty('errors');
     expect(response).toHaveProperty('data');
     expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0].message).toContain('Email is already set.');
     expect(response.errors[0]).toHaveProperty('locations');
     expect(response.errors[0]).toHaveProperty('path');
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('change_password');
-    expect(response.data.change_password).toBeDefined();
-    expect(response.data.change_password).toBeNull();
+    expect(response.data).toHaveProperty('send_add_email_token');
+    expect(response.data.send_add_email_token).toBeDefined();
+    expect(response.data.send_add_email_token).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -105,9 +106,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            send_add_email_token(
+                email: ${sendData.email}
             )
         }`,
     });
