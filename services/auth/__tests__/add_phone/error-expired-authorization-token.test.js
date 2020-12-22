@@ -24,7 +24,8 @@ const user = {
 };
 
 const sendData = {
-    token: 'right-token',
+	phone: '998997776611',
+	token: '58615',
 }
 
 const serverResponseData = {
@@ -69,6 +70,7 @@ test('register calls fetch with the expired authorization token and returns erro
         },
         body: `mutation {
             send_add_email_token(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
@@ -95,6 +97,7 @@ async function mockFetch(sendData, accessToken) {
         },
         body: `mutation {
             send_add_email_token(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,

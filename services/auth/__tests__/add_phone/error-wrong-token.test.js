@@ -24,37 +24,44 @@ const user = {
 };
 
 const sendData = {
-    token: 'right-token',
+	phone: '998997776611',
+	token: '586151',
 }
 
 const serverResponseData = {
     errors: [
         {
+            message: 'Provided token is not equal to the current user.',
+            locations: [
+                {
+                    line: 28,
+                    column: 3,
+                }
+            ],
+            path: [
+                'add_phone'
+            ],
             extensions: {
-                path: '$',
-                code: 'invalid-jwt',
+                code: 'BAD_USER_INPUT',
+                exception: {
+                    stacktrace: [
+						"Error: Provided token is not equal to the current user.",
+						"    at addPhone (/app/services/user/add_phone.js:83:9)",
+						"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
+                    ],
+                },
             },
-            message: 'Could not verify JWT: JWTExpired',
         },
     ],
+    data: {
+        add_phone: null,
+    }
 }
 
-const responseData = {
-    errors: [
-        {
-            extensions: {
-                path: '$',
-                code: 'invalid-jwt',
-            },
-            message: 'Could not verify JWT: JWTExpired',
-        },
-    ],
-}
-
-test('register calls fetch with the expired authorization token and returns error', async () => {
+test('register calls fetch with the wrong arguments and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-    const accessToken = (await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()))).slice(1);
+    const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
 
     const response = await mockFetch(sendData, accessToken);
 
@@ -68,21 +75,28 @@ test('register calls fetch with the expired authorization token and returns erro
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            send_add_email_token(
+            add_phone(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
     });
 
-    expect(response).toHaveProperty('errors');
-    expect(response.errors[0]).toHaveProperty('message');
-    expect(response.errors[0]).toHaveProperty('extensions');
-    expect(response.errors[0].extensions).toHaveProperty('path');
-    expect(response.errors[0].extensions).toHaveProperty('code');
-    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
-    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
+	expect(response).toHaveProperty('errors');
+	expect(response).toHaveProperty('data');
+	expect(response.errors[0]).toHaveProperty('message');
+	expect(response.errors[0].message).toContain('Provided token is not equal to the current user.');
+	expect(response.errors[0]).toHaveProperty('locations');
+	expect(response.errors[0]).toHaveProperty('path');
+	expect(response.errors[0]).toHaveProperty('extensions');
+	expect(response.errors[0].extensions).toHaveProperty('code');
+	expect(response.errors[0].extensions).toHaveProperty('exception');
+	expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
+	expect(response.data).toHaveProperty('add_phone');
+	expect(response.data.add_phone).toBeDefined();
+	expect(response.data.add_phone).toBeNull();
 
-    expect(response).toEqual(responseData);
+    // expect(response).toEqual(responseData);
 });
 
 async function mockFetch(sendData, accessToken) {
@@ -94,7 +108,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            send_add_email_token(
+            add_phone(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
