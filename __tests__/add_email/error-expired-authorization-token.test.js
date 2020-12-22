@@ -18,7 +18,7 @@ const { Response } = jest.requireActual('node-fetch');
 const user = {
     id: 1,
     username: 'test',
-    email: null,
+    email: 'test@gmail.com',
     phone: '998997776611',
     role: 'user',
 };

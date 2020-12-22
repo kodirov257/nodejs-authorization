@@ -24,28 +24,29 @@ const user = {
 };
 
 const sendData = {
-    token: 'wrong-token',
+	phone: '998997776611',
+	token: '586151',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Wrong token is provided.',
+            message: 'Provided token is not equal to the current user.',
             locations: [
                 {
-                    line: 20,
+                    line: 28,
                     column: 3,
                 }
             ],
             path: [
-                'add_email'
+                'add_phone'
             ],
             extensions: {
                 code: 'BAD_USER_INPUT',
                 exception: {
                     stacktrace: [
-						"Error: Wrong token is provided.",
-						"    at addEmail (/app/services/user/add_email.js:73:9)",
+						"Error: Provided token is not equal to the current user.",
+						"    at addPhone (/app/services/user/add_phone.js:83:9)",
 						"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
                     ],
                 },
@@ -53,7 +54,7 @@ const serverResponseData = {
         },
     ],
     data: {
-        add_email: null,
+        add_phone: null,
     }
 }
 
@@ -74,7 +75,8 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            add_email(
+            add_phone(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
@@ -83,16 +85,16 @@ test('register calls fetch with the wrong arguments and returns error', async ()
 	expect(response).toHaveProperty('errors');
 	expect(response).toHaveProperty('data');
 	expect(response.errors[0]).toHaveProperty('message');
-	expect(response.errors[0].message).toContain('Wrong token is provided.');
+	expect(response.errors[0].message).toContain('Provided token is not equal to the current user.');
 	expect(response.errors[0]).toHaveProperty('locations');
 	expect(response.errors[0]).toHaveProperty('path');
 	expect(response.errors[0]).toHaveProperty('extensions');
 	expect(response.errors[0].extensions).toHaveProperty('code');
 	expect(response.errors[0].extensions).toHaveProperty('exception');
 	expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-	expect(response.data).toHaveProperty('add_email');
-	expect(response.data.add_email).toBeDefined();
-	expect(response.data.add_email).toBeNull();
+	expect(response.data).toHaveProperty('add_phone');
+	expect(response.data.add_phone).toBeDefined();
+	expect(response.data.add_phone).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -106,7 +108,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            add_email(
+            add_phone(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,

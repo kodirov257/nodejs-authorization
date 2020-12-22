@@ -24,43 +24,38 @@ const user = {
 };
 
 const sendData = {
-    token: 'wrong-token',
+	phone: '998997776611',
+	token: '58615',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Wrong token is provided.',
-            locations: [
-                {
-                    line: 20,
-                    column: 3,
-                }
-            ],
-            path: [
-                'add_email'
-            ],
             extensions: {
-                code: 'BAD_USER_INPUT',
-                exception: {
-                    stacktrace: [
-						"Error: Wrong token is provided.",
-						"    at addEmail (/app/services/user/add_email.js:73:9)",
-						"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
-                    ],
-                },
+                path: '$',
+                code: 'invalid-jwt',
             },
+            message: 'Could not verify JWT: JWTExpired',
         },
     ],
-    data: {
-        add_email: null,
-    }
 }
 
-test('register calls fetch with the wrong arguments and returns error', async () => {
+const responseData = {
+    errors: [
+        {
+            extensions: {
+                path: '$',
+                code: 'invalid-jwt',
+            },
+            message: 'Could not verify JWT: JWTExpired',
+        },
+    ],
+}
+
+test('register calls fetch with the expired authorization token and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-    const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
+    const accessToken = (await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()))).slice(1);
 
     const response = await mockFetch(sendData, accessToken);
 
@@ -74,27 +69,22 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            add_email(
+            send_add_email_token(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
     });
 
-	expect(response).toHaveProperty('errors');
-	expect(response).toHaveProperty('data');
-	expect(response.errors[0]).toHaveProperty('message');
-	expect(response.errors[0].message).toContain('Wrong token is provided.');
-	expect(response.errors[0]).toHaveProperty('locations');
-	expect(response.errors[0]).toHaveProperty('path');
-	expect(response.errors[0]).toHaveProperty('extensions');
-	expect(response.errors[0].extensions).toHaveProperty('code');
-	expect(response.errors[0].extensions).toHaveProperty('exception');
-	expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-	expect(response.data).toHaveProperty('add_email');
-	expect(response.data.add_email).toBeDefined();
-	expect(response.data.add_email).toBeNull();
+    expect(response).toHaveProperty('errors');
+    expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0]).toHaveProperty('extensions');
+    expect(response.errors[0].extensions).toHaveProperty('path');
+    expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
+    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
 
-    // expect(response).toEqual(responseData);
+    expect(response).toEqual(responseData);
 });
 
 async function mockFetch(sendData, accessToken) {
@@ -106,7 +96,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            add_email(
+            send_add_email_token(
+            	phone: ${sendData.phone},
                 token: ${sendData.token}
             )
         }`,
