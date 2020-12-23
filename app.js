@@ -1,13 +1,11 @@
-import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
-import { typeDefs } from './typeDefs';
-import passport from 'passport';
-let JwtStrategy = require('passport-jwt').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt;
-import { buildContext } from 'graphql-passport';
-import bodyParser from "body-parser"
-
 require('dotenv-flow').config();
+import { ApolloServer } from 'apollo-server-express';
+import { buildContext } from 'graphql-passport';
+import { typeDefs } from './typeDefs';
+import bodyParser from "body-parser"
+import passport from 'passport';
+import express from 'express';
+
 import {
 	getCurrentUserId,
 	isAuthenticated,
@@ -31,39 +29,6 @@ import {
 } from "./services";
 import { log } from "./services/log";
 const authRouter = require('./routes/auth');
-
-// let opts = {
-//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-//   secretOrKey: process.env.JWT_PRIVATE_KEY,
-//   algorithms: [process.env.JWT_ALGORITHM],
-// };
-// passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-//
-// }));
-
-/*passport.use('api', new OAuth2Strategy({
-      authorizationURL: 'https://www.provider.com/oauth2/authorize',
-      tokenURL: 'https://www.provider.com/oauth2/token',
-      clientID: '123-456-789',
-      clientSecret: 'shhh-its-a-secret',
-      callbackURL: 'https://www.example.com/auth/provider/callback'
-    },
-    function (username, password, done) {
-      const user = getUserByUsername(username);
-
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
-      }
-
-      const passwordMatch = bcrypt.compare(password, user.password);
-
-      if (!passwordMatch) {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-
-      return done(null, user);
-    }
-));*/
 
 const resolvers = {
   Query: {
@@ -153,10 +118,5 @@ app.use(passport.initialize());
 app.use(bodyParser.json())
 app.use('/', authRouter);
 server.applyMiddleware({ app });
-
-// const port = process.env.PORT;
-// app.listen({ port: port }, () =>
-//     console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
-// );
 
 module.exports = app;
