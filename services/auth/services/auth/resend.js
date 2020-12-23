@@ -1,3 +1,5 @@
+import {STATUS_VERIFIED} from "../../helpers/values";
+
 const moment = require('moment');
 import get from "lodash/get";
 import { v4 as uuidv4 } from 'uuid';
@@ -23,15 +25,20 @@ export const resendEmail = async (email) => {
         email_verify_token: uuidv4() + '-' + (+new Date()),
     };
 
-    const result = await updateUser(user.id, fields);
+    const result = await updateUser(user.id, {status: STATUS_VERIFIED}, fields);
 
-    let data = get(result, 'data.update_users_by_pk');
+    let data = get(result, 'data.update_user_verifications_by_pk');
 
     if (data !== undefined) {
-        await sendEmailVerifyToken(data.username, data.email, data.email_verify_token);
+        await sendEmailVerifyToken(user.username, user.email, data.email_verify_token);
 
         return true;
     }
+
+    user.user_verifications[0].email_verified ? await updateUser(user.id, {status: user.status}, {
+        email_verified: true,
+        email_verify_token: null,
+    }) : null;
 
     return false;
 }
@@ -52,15 +59,21 @@ export const resendPhone = async (phone) => {
         phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
     };
 
-    const result = await updateUser(user.id, fields)
+    const result = await updateUser(user.id, {status: STATUS_VERIFIED}, fields)
 
-    let data = get(result, 'data.update_users_by_pk');
+    let data = get(result, 'data.update_user_verifications_by_pk');
 
     if (data !== undefined) {
-        await sendSmsVerifyToken(data.phone, data.phone_verify_token);
+        await sendSmsVerifyToken(user.phone, data.phone_verify_token);
 
         return true;
     }
+
+    user.user_verifications[0].phone_verified ? await updateUser(user.id, {status: user.status}, {
+        phone_verified: true,
+        phone_verify_token: null,
+        phone_verify_token_expire: null,
+    }) : null;
 
     return false;
 }

@@ -8,7 +8,7 @@ import { getUserByEmail, getUserByEmailVerifyToken } from "../hasura/get-user";
 import { updateUser } from "../hasura/update-user";
 import { validateEmail, validateVerifyEmail } from "../../validators";
 import { sendAddEmailToken } from "../mail";
-import {UserRegistrationFragment} from "../../fragments";
+import { UserFragment } from "../../fragments";
 
 export const sendEmailAddEmailToken = async (email, ctx) => {
     const value = validateEmail(email);
@@ -19,7 +19,7 @@ export const sendEmailAddEmailToken = async (email, ctx) => {
     }
 
     const currentUserId = getCurrentUserId(ctx.req);
-    const user = await getUserById(currentUserId, UserRegistrationFragment);
+    const user = await getUserById(currentUserId, UserFragment);
 
     if (!user) {
         throw new Error('User not found.');

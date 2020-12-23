@@ -1,7 +1,7 @@
-import {UserRegistrationFragment} from "../../fragments";
+import { UserFragment } from "../../fragments";
 
 const moment = require('moment');
-import {getUserByPhone, getUserByPhoneVerifyToken} from "../hasura/get-user";
+import { getUserByPhone, getUserByPhoneVerifyToken } from "../hasura/get-user";
 import { validatePhone, validateVerifyPhone } from "../../validators";
 import { getCurrentUserId, isAuthenticated } from "./user";
 import { getUserById } from "../hasura/get-user-by-id";
@@ -19,7 +19,7 @@ export const sendAddPhoneToken = async (phone, ctx) => {
 	}
 
 	const currentUserId = getCurrentUserId(ctx.req);
-	const user = await getUserById(currentUserId, UserRegistrationFragment);
+	const user = await getUserById(currentUserId, UserFragment);
 
 	if (!user) {
 		throw new Error('User not found.');

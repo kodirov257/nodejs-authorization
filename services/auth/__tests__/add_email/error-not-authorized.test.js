@@ -1,11 +1,9 @@
 'use strict';
 
-const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const dotEnv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
-const uuidv4 = require('uuid');
 
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {

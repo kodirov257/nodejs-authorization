@@ -14,22 +14,25 @@ router.get('/verify-email/:token', async (req, res) => {
             throw new Error('Invalid token');
         }
 
-        const fields = {
+        const result = await updateUser(user.id, {status: constants.STATUS_ACTIVE}, {
             email_verified: true,
             email_verify_token: null,
-            status: constants.STATUS_ACTIVE,
-        };
-
-        const result = await updateUser(user.id, fields);
+        });
 
         const data = get(result, 'data.update_users_by_pk');
+        const dataVerification = get(result, 'data.update_user_verifications_by_pk');
 
-        if (data !== undefined) {
+        if (data !== undefined && dataVerification !== undefined) {
             res.send({
                 data: true,
                 result: data,
             });
         }
+
+        await updateUser(user.id, {status: user.status}, {
+            email_verified: true,
+            email_verify_token: null,
+        });
 
         res.send({
             data: false,
@@ -45,5 +48,14 @@ router.get('/verify-email/:token', async (req, res) => {
 
 
 });
+
+// router.post('/hasura-event', async (req, res) => {
+//
+// 	console.log(req.body)
+// 	res.end('resd')
+//
+//
+//
+// });
 
 module.exports = router;
