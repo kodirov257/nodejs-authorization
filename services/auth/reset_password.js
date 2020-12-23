@@ -27,12 +27,13 @@ export const sendResetEmail = async (email) => {
         email_verify_token: uuidv4() + '-' + (+new Date()),
     };
 
-    const result = await updateUser(user.id, fields)
+    const result = await updateUser(user.id, {}, fields);
 
-    let data = get(result, 'data.update_users_by_pk');
+    let data = get(result, 'data.update_user_verifications_by_pk');
 
     if (data !== undefined) {
-        await sendEmailResetToken(data.username, data.email, data.email_verify_token);
+		// const userVerificationData =;
+		await sendEmailResetToken(data.username, data.email, data.email_verify_token);
 
         return true;
     }
@@ -55,9 +56,9 @@ export const sendResetPhone = async (phone) => {
         phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
     };
 
-    const result = await updateUser(user.id, fields)
+    const result = await updateUser(user.id, {}, fields)
 
-    let data = get(result, 'data.update_users_by_pk');
+    let data = get(result, 'data.update_user_verifications_by_pk');
 
     if (data !== undefined) {
         await sendSmsResetToken(data.phone, data.phone_verify_token);
@@ -77,15 +78,21 @@ export const resetViaEmail = async (token, password) => {
         throw new Error('Invalid token');
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    let passwordHash = await bcrypt.hash(password, 10);
     const fields = {
         email_verify_token: null,
         password: passwordHash,
     };
 
-    const result = await updateUser(user.id, fields)
+    const result = await updateUser(user.id, fields);
 
-    return get(result, 'data.update_users_by_pk') !== undefined;
+    if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+    	return true;
+	}
+
+	await updateUser(user.id, {password: user.password}, {email_verify_token: null});
+
+    return false;
 }
 
 export const resetViaPhone = async (phone, token, password) => {
@@ -96,9 +103,6 @@ export const resetViaPhone = async (phone, token, password) => {
     if (!user) {
         throw new Error('Invalid phone');
     }
-
-    console.log(user.phone_verify_token);
-    console.log(token);
 
     if (user.phone_verify_token !== token) {
         throw new Error('Invalid token');
@@ -118,5 +122,11 @@ export const resetViaPhone = async (phone, token, password) => {
 
     const result = await updateUser(user.id, fields)
 
-    return get(result, 'data.update_users_by_pk') !== undefined;
+	if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+		return true;
+	}
+
+	await updateUser(user.id, {password: user.password}, {phone_verify_token: null, phone_verify_token_expire: null});
+
+    return false;
 }

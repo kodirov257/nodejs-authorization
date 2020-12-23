@@ -5,6 +5,7 @@ import passport from 'passport';
 let JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 import { buildContext } from 'graphql-passport';
+import bodyParser from "body-parser"
 
 require('dotenv-flow').config();
 import {
@@ -149,6 +150,7 @@ const server = new ApolloServer({
 
 const app = express();
 app.use(passport.initialize());
+app.use(bodyParser.json())
 app.use('/', authRouter);
 server.applyMiddleware({ app });
 

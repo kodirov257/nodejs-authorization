@@ -9,5 +9,12 @@ export const UserFragment = gql`
         role
         status
         password
+		user_verifications {
+			email_verify_token
+			email_verified
+			phone_verify_token
+			phone_verify_token_expire
+			phone_verified
+		}
     }
 `;

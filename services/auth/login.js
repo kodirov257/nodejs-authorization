@@ -6,6 +6,30 @@ import { hasuraQuery } from "../client";
 import { getUserByCredentials } from "../index";
 import { generateClaimsJwtToken, generateJwtRefreshToken } from "../../helpers/auth-tools";
 
+export const singin = async (usernameEmailOrPhone, password, ctx) => {
+	const user = await getUserByCredentials(usernameEmailOrPhone, password);
+
+	return generateTokens(user, ctx.req);
+}
+
+export const generateTokens = async (user, request) => {
+	const ipAddress = (
+		request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
+	).split(',')[0].trim();
+
+	const [refreshToken, sessionId] = await createUserSession(user, request.headers['user-agent'], ipAddress);
+
+	const accessToken = await generateClaimsJwtToken(user, sessionId);
+
+	return {
+		access_token: accessToken,
+		refresh_token: generateJwtRefreshToken({
+			token: refreshToken,
+		}),
+		user_id: user.id,
+	};
+}
+
 export const createUserSession = async (user, userAgent = null, ipAddress = null) => {
     const refreshToken = uuidv4() + '-' + (+new Date());
     try {
@@ -41,30 +65,6 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
     } catch (e) {
         throw new Error('Could not create "session" for user');
     }
-}
-
-export const singin = async (usernameEmailOrPhone, password, ctx) => {
-    const user = await getUserByCredentials(usernameEmailOrPhone, password);
-
-    return generateTokens(user, ctx.req);
-}
-
-export const generateTokens = async (user, request) => {
-    const ipAddress = (
-        request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
-    ).split(',')[0].trim();
-
-    const [refreshToken, sessionId] = await createUserSession(user, request.headers['user-agent'], ipAddress);
-
-    const accessToken = await generateClaimsJwtToken(user, sessionId);
-
-    return {
-        access_token: accessToken,
-        refresh_token: generateJwtRefreshToken({
-            token: refreshToken,
-        }),
-        user_id: user.id,
-    };
 }
 
 export const getExpiresDate = () => {

@@ -14,16 +14,30 @@ export const verifyEmail = async (token) => {
         throw new Error('Invalid token');
     }
 
+    const userVerifications = user.user_verifications[0];
+
     const fields = {
-        email_verified: true,
-        email_verify_token: null,
         status: constants.STATUS_ACTIVE,
         updated_at: moment().format('Y-M-D H:mm:ss'),
     };
 
-    const result = await updateUser(user.id, fields);
+    const verificationFields = {
+		email_verified: true,
+		email_verify_token: null,
+	};
 
-    return get(result, 'data.update_users_by_pk') !== undefined;
+    const result = await updateUser(user.id, fields, verificationFields);
+
+    if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+    	return true;
+	}
+
+	await updateUser(user.id, {status: user.status, updated_at: moment().format('Y-M-D H:mm:ss')}, {
+		email_verified: userVerifications ? userVerifications.email_verified : false,
+		email_verify_token: userVerifications ? userVerifications.email_verify_token : null,
+	});
+
+    return false;
 }
 
 export const verifyPhone = async (phone, token) => {
@@ -46,14 +60,21 @@ export const verifyPhone = async (phone, token) => {
     }
 
     const fields = {
-        phone_verified: true,
-        phone_verify_token: null,
-        phone_verify_token_expire: null,
         status: constants.STATUS_ACTIVE,
         updated_at: moment().format('Y-M-D H:mm:ss'),
     };
 
-    const result = await updateUser(user.id, fields);
+    const userVerificationFields = {
+		phone_verified: true,
+		phone_verify_token: null,
+		phone_verify_token_expire: null,
+	};
+
+    const result = await updateUser(user.id, fields, userVerificationFields);
+
+	if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+		return true;
+	}
 
     return get(result, 'data.update_users_by_pk') !== undefined;
 }
