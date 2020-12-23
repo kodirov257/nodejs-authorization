@@ -3,11 +3,11 @@ import gql from 'graphql-tag';
 import { UserFragment } from '../../fragments';
 import { hasuraQuery } from '../client';
 
-export const getUserById = async (id) => {
+export const getUserById = async (id, fragment = UserFragment) => {
     try {
         const response = await hasuraQuery(
             gql`
-                ${UserFragment}
+                ${fragment}
                 query($id: bigint!) {
                     users_by_pk(id: $id) {
                         ...User

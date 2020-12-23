@@ -8,6 +8,7 @@ export * from './client';
 export * from './user/user';
 export * from './user/change_password';
 export * from './user/add_email';
+export * from './user/add_phone';
 export * from './mail';
 export * from './sms';
 export * from './hasura/get-user';

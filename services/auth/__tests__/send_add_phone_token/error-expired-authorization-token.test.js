@@ -7,8 +7,6 @@ const path = require('path');
 const fs = require('fs');
 const uuidv4 = require('uuid');
 
-// import { v4 as uuidv4 } from "uuid";
-
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {
     process.env[k] = envConfig[k]
@@ -18,33 +16,45 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const user = {
-    id: 1,
-    username: 'test',
-    email: null,
-    phone: '998997776611',
-    role: 'user',
+	id: 1,
+	username: 'test',
+	email: 'test@gmail.com',
+	phone: null,
+	role: 'user',
 };
 
 const sendData = {
-    email: 'test@gmail.com',
+	phone: '998997776611',
+}
+
+const serverResponseData = {
+    errors: [
+        {
+            extensions: {
+                path: '$',
+                code: 'invalid-jwt',
+            },
+            message: 'Could not verify JWT: JWTExpired',
+        },
+    ],
 }
 
 const responseData = {
-    data: {
-        send_add_email_token: true,
-    },
-};
-
-const serverResponseData = {
-    data: {
-        send_add_email_token: true,
-    },
+    errors: [
+        {
+            extensions: {
+                path: '$',
+                code: 'invalid-jwt',
+            },
+            message: 'Could not verify JWT: JWTExpired',
+        },
+    ],
 }
 
-test('register calls fetch with the right arguments and returns boolean true', async () => {
+test('register calls fetch with the expired authorization token and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-    const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
+    const accessToken = (await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()))).slice(1);
 
     const response = await mockFetch(sendData, accessToken);
 
@@ -59,15 +69,19 @@ test('register calls fetch with the right arguments and returns boolean true', a
         },
         body: `mutation {
             send_add_email_token(
-                email: ${sendData.email}
+                phone: ${sendData.phone}
             )
         }`,
     });
 
-    expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('send_add_email_token');
-    expect(response.data.send_add_email_token).toBeDefined();
-    expect(response.data.send_add_email_token).toBeTruthy();
+    expect(response).toHaveProperty('errors');
+    expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0]).toHaveProperty('extensions');
+    expect(response.errors[0].extensions).toHaveProperty('path');
+    expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions.code).toContain('invalid-jwt');
+    expect(response.errors[0].message).toContain('Could not verify JWT: JWTExpired');
+
     expect(response).toEqual(responseData);
 });
 
@@ -81,7 +95,7 @@ async function mockFetch(sendData, accessToken) {
         },
         body: `mutation {
             send_add_email_token(
-                email: ${sendData.email}
+                phone: ${sendData.phone}
             )
         }`,
     });

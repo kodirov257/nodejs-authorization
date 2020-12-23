@@ -20,24 +20,24 @@ const { Response } = jest.requireActual('node-fetch');
 const user = {
     id: 1,
     username: 'test',
-    email: null,
+    email: 'test@gmail.com',
     phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    email: 'test@gmail.com',
+    phone: '998997776611',
 }
 
 const responseData = {
     data: {
-        send_add_email_token: true,
+        send_add_phone_token: true,
     },
 };
 
 const serverResponseData = {
     data: {
-        send_add_email_token: true,
+        send_add_phone_token: true,
     },
 }
 
@@ -58,20 +58,20 @@ test('register calls fetch with the right arguments and returns boolean true', a
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            send_add_email_token(
-                email: ${sendData.email}
+            send_add_phone_token(
+                phone: ${sendData.phone}
             )
         }`,
     });
 
     expect(response).toHaveProperty('data');
-    expect(response.data).toHaveProperty('send_add_email_token');
-    expect(response.data.send_add_email_token).toBeDefined();
-    expect(response.data.send_add_email_token).toBeTruthy();
+    expect(response.data).toHaveProperty('send_add_phone_token');
+    expect(response.data.send_add_phone_token).toBeDefined();
+    expect(response.data.send_add_phone_token).toBeTruthy();
     expect(response).toEqual(responseData);
 });
 
-async function mockFetch(sendData, accessToken) {
+    async function mockFetch(sendData, accessToken) {
     const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -80,8 +80,8 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            send_add_email_token(
-                email: ${sendData.email}
+            send_add_phone_token(
+                phone: ${sendData.phone}
             )
         }`,
     });
