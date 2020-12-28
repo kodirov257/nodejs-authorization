@@ -1,42 +1,42 @@
 import get from 'lodash/get';
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
-import * as constants from "../../helpers/values";
-import { getUserById } from "../hasura/get-user-by-id";
-import { updateUser } from "../hasura/update-user";
-import { validateChangePassword } from "../../validators";
-import { getCurrentUserId, isAuthenticated } from "./user";
+import * as constants from '../../helpers/values';
+import { getUserById } from '../hasura/get-user-by-id';
+import { updateUser } from '../hasura/update-user';
+import { validateChangePassword } from '../../validators';
+import { getCurrentUserId, isAuthenticated } from './user';
 
 export const changePassword = async (oldPassword, newPassword, ctx) => {
-    if (!isAuthenticated(ctx.req)) {
-        throw new Error('Authorization token has not provided');
-    }
+  if (!isAuthenticated(ctx.req)) {
+    throw new Error('Authorization token has not provided');
+  }
 
-    const currentUserId = getCurrentUserId(ctx.req);
-    const user = await getUserById(currentUserId);
+  const currentUserId = getCurrentUserId(ctx.req);
+  const user = await getUserById(currentUserId);
 
-    if (!user) {
-        throw new Error('User not found.');
-    }
+  if (!user) {
+    throw new Error('User not found.');
+  }
 
-    if (user.status !== constants.STATUS_ACTIVE) {
-        throw new Error('User not activated.');
-    }
+  if (user.status !== constants.STATUS_ACTIVE) {
+    throw new Error('User not activated.');
+  }
 
-    validateChangePassword(oldPassword, newPassword);
+  validateChangePassword(oldPassword, newPassword);
 
-    const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+  const passwordMatch = await bcrypt.compare(oldPassword, user.password);
 
-    if (!passwordMatch) {
-        throw new Error('Invalid "password".');
-    }
+  if (!passwordMatch) {
+    throw new Error('Invalid "password".');
+  }
 
-    const passwordHash = await bcrypt.hash(newPassword, 10);
-    const fields = {
-        password: passwordHash,
-    };
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const fields = {
+    password: passwordHash,
+  };
 
-    const result = await updateUser(user.id, fields);
+  const result = await updateUser(user.id, fields, {});
 
-    return get(result, 'data.update_users_by_pk') !== undefined;
+  return get(result, 'data.update_users_by_pk') !== undefined;
 }

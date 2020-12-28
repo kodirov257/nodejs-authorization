@@ -1,0 +1,54 @@
+import bcrypt from 'bcryptjs';
+import get from 'lodash/get';
+
+import { isAuthenticated, getCurrentUserId } from '../../../../core/helpers/user';
+import { validateChangePassword } from '../../../../core/validators';
+import * as constants from '../../../../core/helpers/values';
+import { getUserById } from '../hasura/get-user-by-id';
+import { updateUser } from '../hasura/update-user';
+
+export class ChangePassword {
+	oldPassword;
+	newPassword;
+	ctx;
+
+	constructor(oldPassword, newPassword, ctx) {
+		this.oldPassword = oldPassword;
+		this.newPassword = newPassword;
+		this.ctx = ctx;
+	}
+
+	async changePassword() {
+		if (!isAuthenticated(this.ctx.req)) {
+			throw new Error('Authorization token has not provided');
+		}
+
+		const currentUserId = getCurrentUserId(this.ctx.req);
+		const user = await getUserById(currentUserId);
+
+		if (!user) {
+			throw new Error('User not found.');
+		}
+
+		if (user.status !== constants.STATUS_ACTIVE) {
+			throw new Error('User not activated.');
+		}
+
+		validateChangePassword(this.oldPassword, this.newPassword);
+
+		const passwordMatch = await bcrypt.compare(this.oldPassword, user.password);
+
+		if (!passwordMatch) {
+			throw new Error('Invalid "password".');
+		}
+
+		const passwordHash = await bcrypt.hash(this.newPassword, 10);
+		const fields = {
+			password: passwordHash,
+		};
+
+		const result = await updateUser(user.id, fields);
+
+		return get(result, 'data.update_users_by_pk') !== undefined;
+	}
+}

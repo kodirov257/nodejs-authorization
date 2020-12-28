@@ -1,0 +1,148 @@
+import { BasicAuth } from '../BasicAuth/resolvers';
+import {
+	Register,
+	Verify,
+	Signin,
+	Resend,
+	ResetPassword,
+	ChangePassword,
+	RefreshToken,
+	AddEmail,
+	AddPhone,
+} from './services';
+
+export class VerifyAuth extends BasicAuth {
+	registerService;
+	verifyService;
+	signinService;
+	resendService;
+	resetService;
+	changePasswordService;
+	refreshTokenService;
+	addEmailService;
+	addPhoneService;
+
+	constructor() {
+		super();
+
+		this.registerService = new Register();
+		this.verifyService = new Verify();
+		this.signinService = new Signin();
+		this.resendService = new Resend();
+		this.resetService = new ResetPassword();
+		this.refreshTokenService = new RefreshToken();
+		this.addEmailService = new AddEmail();
+		this.addPhoneService = new AddPhone();
+	}
+
+	register = async (_, {username, email_or_phone, password}) => {
+		return (new Register(username, email_or_phone, password)).register();
+	}
+
+	verify_email = async (_, {token}, ctx) => {
+		return this.verifyService.verifyEmail(token);
+	}
+
+	verify_phone = async (_, {phone, token}, ctx) => {
+		return this.verifyService.verifyPhone(phone, token);
+	}
+
+	signin = async (_, {login, password}, ctx) => {
+		return this.signinService.singin(login, password, ctx);
+	}
+
+	resend_email = async (_, {email}) => {
+		return this.resendService.resendEmail(email);
+	}
+
+	resend_phone = async (_, {phone}) => {
+		return this.resendService.resendPhone(phone);
+	}
+
+	send_reset_email = async (_, {email}) => {
+		return this.resendService.sendResetEmail(email);
+	}
+
+	send_reset_phone = async (_, {phone}) => {
+		return this.resendService.sendResetPhone(phone);
+	}
+
+	reset_via_email = async (_, {token, password}) => {
+		return this.resetService.resetViaEmail(token, password);
+	}
+
+	reset_via_phone = async (_, {phone, token, password}) => {
+		return this.resetService.resetViaPhone(phone, token, password);
+	}
+
+	change_password = async (_, {old_password, new_password}, ctx) => {
+		return (new ChangePassword(old_password, new_password, ctx)).changePassword()
+	}
+
+	refresh_token = async (_, {refresh_token}, ctx) => {
+		if (!refresh_token) {
+			throw new Error('Refresh token is not provided.');
+		}
+
+		return this.refreshToken.refreshToken(refresh_token, ctx);
+	}
+
+	send_add_email_token = async (_, {email}, ctx) => {
+		return this.addEmailService.sendEmailAddEmailToken(email, ctx);
+	}
+
+	add_email = async (_, {token}, ctx) => {
+		return this.addEmailService.addEmail(token, ctx);
+	}
+
+	send_add_phone_token = async (_, {phone}, ctx) => {
+		return this.addPhoneService.sendAddPhoneToken(phone, ctx);
+	}
+
+	add_phone = async (_, {phone, token}, ctx) => {
+		return this.addPhoneService.addPhone(phone, token, ctx);
+	}
+
+	resolvers() {
+		return {
+			Query: {
+				hello: () => super.hello(),
+				auth_me: async () => super.auth_me(),
+			},
+			Mutation: {
+				register: async (_, {username, email_or_phone, password}) =>
+					this.register(_, {username, email_or_phone, password}),
+				verify_email: async (_, {token}, ctx) =>
+					this.verify_email(_, {token}, ctx),
+				verify_phone: async (_, {phone, token}, ctx) =>
+					this.verify_phone(_, {phone, token}, ctx),
+				signin: async (_, {login, password}, ctx) =>
+					this.signin(_, {login, password}, ctx),
+				change_password: async (_, {old_password, new_password}, ctx) =>
+					this.change_password(_, {old_password, new_password}, ctx),
+				refresh_token: async (_, {refresh_token}, ctx) =>
+					this.refresh_token(_, {refresh_token}, ctx),
+				resend_email: async (_, {email}) =>
+					this.resend_email(_, {email}),
+				resend_phone: async (_, {phone}) =>
+					this.resend_phone(_, {phone}),
+				send_reset_email: async (_, {email}) =>
+					this.send_reset_email(_, {email}),
+				send_reset_phone: async (_, {phone}) =>
+					this.send_reset_phone(_, {phone}),
+				reset_via_email: async (_, {token, password}) =>
+					this.reset_via_email(_, {token, password}),
+				reset_via_phone: async (_, {phone, token, password}) =>
+					this.reset_via_phone(_, {phone, token, password}),
+				send_add_email_token: async (_, {email}, ctx) =>
+					this.send_add_email_token(_, {email}, ctx),
+				add_email: async (_, {token}, ctx) =>
+					this.add_email(_, {token}, ctx),
+				send_add_phone_token: async (_, {phone}, ctx) =>
+					this.send_add_phone_token(_, {phone}, ctx),
+				add_phone: async (_, {phone, token}, ctx) =>
+					this.add_phone(_, {phone, token}, ctx),
+			},
+		};
+	}
+}

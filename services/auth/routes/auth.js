@@ -1,7 +1,7 @@
-import * as constants from "../helpers/values";
-import get from "lodash/get";
+import * as constants from '../helpers/values';
+import get from 'lodash/get';
 
-import { getUserByEmailVerifyToken, updateUser } from "../services";
+import { getUserByEmailVerifyToken, updateUser } from '../services';
 
 let express = require('express');
 let router = express.Router();
@@ -48,14 +48,5 @@ router.get('/verify-email/:token', async (req, res) => {
 
 
 });
-
-// router.post('/hasura-event', async (req, res) => {
-//
-// 	console.log(req.body)
-// 	res.end('resd')
-//
-//
-//
-// });
 
 module.exports = router;
