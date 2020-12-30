@@ -87,3 +87,16 @@
         id:
           _eq: X-Hasura-User-Id
       check: null
+  event_triggers:
+  - name: change_user_info
+    definition:
+      enable_manual: false
+      update:
+        columns:
+        - email
+        - phone
+    retry_conf:
+      num_retries: 3
+      interval_sec: 10
+      timeout_sec: 60
+    webhook: http://hasura-auth:4000/users/update

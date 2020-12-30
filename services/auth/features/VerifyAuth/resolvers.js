@@ -28,7 +28,7 @@ export class VerifyAuth extends BasicAuth {
 		this.registerService = new Register();
 		this.verifyService = new Verify();
 		this.signinService = new Signin();
-		this.resendService = new Resend();
+		this.resendService = Resend;
 		this.resetService = new ResetPassword();
 		this.refreshTokenService = new RefreshToken();
 		this.addEmailService = new AddEmail();
@@ -52,19 +52,19 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	resend_email = async (_, {email}) => {
-		return this.resendService.resendEmail(email);
+		return (new this.resendService({email})).resendEmail(email);
 	}
 
 	resend_phone = async (_, {phone}) => {
-		return this.resendService.resendPhone(phone);
+		return (new this.resendService({phone})).resendPhone(phone);
 	}
 
 	send_reset_email = async (_, {email}) => {
-		return this.resendService.sendResetEmail(email);
+		return this.resetService.sendResetEmail(email);
 	}
 
 	send_reset_phone = async (_, {phone}) => {
-		return this.resendService.sendResetPhone(phone);
+		return this.resetService.sendResetPhone(phone);
 	}
 
 	reset_via_email = async (_, {token, password}) => {

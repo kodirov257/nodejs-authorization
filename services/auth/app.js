@@ -12,6 +12,7 @@ import { typeDefs as basicTypeDef } from './features/BasicAuth/typeDefs';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 const indexRouter = require('./routes/index');
+const userRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 
 const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
@@ -58,6 +59,7 @@ app.use(passport.initialize());
 app.use(bodyParser.json())
 app.use('/', authRouter);
 app.use('/', indexRouter);
+app.use('/users', userRouter);
 server.applyMiddleware({app});
 
 module.exports = app;
