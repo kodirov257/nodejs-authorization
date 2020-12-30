@@ -52,7 +52,7 @@ export class GetUser extends BasicGetUser {
 	}
 
 	getUserByPhoneVerifyToken = async (phone) => {
-		return this.getUser('phone', phone.replace(/^\++/, ''));
+		return this.getUser('phone', phone.replace(/^\++/, ''), UserFragment);
 	}
 
 	getUserByEmailVerifyToken = async (token) => {

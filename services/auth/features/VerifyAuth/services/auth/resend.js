@@ -1,12 +1,14 @@
 const moment = require('moment');
-import {  v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import get from 'lodash/get';
 
-import { sendEmailVerifyToken, sendSmsVerifyToken, updateUser } from '../../../../services';
 import { validateEmail, validatePhone } from '../../validators';
-import { STATUS_VERIFIED}  from '../../../../helpers/values';
+import { STATUS_VERIFIED } from '../../../../helpers/values';
+import { updateUser } from '../hasura/update-user';
 import { UserFragment } from '../../fragments';
 import { GetUser } from '../hasura/get-user';
+import { Mail } from '../mail';
+import { Sms } from '../sms';
 
 export class Resend {
 	getUser;
@@ -16,12 +18,12 @@ export class Resend {
 		this.getUser = new GetUser();
 		if (email) {
 			validateEmail(email);
-			this.user = this.getUser.getUserByEmail(email, UserFragment)
+			this.user = this.getUser.getUserByEmail(email, UserFragment);
 		} else if (phone) {
 			validatePhone(phone);
-			this.user = this.getUser.getUserByPhone(phone, UserFragment)
+			this.user = this.getUser.getUserByPhone(phone, UserFragment);
 		} else {
-
+			throw new Error('No parameters are provided.');
 		}
 	}
 
@@ -49,7 +51,7 @@ export class Resend {
 				phone_verify_token_expire: moment().add(5, 'minutes').format('Y-M-D H:mm:ss'),
 			}
 		};
-		const user = await this.user
+		const user = await this.user;
 		if (!user) {
 			throw new Error(`Invalid ${type} provided`);
 		}
@@ -59,10 +61,10 @@ export class Resend {
 
 		if (data !== undefined) {
 			if (type === 'email' || type === 'both') {
-				await sendEmailVerifyToken(user.username, user.email, data.email_verify_token);
+				await (new Mail(user.username, user.email, data.email_verify_token)).sendEmailVerifyToken();
 			}
 			if (type === 'phone' || type === 'both') {
-				await sendSmsVerifyToken(user.phone, data.phone_verify_token);
+				await (new Sms(user.phone, data.phone_verify_token)).sendSmsVerifyToken();
 			}
 			return true;
 		}

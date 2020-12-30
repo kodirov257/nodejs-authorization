@@ -29,7 +29,7 @@ export class VerifyAuth extends BasicAuth {
 		this.verifyService = new Verify();
 		this.signinService = new Signin();
 		this.resendService = Resend;
-		this.resetService = new ResetPassword();
+		this.resetService = ResetPassword;
 		this.refreshTokenService = new RefreshToken();
 		this.addEmailService = new AddEmail();
 		this.addPhoneService = new AddPhone();
@@ -60,19 +60,19 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	send_reset_email = async (_, {email}) => {
-		return this.resetService.sendResetEmail(email);
+		return (new this.resetService({email})).sendResetEmail();
 	}
 
 	send_reset_phone = async (_, {phone}) => {
-		return this.resetService.sendResetPhone(phone);
+		return (new this.resetService({phone})).sendResetPhone();
 	}
 
 	reset_via_email = async (_, {token, password}) => {
-		return this.resetService.resetViaEmail(token, password);
+		return (new this.resetService({token, password})).resetViaEmail();
 	}
 
 	reset_via_phone = async (_, {phone, token, password}) => {
-		return this.resetService.resetViaPhone(phone, token, password);
+		return (new this.resetService({phone, token, password})).resetViaPhone();
 	}
 
 	change_password = async (_, {old_password, new_password}, ctx) => {
