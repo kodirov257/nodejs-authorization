@@ -1,13 +1,14 @@
-import { GetUser, Signin as BasicLogin } from '..';
+import { GetUser } from '..';
+import { Signin as BasicLogin } from '../../../BasicAuth/services/auth/login';
 
 export class Signin extends BasicLogin {
 	constructor(usernameEmailOrPhone, password, ctx) {
 		super(usernameEmailOrPhone, password, ctx);
 	}
 
-	singin = async (usernameEmailOrPhone, password, ctx) => {
-		const user = await (new GetUser()).getUserByCredentials(usernameEmailOrPhone, password);
+	signin = async () => {
+		const user = await (new GetUser()).getUserByCredentials(this.usernameEmailOrPhone, this.password);
 
-		return this.generateTokens(user, ctx.req);
+		return this.generateTokens(user, this.ctx.req);
 	}
 }

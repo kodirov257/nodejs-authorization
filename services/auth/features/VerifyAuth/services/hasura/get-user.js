@@ -15,13 +15,13 @@ export class GetUser extends BasicGetUser {
 		let searchType;
 		if (isEmail(usernameEmailOrPhone)) {
 			searchType = 'email';
-			user = await this.getUserByEmail(usernameEmailOrPhone);
+			user = await this.getUserByEmail(usernameEmailOrPhone, UserFragment);
 		} else if (isPhone(usernameEmailOrPhone)) {
 			searchType = 'phone';
-			user = await this.getUserByPhone(usernameEmailOrPhone);
+			user = await this.getUserByPhone(usernameEmailOrPhone, UserFragment);
 		} else {
 			searchType = 'username';
-			user = await this.getUserByUsername(usernameEmailOrPhone);
+			user = await this.getUserByUsername(usernameEmailOrPhone, UserFragment);
 		}
 
 		if (!user || !user.user_verifications || !(userVerifications = user.user_verifications[0])) {

@@ -6,7 +6,7 @@ import { hasuraQuery } from "../client";
 import { getUserByCredentials } from "../index";
 import { generateClaimsJwtToken, generateJwtRefreshToken } from "../../helpers/auth-tools";
 
-export const singin = async (usernameEmailOrPhone, password, ctx) => {
+export const signin = async (usernameEmailOrPhone, password, ctx) => {
     const user = await getUserByCredentials(usernameEmailOrPhone, password);
 
     return generateTokens(user, ctx.req);
@@ -14,7 +14,7 @@ export const singin = async (usernameEmailOrPhone, password, ctx) => {
 
 export const generateTokens = async (user, request) => {
     const ipAddress = (
-        request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
+      request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
     ).split(',')[0].trim();
 
     const [refreshToken, sessionId] = await createUserSession(user, request.headers['user-agent'], ipAddress);
@@ -36,24 +36,24 @@ export const createUserSession = async (user, userAgent = null, ipAddress = null
         const expiresAt = getExpiresDate();
 
         const result = await hasuraQuery(
-            gql`
-                mutation ($userSessionData: [user_sessions_insert_input!]!) {
-                    insert_user_sessions(objects: $userSessionData) {
-                        returning {
-                            id
-                        }
-                    }
-                }
-            `,
-            {
-                userSessionData: {
-                    user_id: user.id,
-                    expires_at: expiresAt,
-                    refresh_token: refreshToken,
-                    user_agent: userAgent,
-                    ip_address: ipAddress,
-                }
-            }
+          gql`
+              mutation ($userSessionData: [user_sessions_insert_input!]!) {
+                  insert_user_sessions(objects: $userSessionData) {
+                      returning {
+                          id
+                      }
+                  }
+              }
+          `,
+          {
+              userSessionData: {
+                  user_id: user.id,
+                  expires_at: expiresAt,
+                  refresh_token: refreshToken,
+                  user_agent: userAgent,
+                  ip_address: ipAddress,
+              }
+          }
         );
 
         const sessionId = get(result, 'data.insert_user_sessions.returning[0].id');

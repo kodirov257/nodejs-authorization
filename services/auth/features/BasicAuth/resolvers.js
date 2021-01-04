@@ -25,7 +25,7 @@ export class BasicAuth {
 	}
 
 	signin = async (_, {login, password}, ctx) => {
-		return (new Signin(login, password, ctx)).singin();
+		return (new Signin(login, password, ctx)).signin();
 	}
 
 	change_password = async (_, {old_password, new_password}, ctx) => {

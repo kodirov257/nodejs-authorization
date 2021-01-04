@@ -1,6 +1,6 @@
 export * from '../../../core/services';
 export * from './auth/register';
-export * from '../../BasicAuth/services/auth/login';
+export * from './auth/login';
 export * from '../../BasicAuth/services/auth/refresh_token';
 export * from './hasura/get-user';
 export * from '../../BasicAuth/services/hasura/get-user-by-id';

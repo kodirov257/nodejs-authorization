@@ -27,7 +27,7 @@ export class VerifyAuth extends BasicAuth {
 
 		this.registerService = new Register();
 		this.verifyService = Verify;
-		this.signinService = new Signin();
+		this.signinService = Signin;
 		this.resendService = Resend;
 		this.resetService = ResetPassword;
 		this.refreshTokenService = new RefreshToken();
@@ -48,7 +48,7 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	signin = async (_, {login, password}, ctx) => {
-		return this.signinService.singin(login, password, ctx);
+		return (new this.signinService(login, password, ctx)).signin();
 	}
 
 	resend_email = async (_, {email}) => {
