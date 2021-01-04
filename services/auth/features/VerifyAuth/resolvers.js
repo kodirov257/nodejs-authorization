@@ -30,7 +30,7 @@ export class VerifyAuth extends BasicAuth {
 		this.signinService = Signin;
 		this.resendService = Resend;
 		this.resetService = ResetPassword;
-		this.refreshTokenService = new RefreshToken();
+		this.refreshTokenService = RefreshToken;
 		this.addEmailService = new AddEmail();
 		this.addPhoneService = new AddPhone();
 	}
@@ -52,11 +52,11 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	resend_email = async (_, {email}) => {
-		return (new this.resendService({email})).resendEmail(email);
+		return (new this.resendService({email})).resendEmail();
 	}
 
 	resend_phone = async (_, {phone}) => {
-		return (new this.resendService({phone})).resendPhone(phone);
+		return (new this.resendService({phone})).resendPhone();
 	}
 
 	send_reset_email = async (_, {email}) => {
@@ -84,7 +84,7 @@ export class VerifyAuth extends BasicAuth {
 			throw new Error('Refresh token is not provided.');
 		}
 
-		return this.refreshToken.refreshToken(refresh_token, ctx);
+		return (new this.refreshTokenService(refresh_token, ctx)).refreshToken();
 	}
 
 	send_add_email_token = async (_, {email}, ctx) => {

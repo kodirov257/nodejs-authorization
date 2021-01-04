@@ -3,7 +3,6 @@ import get from 'lodash/get';
 
 import { isAuthenticated, getCurrentUserId } from '../../../../core/helpers/user';
 import { validateChangePassword } from '../../../../core/validators';
-import * as constants from '../../../../core/helpers/values';
 import { getUserById } from '../hasura/get-user-by-id';
 import { updateUser } from '../hasura/update-user';
 
@@ -19,6 +18,12 @@ export class ChangePassword {
 	}
 
 	async changePassword() {
+		const user = await this.getUser();
+
+		return this.change(user);
+	}
+
+	async getUser() {
 		if (!isAuthenticated(this.ctx.req)) {
 			throw new Error('Authorization token has not provided');
 		}
@@ -30,10 +35,10 @@ export class ChangePassword {
 			throw new Error('User not found.');
 		}
 
-		if (user.status !== constants.STATUS_ACTIVE) {
-			throw new Error('User not activated.');
-		}
+		return user;
+	}
 
+	async change(user) {
 		validateChangePassword(this.oldPassword, this.newPassword);
 
 		const passwordMatch = await bcrypt.compare(this.oldPassword, user.password);
