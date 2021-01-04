@@ -7,83 +7,102 @@ import { GetUser, updateUser } from '../index';
 
 export class Verify {
 	getUser;
+	token;
+	phone;
 
-	constructor() {
+	constructor({token, phone = null}) {
 		this.getUser = new GetUser();
+		this.token = token;
+		this.phone = phone ? phone.replace(/^\++/, '') : null;
 	}
 
-	async verifyEmail(token) {
-		validateVerifyEmail(token);
+	async verifyEmail() {
+		validateVerifyEmail(this.token);
 
-		let user = await this.getUser.getUserByEmailVerifyToken(token);
-		console.log(user);
+		let user = await this.getUser.getUserByEmailVerifyToken(this.token);
 
 		if (!user) {
 			throw new Error('Invalid token');
 		}
 
-		const userVerifications = user.user_verifications[0];
-
-		const fields = {
-			status: constants.STATUS_ACTIVE,
-			updated_at: moment().format('Y-M-D H:mm:ss'),
-		};
-
-		const verificationFields = {
-			email_verified: true,
-			email_verify_token: null,
-		};
-
-		const result = await updateUser(user.id, fields, verificationFields);
-
-		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
-			return true;
-		}
-
-		await updateUser(user.id, {status: user.status, updated_at: moment().format('Y-M-D H:mm:ss')}, {
-			email_verified: userVerifications ? userVerifications.email_verified : false,
-			email_verify_token: userVerifications ? userVerifications.email_verify_token : null,
-		});
-
-		return false;
+		return this.verify(user, 'email');
 	}
 
-	async verifyPhone(phone, token) {
-		validateVerifyPhone(phone, token);
-		phone = phone.replace(/^\++/, '');
+	async verifyPhone() {
+		validateVerifyPhone(this.phone, this.token);
 
-		let user = await this.getUser.getUserByPhoneVerifyToken(phone);
+		let user = await this.getUser.getUserByPhoneVerifyToken(this.phone);
 
 		if (!user) {
 			throw new Error('Invalid phone');
 		}
 
-		if (user.phone_verify_token !== token) {
-			throw new Error('Invalid token');
+		return this.verify(user, 'phone');
+	}
+
+	validate = (user, type = 'email') => {
+		const userVerifications = user.user_verifications[0];
+
+		if (!userVerifications) {
+			throw new Error('No user verification is provided.');
 		}
 
-		const expireData = moment(user.phone_verify_token_expire);
-		if (expireData.isBefore()) {
-			throw new Error('Phone verify token is expired.');
+		if (type === 'phone') {
+			if (userVerifications.phone_verify_token !== this.token) {
+				throw new Error('Invalid token');
+			}
+
+			const expireData = moment(userVerifications.phone_verify_token_expire);
+			if (expireData.isBefore()) {
+				throw new Error('Phone verify token is expired.');
+			}
 		}
+	}
+
+	async verify(user, type = 'email') {
+		this.validate(user, type);
 
 		const fields = {
 			status: constants.STATUS_ACTIVE,
 			updated_at: moment().format('Y-M-D H:mm:ss'),
 		};
 
-		const userVerificationFields = {
-			phone_verified: true,
-			phone_verify_token: null,
-			phone_verify_token_expire: null,
+		const _verificationFields = {
+			emailFields: {
+				email_verified: true,
+				email_verify_token: null,
+			},
+			phoneFields: {
+				phone_verified: true,
+				phone_verify_token: null,
+				phone_verify_token_expire: null,
+			},
 		};
 
-		const result = await updateUser(user.id, fields, userVerificationFields);
+		const result = await updateUser(user.id, fields, _verificationFields[type + 'Fields']);
 
 		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
 			return true;
 		}
 
-		return get(result, 'data.update_users_by_pk') !== undefined;
+		return this.revertChanges(user, user.user_verifications[0], type);
+	}
+
+	async revertChanges(user, verification, type = 'email') {
+		const _fields = {
+			emailFields: {
+				email_verified: verification.email_verified,
+				email_verify_token: verification.email_verify_token,
+			},
+			phoneFields: {
+				phone_verified: false,
+				phone_verify_token: null,
+				phone_verify_token_expire: null,
+			}
+		};
+
+		await updateUser(user.id, {status: user.status, updated_at: moment().format('Y-M-D H:mm:ss')}, _fields[type + 'Fields']);
+
+		return false;
 	}
 }
