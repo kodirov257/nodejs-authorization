@@ -31,8 +31,8 @@ export class VerifyAuth extends BasicAuth {
 		this.resendService = Resend;
 		this.resetService = ResetPassword;
 		this.refreshTokenService = RefreshToken;
-		this.addEmailService = new AddEmail();
-		this.addPhoneService = new AddPhone();
+		this.addEmailService = AddEmail;
+		this.addPhoneService = AddPhone;
 	}
 
 	register = async (_, {username, email_or_phone, password}) => {
@@ -76,7 +76,7 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	change_password = async (_, {old_password, new_password}, ctx) => {
-		return (new ChangePassword(old_password, new_password, ctx)).changePassword()
+		return (new ChangePassword({old_password, new_password, ctx})).changePassword()
 	}
 
 	refresh_token = async (_, {refresh_token}, ctx) => {
@@ -88,19 +88,19 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	send_add_email_token = async (_, {email}, ctx) => {
-		return this.addEmailService.sendEmailAddEmailToken(email, ctx);
+		return (new this.addEmailService({email, ctx})).sendEmailAddEmailToken();
 	}
 
 	add_email = async (_, {token}, ctx) => {
-		return this.addEmailService.addEmail(token, ctx);
+		return (new this.addEmailService({token, ctx})).addEmail();
 	}
 
 	send_add_phone_token = async (_, {phone}, ctx) => {
-		return this.addPhoneService.sendAddPhoneToken(phone, ctx);
+		return (new this.addPhoneService({phone, ctx})).sendAddPhoneToken();
 	}
 
 	add_phone = async (_, {phone, token}, ctx) => {
-		return this.addPhoneService.addPhone(phone, token, ctx);
+		return (new this.addPhoneService({phone, token, ctx})).addPhone();
 	}
 
 	resolvers() {
