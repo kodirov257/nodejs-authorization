@@ -1,14 +1,14 @@
-import * as constants from '../helpers/values';
+import * as constants from '../features/VerifyAuth/helpers/values';
 import get from 'lodash/get';
 
-import { getUserByEmailVerifyToken, updateUser } from '../services';
+import { GetUser, updateUser } from '../features/VerifyAuth/services';
 
 let express = require('express');
 let router = express.Router();
 
 router.get('/verify-email/:token', async (req, res) => {
     try {
-        let user = await getUserByEmailVerifyToken(req.params.token);
+        let user = await (new GetUser()).getUserByEmailVerifyToken(req.params.token);
 
         if (!user) {
             throw new Error('Invalid token');

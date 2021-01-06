@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import get from 'lodash/get';
 
 import { validateEmail, validatePhone } from '../../validators';
-import { STATUS_VERIFIED } from '../../../../helpers/values';
+import { STATUS_VERIFIED } from '../../helpers/values';
 import { updateUser } from '../hasura/update-user';
 import { UserFragment } from '../../fragments';
 import { GetUser } from '../hasura/get-user';

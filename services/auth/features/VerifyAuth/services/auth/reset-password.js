@@ -1,5 +1,3 @@
-import {sendEmailVerifyToken, sendSmsVerifyToken} from "../../../../services";
-
 const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
@@ -66,7 +64,6 @@ export class ResetPassword {
 			}
 		};
 
-		console.log(user);
 		if (!user) {
 			throw new Error(`Invalid ${type} provided`);
 		}
@@ -106,7 +103,6 @@ export class ResetPassword {
 		if (!user) {
 			throw new Error('Invalid phone');
 		}
-		console.log(user);
 		const userVerification = user.user_verifications[0];
 
 		if (userVerification.phone_verify_token !== this.token) {

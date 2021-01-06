@@ -1,5 +1,5 @@
 import { ChangePassword as BasicChangePassword } from '../../../BasicAuth/services/user/change_password';
-import * as constants from "../../../../core/helpers/values";
+import * as constants from '../../helpers/values';
 
 export class ChangePassword extends BasicChangePassword {
 

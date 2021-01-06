@@ -2,7 +2,7 @@ require('dotenv-flow').config();
 import { ApolloServer } from 'apollo-server-express';
 import { buildContext } from 'graphql-passport';
 import bodyParser from 'body-parser';
-import { log } from './services/log';
+import { log } from './core/services';
 import passport from 'passport';
 import express from 'express';
 import fs from 'fs';
@@ -18,7 +18,6 @@ const authRouter = require('./routes/auth');
 const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
 
 const resolvers = () => {
-  console.log(service);
   switch (service.service) {
     case 'VerifyAuth':
       return (new VerifyAuth()).resolvers();
@@ -30,7 +29,6 @@ const resolvers = () => {
 };
 
 const typeDef = () => {
-  console.log(service);
 
   switch (service.service) {
     case 'VerifyAuth':
