@@ -13,6 +13,9 @@ const google = new Google();
 
 passport.use(new FacebookStrategy(facebook.options(),
   async function(accessToken, refreshToken, profile, done) {
+    console.log(accessToken);
+    console.log(refreshToken);
+    console.log(profile);
     return facebook.callback(profile, done);
   }
 ));

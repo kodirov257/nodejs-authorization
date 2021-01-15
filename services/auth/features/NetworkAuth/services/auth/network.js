@@ -1,12 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import gql from 'graphql-tag';
 import get from 'lodash/get';
 
-import { Generator } from '../../../BasicAuth/services/auth/generator';
+import {Generator} from '../../../BasicAuth/services/auth/generator';
 import * as constants from '../../../../core/helpers/values';
-import { hasuraQuery } from '../../../../core/services';
-import { UserFragment } from '../../fragments';
-import { GetUser } from '../hasura/get-user';
+import {hasuraQuery} from '../../../../core/services';
+import {UserFragment} from '../../fragments';
+import {GetUser} from '../hasura/get-user';
 
 export class Network {
   getUserService;
@@ -14,11 +14,13 @@ export class Network {
   clientID;
   clientSecret;
   callbackUrl;
+  profileFields;
   network;
 
   constructor() {
     this.getUserService = new GetUser();
     this.generator = new Generator();
+    this.profileFields = [];
   }
 
   options = () => {
@@ -26,7 +28,7 @@ export class Network {
       clientID: this.clientID,
       clientSecret: this.clientSecret,
       callbackURL: this.callbackUrl,
-      // profileFields: ['id', 'email', 'first_name', 'last_name'],
+      ...this.profileFields.length > 0 ? {profileFields: this.profileFields} : {},
     };
   }
 
@@ -37,13 +39,15 @@ export class Network {
   authorize = async (accessToken) => {
     const userInfo = await this.getUserInfo(accessToken);
     console.log(userInfo);
-    // console.log(userInfo.sub);
+    console.log(userInfo.id);
 
     if (!userInfo) {
       throw new Error(`Wrong ${this.network} token is provided.`);
     }
 
-    const user = await this.getUser(userInfo.sub);
+    const userId = this.getUserId(userInfo);
+
+    const user = await this.getUser(userId);
 
     // console.log(user);
 
@@ -51,7 +55,7 @@ export class Network {
       return this.generator.generateTokens(user);
     }
 
-    const params = await this.getParams(userInfo.sub, accessToken);
+    const params = await this.getParams(userId, accessToken);
     console.log(params);
 
     const result = await hasuraQuery(
@@ -85,6 +89,10 @@ export class Network {
   getUser = async (identity) => null;
 
   getUserInfo = async (token) => null;
+
+  getUserId = (user) => {
+    return user.id;
+  }
 
   getParams = async (identity, accessToken) => {
     return {

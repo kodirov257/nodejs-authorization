@@ -25,4 +25,8 @@ export class Google extends Network {
 
     return response.json();
   }
+
+  getUserId = (user) => {
+    return user.sub;
+  }
 }
