@@ -13,6 +13,7 @@ import { NetworkAuth } from './features/NetworkAuth/resolvers';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 const indexRouter = require('./routes/index');
+const jwkRouter = require('./routes/jwk');
 
 const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
 
@@ -58,6 +59,7 @@ const server = new ApolloServer({
 const app = express();
 app.use(bodyParser.json())
 app.use('/', indexRouter);
+app.use('/jwk', jwkRouter);
 
 switch (service.service) {
   case 'NetworkAuth':

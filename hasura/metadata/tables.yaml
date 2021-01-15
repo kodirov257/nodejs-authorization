@@ -114,7 +114,7 @@
         - email
         - phone
     retry_conf:
-      num_retries: 3
+      num_retries: 1
       interval_sec: 10
       timeout_sec: 60
     webhook: http://hasura-auth:4000/users/update

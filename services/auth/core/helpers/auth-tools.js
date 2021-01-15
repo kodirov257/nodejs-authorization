@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
 
+import { JWT_ALGORITHM } from '../config';
+
 const generateJwtAccessToken = (payload) => {
     const jwtOptions = {
-        algorithm: process.env.JWT_ALGORITHM,
+        algorithm: JWT_ALGORITHM,
         expiresIn: `${process.env.JWT_TOKEN_EXPIRES_MIN}m`,
     };
 
@@ -11,7 +13,7 @@ const generateJwtAccessToken = (payload) => {
 
 export const generateJwtRefreshToken = (payload) => {
     const jwtOptions = {
-        algorithm: process.env.JWT_ALGORITHM,
+        algorithm: JWT_ALGORITHM,
         expiresIn: `${process.env.REFRESH_TOKEN_EXPIRES_IN_MIN}m`,
     };
 

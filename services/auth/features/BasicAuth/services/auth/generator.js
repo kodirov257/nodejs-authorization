@@ -6,8 +6,8 @@ import { generateClaimsJwtToken, generateJwtRefreshToken } from '../../../../cor
 import { hasuraQuery } from '../../../../core/services';
 
 export class Generator {
+
   generateTokens = async (user, request = null) => {
-    console.log(user);
     const ipAddress = request ? (
       request.headers['x-forwarded-for'] || request.connection.remoteAddress || ''
     ).split(',')[0].trim() : '';

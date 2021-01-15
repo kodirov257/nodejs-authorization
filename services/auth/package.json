@@ -7,6 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@hapi/boom": "9.1.0",
     "@hapi/joi": "^17.1.1",
     "apollo-server-express": "^2.19.0",
     "bcryptjs": "^2.4.3",
@@ -21,6 +22,7 @@
     "graphql-passport": "^0.6.3",
     "graphql-tag": "^2.11.0",
     "http-errors": "~1.6.3",
+    "jose": "1.26.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "moment": "^2.29.1",
