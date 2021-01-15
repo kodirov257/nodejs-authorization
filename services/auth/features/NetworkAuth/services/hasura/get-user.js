@@ -49,8 +49,8 @@ export class GetUser extends VerifyGetUser {
       const response = await hasuraQuery(
         gql`
             ${fragment}
-            query($where: user_networks_bool_exp) {
-                user_networks(where: $where) {
+            query($where: auth_user_networks_bool_exp) {
+                auth_user_networks(where: $where) {
                     ...UserNetwork
                 }
             }
@@ -58,7 +58,7 @@ export class GetUser extends VerifyGetUser {
         condition,
       );
 
-      return get(response, 'data.user_networks[0]');
+      return get(response, 'data.auth_user_networks[0]');
     } catch (e) {
       throw new Error(e.message);
     }

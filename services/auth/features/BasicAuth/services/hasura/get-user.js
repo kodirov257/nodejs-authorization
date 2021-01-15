@@ -56,8 +56,8 @@ export class GetUser {
 			const response = await hasuraQuery(
 				gql`
 					${fragment}
-					query($where: users_bool_exp) {
-						users(where: $where) {
+					query($where: auth_users_bool_exp) {
+						auth_users(where: $where) {
 							...User
 						}
 					}
@@ -65,7 +65,7 @@ export class GetUser {
 				condition,
 			);
 
-			return get(response, 'data.users[0]');
+			return get(response, 'data.auth_users[0]');
 		} catch (e) {
 			// throw new Error('Unable to find the email');
 			throw new Error(e.message);

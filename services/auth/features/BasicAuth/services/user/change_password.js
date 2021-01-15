@@ -54,6 +54,6 @@ export class ChangePassword {
 
 		const result = await updateUser(user.id, fields);
 
-		return get(result, 'data.update_users_by_pk') !== undefined;
+		return get(result, 'data.update_auth_users_by_pk') !== undefined;
 	}
 }

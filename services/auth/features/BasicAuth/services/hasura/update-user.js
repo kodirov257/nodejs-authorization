@@ -9,8 +9,8 @@ export const updateUser = async (userId, fields) => {
 	return hasuraQuery(
 		gql`
 			${UserFragment}
-			mutation ($user: users_set_input, $id: users_pk_columns_input!) {
-				update_users_by_pk(_set: $user, pk_columns: $id) {
+			mutation ($user: auth_users_set_input, $id: auth_users_pk_columns_input!) {
+				update_auth_users_by_pk(_set: $user, pk_columns: $id) {
 					...User
 				}
 			}

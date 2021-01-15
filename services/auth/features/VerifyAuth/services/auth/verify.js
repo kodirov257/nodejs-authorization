@@ -81,7 +81,7 @@ export class Verify {
 
 		const result = await updateUser(user.id, fields, _verificationFields[type + 'Fields']);
 
-		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+		if (get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined) {
 			return true;
 		}
 

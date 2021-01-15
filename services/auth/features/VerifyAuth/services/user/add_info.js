@@ -86,8 +86,8 @@ export class AddInfo {
         };
 
         const result = await updateUser(userId, _fields[`${type}Fields`], _verificationFields[`${type}Fields`]);
-        let userData = get(result, 'data.update_users_by_pk');
-        let verificationData = get(result, 'data.update_user_verifications_by_pk');
+        let userData = get(result, 'data.update_auth_users_by_pk');
+        let verificationData = get(result, 'data.update_auth_user_verifications_by_pk');
 
         if (userData !== undefined && verificationData !== undefined) {
             if (type === 'email') {
@@ -131,7 +131,7 @@ export class AddInfo {
 
         const result = await updateUser(user.id, {}, _fields[`${type}Fields`]);
 
-        return get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined;
+        return get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined;
     }
 
     validateAdd = (verification) => {}

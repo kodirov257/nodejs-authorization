@@ -70,7 +70,7 @@ export class ResetPassword {
 
 		const result = await updateUser(user.id, {}, _fields[type + 'Fields']);
 
-		let data = get(result, 'data.update_user_verifications_by_pk');
+		let data = get(result, 'data.update_auth_user_verifications_by_pk');
 
 		if (data !== undefined) {
 			if (type === 'email') {
@@ -131,7 +131,7 @@ export class ResetPassword {
 
 		const result = await updateUser(user.id, {password: passwordHash}, _fields[type + 'Fields']);
 
-		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
+		if (get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined) {
 			return true;
 		}
 

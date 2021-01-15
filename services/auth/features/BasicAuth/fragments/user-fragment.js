@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
 export const UserFragment = gql`
-    fragment User on users {
+    fragment User on auth_users {
         id
         username
         email

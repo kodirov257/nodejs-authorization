@@ -33,8 +33,8 @@ export class Generator {
 
       const result = await hasuraQuery(
         gql`
-            mutation ($userSessionData: [user_sessions_insert_input!]!) {
-                insert_user_sessions(objects: $userSessionData) {
+            mutation ($userSessionData: [auth_user_sessions_insert_input!]!) {
+                insert_auth_user_sessions(objects: $userSessionData) {
                     returning {
                         id
                     }
@@ -52,7 +52,7 @@ export class Generator {
         }
       );
 
-      const sessionId = get(result, 'data.insert_user_sessions.returning[0].id');
+      const sessionId = get(result, 'data.insert_auth_user_sessions.returning[0].id');
       if (sessionId === undefined) {
         return Promise.reject(new Error('Error to create the user session.'));
       }

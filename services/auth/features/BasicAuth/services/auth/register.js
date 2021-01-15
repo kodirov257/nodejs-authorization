@@ -86,8 +86,8 @@ export class Register {
 		const result = await hasuraQuery(
 			gql`
 				${this.fragment}
-				mutation ($user: users_insert_input!) {
-					insert_users(objects: [$user]) {
+				mutation ($user: auth_users_insert_input!) {
+					insert_auth_users(objects: [$user]) {
 						returning {
 							...User
 						}
@@ -99,13 +99,13 @@ export class Register {
 			}
 		);
 
-		// console.log(result);
+		console.log(result);
 		// console.log(result.errors[0].extensions);
 		// console.log(JSON.stringify(result));
 		// console.log(result.errors[0].extensions.internal.statement);
 		// console.log(result.errors[0]);
 
-		this.registerData = get(result, 'data.insert_users.returning');
+		this.registerData = get(result, 'data.insert_auth_users.returning');
 
 		return this.registerData !== undefined;
 	};

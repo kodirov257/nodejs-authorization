@@ -11,15 +11,15 @@ export const updateUser = async (userId, userFields, userVerificationFields = {}
 			${UserFragment}
 			${UserVerificationFragment}
 			mutation (
-				$user: users_set_input,
-				$id: users_pk_columns_input!,
-				$verification: user_verifications_set_input,
-				$user_id: user_verifications_pk_columns_input!
+				$user: auth_users_set_input,
+				$id: auth_users_pk_columns_input!,
+				$verification: auth_user_verifications_set_input,
+				$user_id: auth_user_verifications_pk_columns_input!
 			) {
-				update_users_by_pk(_set: $user, pk_columns: $id) {
+				update_auth_users_by_pk(_set: $user, pk_columns: $id) {
 					...User
 				},
-				update_user_verifications_by_pk(_set: $verification, pk_columns: $user_id) {
+				update_auth_user_verifications_by_pk(_set: $verification, pk_columns: $user_id) {
 					...UserVerification
 				}
 			}

@@ -1,5 +1,4 @@
-import {v4 as uuidv4} from 'uuid';
-import fetch from 'node-fetch';
+import { v4 as uuidv4 } from 'uuid';
 import gql from 'graphql-tag';
 import get from 'lodash/get';
 
@@ -58,8 +57,8 @@ export class Network {
     const result = await hasuraQuery(
       gql`
           ${UserFragment}
-          mutation ($user: users_insert_input!) {
-              insert_users(objects: [$user]) {
+          mutation ($user: auth_users_insert_input!) {
+              insert_auth_users(objects: [$user]) {
                   returning {
                       ...User
                   }
@@ -71,7 +70,7 @@ export class Network {
       }
     );
 
-    const userData = get(result, 'data.insert_users.returning');
+    const userData = get(result, 'data.insert_auth_users.returning');
 
     console.log(result);
     console.log(userData);
