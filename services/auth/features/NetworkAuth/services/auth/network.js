@@ -37,10 +37,8 @@ export class Network {
   }
 
   authorize = async (accessToken) => {
-    console.log('dsadhgqwgdljksadaskjdajslkd');
     const userInfo = await this.getUserInfo(accessToken);
     console.log(userInfo);
-    console.log(userInfo.id);
 
     if (!userInfo || userInfo.error) {
       throw new Error(`Wrong ${this.network} token is provided.`);
