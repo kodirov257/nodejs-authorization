@@ -5,8 +5,13 @@ import path from 'path';
 import fs from 'fs';
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', async (req, res) => {
+  return res.send({ title: 'Express' });
+});
+
+router.get('/test', async (req, res) => {
+  res.status(200);
+  return res.send({ title: 'Test' });
 });
 
 const services = [

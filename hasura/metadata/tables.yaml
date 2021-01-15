@@ -1,15 +1,33 @@
 - table:
-    schema: public
+    schema: auth
     name: logs
 - table:
-    schema: public
+    schema: auth
     name: user_sessions
   object_relationships:
   - name: user
     using:
       foreign_key_constraint_on: user_id
 - table:
-    schema: public
+    schema: auth
+    name: user_networks
+  object_relationships:
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  select_permissions:
+    - role: user
+      permission:
+        columns:
+          - user_id
+          - network
+          - identity
+        filter:
+          user:
+            id:
+              _eq: X-Hasura-User-Id
+- table:
+    schema: auth
     name: user_verifications
   object_relationships:
   - name: user
@@ -44,7 +62,7 @@
             _eq: X-Hasura-User-Id
       check: null
 - table:
-    schema: public
+    schema: auth
     name: users
   array_relationships:
   - name: user_sessions
@@ -52,14 +70,14 @@
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
+          schema: auth
           name: user_sessions
   - name: user_verifications
     using:
       foreign_key_constraint_on:
         column: user_id
         table:
-          schema: public
+          schema: auth
           name: user_verifications
   select_permissions:
   - role: user

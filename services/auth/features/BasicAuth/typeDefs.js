@@ -25,17 +25,6 @@ export const typeDefs = gql`
 		last_seen_at: String
 	}
 
-	type Profile {
-		user_id: User!
-		first_name: String
-		middle_name: String
-		last_name: String
-		date_of_birth: String
-		gender: Int
-		biography: String
-		avatar: String
-	}
-
 	type Query {
 		hello: String
 		auth_me: User

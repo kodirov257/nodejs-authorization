@@ -3,22 +3,26 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildContext } from 'graphql-passport';
 import bodyParser from 'body-parser';
 import { log } from './core/services';
-import passport from 'passport';
 import express from 'express';
 import fs from 'fs';
 
+import { typeDefs as networkTypeDef } from './features/NetworkAuth/typeDefs';
 import { typeDefs as verifyTypeDef } from './features/VerifyAuth/typeDefs';
 import { typeDefs as basicTypeDef } from './features/BasicAuth/typeDefs';
+import { NetworkAuth } from './features/NetworkAuth/resolvers';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
+const networkRouter = require('./routes/network');
 
 const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
 
 const resolvers = () => {
   switch (service.service) {
+    case 'NetworkAuth':
+      return (new NetworkAuth()).resolvers();
     case 'VerifyAuth':
       return (new VerifyAuth()).resolvers();
     case 'BasicAuth':
@@ -31,6 +35,8 @@ const resolvers = () => {
 const typeDef = () => {
 
   switch (service.service) {
+    case 'NetworkAuth':
+      return networkTypeDef;
     case 'VerifyAuth':
       return verifyTypeDef;
     case 'BasicAuth':
@@ -53,10 +59,11 @@ const server = new ApolloServer({
 
 
 const app = express();
-app.use(passport.initialize());
+app.use(networkRouter.passport.initialize());
 app.use(bodyParser.json())
-app.use('/', authRouter);
 app.use('/', indexRouter);
+app.use('/auth', authRouter);
+app.use('/network', networkRouter.router);
 app.use('/users', userRouter);
 server.applyMiddleware({app});
 

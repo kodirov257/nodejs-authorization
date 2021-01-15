@@ -9,6 +9,6 @@ export class Signin extends BasicLogin {
 	signin = async () => {
 		const user = await (new GetUser()).getUserByCredentials(this.usernameEmailOrPhone, this.password);
 
-		return this.generateTokens(user, this.ctx.req);
+		return this.generator.generateTokens(user, this.ctx.req);
 	}
 }

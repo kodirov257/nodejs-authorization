@@ -1,6 +1,6 @@
-import { memoize } from "lodash";
-import fetch from "node-fetch";
-import { print } from "graphql/language/printer";
+import { print } from 'graphql/language/printer';
+import { memoize } from 'lodash'
+import fetch from 'node-fetch';
 require('dotenv-flow').config();
 
 const getDefaultHeaders = memoize(() => {
@@ -8,7 +8,7 @@ const getDefaultHeaders = memoize(() => {
 
     if (!adminSecret) {
         throw Error(
-            'The environment "HASURA_GRAPHQL_ADMIN_SECRET" has not provided',
+          'The environment "HASURA_GRAPHQL_ADMIN_SECRET" has not provided',
         );
     }
     return Object.freeze({

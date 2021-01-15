@@ -79,14 +79,6 @@ export class VerifyAuth extends BasicAuth {
 		return (new ChangePassword({old_password, new_password, ctx})).changePassword()
 	}
 
-	refresh_token = async (_, {refresh_token}, ctx) => {
-		if (!refresh_token) {
-			throw new Error('Refresh token is not provided.');
-		}
-
-		return (new this.refreshTokenService(refresh_token, ctx)).refreshToken();
-	}
-
 	send_add_email_token = async (_, {email}, ctx) => {
 		return (new this.addEmailService({email, ctx})).sendEmailAddEmailToken();
 	}
