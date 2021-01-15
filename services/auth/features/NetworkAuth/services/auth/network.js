@@ -37,15 +37,17 @@ export class Network {
   }
 
   authorize = async (accessToken) => {
+    console.log('dsadhgqwgdljksadaskjdajslkd');
     const userInfo = await this.getUserInfo(accessToken);
     console.log(userInfo);
     console.log(userInfo.id);
 
-    if (!userInfo) {
+    if (!userInfo || userInfo.error) {
       throw new Error(`Wrong ${this.network} token is provided.`);
     }
 
     const userId = this.getUserId(userInfo);
+    console.log(userId);
 
     const user = await this.getUser(userId);
 
@@ -56,7 +58,7 @@ export class Network {
     }
 
     const params = await this.getParams(userId, accessToken);
-    console.log(params);
+    // console.log(params);
 
     const result = await hasuraQuery(
       gql`
@@ -76,8 +78,8 @@ export class Network {
 
     const userData = get(result, 'data.insert_auth_users.returning');
 
-    console.log(result);
-    console.log(userData);
+    // console.log(result);
+    // console.log(userData);
 
     if (userData === undefined) {
       throw new Error('Error creating user.');

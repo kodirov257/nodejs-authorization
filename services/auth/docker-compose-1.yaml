@@ -2,12 +2,13 @@ version: '3.6'
 services:
   hasura-auth:
     build:
-      context: ./services/auth
+      context: services/auth
     depends_on:
       - "graphql-engine"
     restart: always
     volumes:
       - ./services/auth:/app
+      - node_modules:/app/node_modules
     ports:
       - "4004:4000"
     environment:

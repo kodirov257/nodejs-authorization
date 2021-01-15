@@ -14,7 +14,6 @@ const google = new Google();
 passport.use(new FacebookStrategy(facebook.options(),
   async function(accessToken, refreshToken, profile, done) {
     console.log(accessToken);
-    console.log(refreshToken);
     console.log(profile);
     return facebook.callback(profile, done);
   }
@@ -23,7 +22,6 @@ passport.use(new FacebookStrategy(facebook.options(),
 passport.use(new GoogleStrategy(google.options(),
   async function(accessToken, refreshToken, profile, done) {
     console.log(accessToken);
-    console.log(refreshToken);
     console.log(profile);
     return google.callback(profile, done);
   }
