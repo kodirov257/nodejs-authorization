@@ -13,9 +13,6 @@ import { NetworkAuth } from './features/NetworkAuth/resolvers';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 const indexRouter = require('./routes/index');
-const userRouter = require('./routes/users');
-const authRouter = require('./routes/auth');
-const networkRouter = require('./routes/network');
 
 const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
 
@@ -59,12 +56,24 @@ const server = new ApolloServer({
 
 
 const app = express();
-app.use(networkRouter.passport.initialize());
 app.use(bodyParser.json())
 app.use('/', indexRouter);
-app.use('/auth', authRouter);
-app.use('/network', networkRouter.router);
-app.use('/users', userRouter);
+
+switch (service.service) {
+  case 'NetworkAuth':
+    const networkRouter = require('./routes/network');
+    app.use(networkRouter.passport.initialize());
+    app.use('/network', networkRouter.router);
+  case 'VerifyAuth':
+    const userRouter = require('./routes/users');
+    const authRouter = require('./routes/auth');
+    app.use('/auth', authRouter);
+    app.use('/users', userRouter);
+  case 'BasicAuth':
+    break;
+  default:
+    throw new Error('Wrong service.');
+}
 server.applyMiddleware({app});
 
 module.exports = app;
