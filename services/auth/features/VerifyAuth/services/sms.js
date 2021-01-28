@@ -1,4 +1,13 @@
 import fetch from 'node-fetch';
+import {
+	SMS_UZ_APP_URL,
+	SMS_USERNAME,
+	SMS_PASSWORD,
+	SMS_CHARSET,
+	SMS_CODING,
+	SMS_FROM,
+	SMS_SMSC,
+} from '../../../core/config/registration';
 
 export class Sms {
 	phone;
@@ -29,9 +38,9 @@ export class Sms {
 
 	sendSms = async (text) => {
 		console.log('Phone number: ' + this.phone);
-		const params = `username=${process.env.SMS_USERNAME}&password=${process.env.SMS_PASSWORD}&smsc=${process.env.SMS_SMSC}&from=${process.env.SMS_FROM}&to=${this.phone}&charset=${process.env.SMS_CHARSET}&coding=${process.env.SMS_CODING}&text=${encodeURI(text)}`
+		const params = `username=${SMS_USERNAME}&password=${SMS_PASSWORD}&smsc=${SMS_SMSC}&from=${SMS_FROM}&to=${this.phone}&charset=${SMS_CHARSET}&coding=${SMS_CODING}&text=${encodeURI(text)}`
 
-		const request = await fetch(`${process.env.SMS_UZ_APP_URL}${params}`);
+		const request = await fetch(`${SMS_UZ_APP_URL}${params}`);
 		console.log(request);
 
 		return true;

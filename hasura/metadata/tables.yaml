@@ -1,4 +1,24 @@
 - table:
+    schema: core
+    name: settings
+  event_triggers:
+    - name: change_settings_auth_key
+      definition:
+        enable_manual: false
+        insert:
+          columns: '*'
+        delete:
+          columns: '*'
+        update:
+          columns:
+            - value
+            - key
+      retry_conf:
+        num_retries: 0
+        interval_sec: 10
+        timeout_sec: 60
+      webhook: http://hasura-auth:4000/hasura-event
+- table:
     schema: auth
     name: logs
 - table:

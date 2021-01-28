@@ -1,13 +1,16 @@
-import { Network } from './network';
 import fetch from 'node-fetch';
+
+import { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET } from '../../../../core/config/network';
+import { BASE_URL } from '../../../../core/config/app';
+import { Network } from './network';
 
 export class Facebook extends Network {
   constructor() {
     super();
 
-    this.clientID = process.env.FACEBOOK_CLIENT_ID;
-    this.clientSecret = process.env.FACEBOOK_CLIENT_SECRET;
-    this.callbackUrl = `${process.env.BASE_URL}/network/facebook/callback`;
+    this.clientID = FACEBOOK_CLIENT_ID;
+    this.clientSecret = FACEBOOK_CLIENT_SECRET;
+    this.callbackUrl = `${BASE_URL}/network/facebook/callback`;
     this.network = 'facebook';
     this.profileFields = ['email', 'id', 'first_name', 'gender', 'last_name', 'picture'];
   }

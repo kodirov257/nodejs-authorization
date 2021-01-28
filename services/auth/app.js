@@ -12,10 +12,11 @@ import { typeDefs as basicTypeDef } from './features/BasicAuth/typeDefs';
 import { NetworkAuth } from './features/NetworkAuth/resolvers';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
+import { reloadServer } from './core/helpers/server';
 const indexRouter = require('./routes/index');
 const jwkRouter = require('./routes/jwk');
 
-const service = JSON.parse(fs.readFileSync('service.json', 'utf-8'));
+const service = JSON.parse(fs.readFileSync('env.json', 'utf-8'));
 
 const resolvers = () => {
   switch (service.service) {
@@ -44,38 +45,42 @@ const typeDef = () => {
   }
 };
 
-const server = new ApolloServer({
-  typeDefs: typeDef(),
-  resolvers: resolvers(),
-  context: ({req, res}) => buildContext({req, res}),
-  formatError: (error) => {
-    console.log(error);
-    log(error);
-    throw error;
-  },
-});
-
-
 const app = express();
-app.use(bodyParser.json())
-app.use('/', indexRouter);
-app.use('/jwk', jwkRouter);
+async function runServer() {
+  const server = new ApolloServer({
+    typeDefs: typeDef(),
+    resolvers: resolvers(),
+    context: ({req, res}) => buildContext({req, res}),
+    formatError: (error) => {
+      console.log(error);
+      log(error);
+      throw error;
+    },
+  });
 
-switch (service.service) {
-  case 'NetworkAuth':
-    const networkRouter = require('./routes/network');
-    app.use(networkRouter.passport.initialize());
-    app.use('/network', networkRouter.router);
-  case 'VerifyAuth':
-    const userRouter = require('./routes/users');
-    const authRouter = require('./routes/auth');
-    app.use('/auth', authRouter);
-    app.use('/users', userRouter);
-  case 'BasicAuth':
-    break;
-  default:
-    throw new Error('Wrong service.');
+  app.use(bodyParser.json())
+  app.use('/', indexRouter);
+  app.use('/jwk', jwkRouter);
+  app.get('/settings/reload-server', reloadServer);
+
+  switch (service.service) {
+    case 'NetworkAuth':
+      const networkRouter = require('./routes/network');
+      app.use(networkRouter.passport.initialize());
+      app.use('/network', networkRouter.router);
+    case 'VerifyAuth':
+      const userRouter = require('./routes/users');
+      const authRouter = require('./routes/auth');
+      app.use('/auth', authRouter);
+      app.use('/users', userRouter);
+    case 'BasicAuth':
+      break;
+    default:
+      throw new Error('Wrong service.');
+  }
+  server.applyMiddleware({app});
 }
-server.applyMiddleware({app});
+
+runServer();
 
 module.exports = app;

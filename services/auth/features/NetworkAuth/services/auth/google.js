@@ -1,13 +1,16 @@
+import fetch from 'node-fetch';
+
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '../../../../core/config/network';
+import { BASE_URL } from '../../../../core/config/app';
 import { Network } from './network';
-import fetch from "node-fetch";
 
 export class Google extends Network {
   constructor() {
     super();
 
-    this.clientID = process.env.GOOGLE_CLIENT_ID;
-    this.clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    this.callbackUrl = `${process.env.BASE_URL}/network/google/callback`;
+    this.clientID = GOOGLE_CLIENT_ID;
+    this.clientSecret = GOOGLE_CLIENT_SECRET;
+    this.callbackUrl = `${BASE_URL}/network/google/callback`;
     this.network = 'google';
   }
 
