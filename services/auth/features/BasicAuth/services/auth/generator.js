@@ -38,7 +38,7 @@ export class Generator {
       refresh_token: this.generateJwtRefreshToken({
         token: refreshToken,
       }),
-      expires_in: this.newJwtExpiry,
+      expires_at: `${this.getExpiresDate().getTime()}`,
       user_id: user.id,
     };
   }

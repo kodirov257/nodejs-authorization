@@ -6,60 +6,60 @@ const fs = require('fs');
 
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {
-  process.env[k] = envConfig[k]
+    process.env[k] = envConfig[k]
 }
 
 jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const sendData = {
-  token: 'wrong-token',
+    token: 'wrong-token',
 }
 
 const serverResponseData = {
-  errors: [
-    {
-      message: 'Wrong facebook token is provided.',
-      locations: [
+    errors: [
         {
-          line: 70,
-          column: 3,
-        }
-      ],
-      path: [
-        'auth_by_facebook'
-      ],
-      extensions: {
-        code: 'INTERNAL_SERVER_ERROR',
-        exception: {
-          stacktrace: [
-            "Error: Wrong facebook token is provided.",
-            "    at Google.authorize (/app/features/NetworkAuth/services/auth/network.js:46:10)",
-            "    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
-          ],
+            message: 'Wrong facebook token is provided.',
+            locations: [
+                {
+                    line: 70,
+                    column: 3,
+                }
+            ],
+            path: [
+                'auth_by_facebook'
+            ],
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                exception: {
+                    stacktrace: [
+											"Error: Wrong facebook token is provided.",
+											"    at Google.authorize (/app/features/NetworkAuth/services/auth/network.js:46:10)",
+											"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
+                    ],
+                },
+            },
         },
-      },
-    },
-  ],
-  data: {
-    auth_by_facebook: null,
-  }
+    ],
+    data: {
+        auth_by_facebook: null,
+    }
 }
 
 test('register calls fetch with the wrong arguments and returns error', async () => {
-  fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
+    fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-  const response = await mockFetch(sendData);
+    const response = await mockFetch(sendData);
 
-  expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
 
-  expect(fetch).toHaveBeenCalledWith(expect.any(String), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: `mutation {
+    expect(fetch).toHaveBeenCalledWith(expect.any(String), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: `mutation {
             auth_by_facebook(
                 token: ${sendData.token}
             ) {
@@ -68,33 +68,33 @@ test('register calls fetch with the wrong arguments and returns error', async ()
 							user_id
             }
         }`,
-  });
+    });
 
-  expect(response).toHaveProperty('errors');
-  expect(response).toHaveProperty('data');
-  expect(response.errors[0]).toHaveProperty('message');
-  expect(response.errors[0].message).toContain('Wrong facebook token is provided.');
-  expect(response.errors[0]).toHaveProperty('locations');
-  expect(response.errors[0]).toHaveProperty('path');
-  expect(response.errors[0]).toHaveProperty('extensions');
-  expect(response.errors[0].extensions).toHaveProperty('code');
-  expect(response.errors[0].extensions).toHaveProperty('exception');
-  expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-  expect(response.data).toHaveProperty('auth_by_facebook');
-  expect(response.data.auth_by_facebook).toBeDefined();
-  expect(response.data.auth_by_facebook).toBeNull();
+    expect(response).toHaveProperty('errors');
+    expect(response).toHaveProperty('data');
+    expect(response.errors[0]).toHaveProperty('message');
+	expect(response.errors[0].message).toContain('Wrong facebook token is provided.');
+    expect(response.errors[0]).toHaveProperty('locations');
+    expect(response.errors[0]).toHaveProperty('path');
+    expect(response.errors[0]).toHaveProperty('extensions');
+    expect(response.errors[0].extensions).toHaveProperty('code');
+    expect(response.errors[0].extensions).toHaveProperty('exception');
+    expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
+    expect(response.data).toHaveProperty('auth_by_facebook');
+    expect(response.data.auth_by_facebook).toBeDefined();
+    expect(response.data.auth_by_facebook).toBeNull();
 
-  // expect(response).toEqual(responseData);
+    // expect(response).toEqual(responseData);
 });
 
 async function mockFetch(sendData) {
-  const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: `mutation {
+    const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: `mutation {
             auth_by_facebook(
                 token: ${sendData.token}
             ) {
@@ -103,7 +103,7 @@ async function mockFetch(sendData) {
 							user_id
             }
         }`,
-  });
+    });
 
-  return response.json();
+    return response.json();
 }

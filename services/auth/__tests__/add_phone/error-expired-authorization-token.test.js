@@ -1,11 +1,11 @@
 'use strict';
 
-const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const dotEnv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const uuidv4 = require('uuid');
+const { generateClaimsJwtToken } = require('../token-generators');
 
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {
@@ -16,16 +16,15 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const user = {
-    id: 1,
-    username: 'test',
-    email: 'test@gmail.com',
-    phone: '998997776611',
-    role: 'user',
+	id: 1,
+	username: 'test',
+	email: 'test@gmail.com',
+	phone: null,
+	role: 'user',
 };
 
 const sendData = {
 	phone: '998997776611',
-	token: '58615',
 }
 
 const serverResponseData = {
@@ -70,8 +69,7 @@ test('register calls fetch with the expired authorization token and returns erro
         },
         body: `mutation {
             send_add_email_token(
-            	phone: ${sendData.phone},
-                token: ${sendData.token}
+                phone: ${sendData.phone}
             )
         }`,
     });
@@ -97,42 +95,10 @@ async function mockFetch(sendData, accessToken) {
         },
         body: `mutation {
             send_add_email_token(
-            	phone: ${sendData.phone},
-                token: ${sendData.token}
+                phone: ${sendData.phone}
             )
         }`,
     });
 
     return response.json();
 }
-
-const generateJwtAccessToken = (payload) => {
-    const jwtOptions = {
-        algorithm: process.env.JWT_ALGORITHM,
-        expiresIn: `${process.env.JWT_TOKEN_EXPIRES_MIN}m`,
-    };
-
-    return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, jwtOptions);
-}
-
-const generateClaimsJwtToken = (user, sessionId = null) => {
-    const headerPrefix = process.env.HASURA_GRAPHQL_HEADER_PREFIX;
-
-    let today = new Date();
-    let date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    let dateTime = date+' '+time;
-
-    const payload = {
-        [process.env.HASURA_GRAPHQL_CLAIMS_KEY]: {
-            [`${headerPrefix}allowed-roles`]: [user.role],
-            [`${headerPrefix}default-role`]: user.role,
-            [`${headerPrefix}role`]: user.role,
-            [`${headerPrefix}user-id`]: user.id.toString(),
-            [`${headerPrefix}session-id`]: sessionId,
-            [`${headerPrefix}signed-at`]: dateTime,
-        },
-    };
-
-    return generateJwtAccessToken(payload);
-};

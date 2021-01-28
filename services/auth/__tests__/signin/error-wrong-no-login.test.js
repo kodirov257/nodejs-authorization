@@ -1,11 +1,8 @@
 'use strict';
-
-const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const dotEnv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
-const uuidv4 = require('uuid');
 
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {
@@ -15,57 +12,46 @@ for (const k in envConfig) {
 jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
-const user = {
-    id: 1,
-    username: 'test',
-    email: null,
-    phone: '998997776611',
-    role: 'user',
-};
-
 const sendData = {
-    email: 'test@gmail.com',
+	password: 'password',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Authorization token has not provided',
+            message: 'Field \\"signin\\" argument \\"password\\" of type \\"String!\\" is required, but it was not provided.',
             locations: [
                 {
-                    line: 45,
+                    line: 70,
                     column: 3,
                 }
-            ],
-            path: [
-                'send_add_email_token'
             ],
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
-                        "Error: Authorization token has not provided",
-                        "    at sendEmailAddEmailToken (/app/services/user/add_email.js:17:15)",
-                        "    at send_add_email_token (/app/app.js:126:14)",
-                        "    at field.resolve (/app/node_modules/graphql-extensions/dist/index.js:134:26)",
-                        "    at field.resolve (/app/node_modules/apollo-server-core/dist/utils/schemaInstrumentation.js:52:26)",
-                        "    at resolveField (/app/node_modules/graphql/execution/execute.js:466:18)",
-                        "    at /app/node_modules/graphql/execution/execute.js:263:18",
-                        "    at /app/node_modules/graphql/jsutils/promiseReduce.js:23:10",
-                        "    at Array.reduce (<anonymous>)",
-                        "    at promiseReduce (/app/node_modules/graphql/jsutils/promiseReduce.js:20:17)",
-                        "    at executeFieldsSerially (/app/node_modules/graphql/execution/execute.js:260:37)",
+											"GraphQLError: Field \\\"signin\\\" argument \\\"password\\\" of type \\\"String!\\\" is required, but it was not provided.",
+											"    at Object.leave (/app/node_modules/graphql/validation/rules/ProvidedRequiredArgumentsRule.js:62:33)",
+											"    at Object.leave (/app/node_modules/graphql/language/visitor.js:344:29)",
+											"    at Object.leave (/app/node_modules/graphql/utilities/TypeInfo.js:390:21)",
+											"    at visit (/app/node_modules/graphql/language/visitor.js:243:26)",
+											"    at Object.validate (/app/node_modules/graphql/validation/validate.js:69:24)",
+											"    at validate (/app/node_modules/apollo-server-core/dist/requestPipeline.js:221:34)",
+											"    at Object.<anonymous> (/app/node_modules/apollo-server-core/dist/requestPipeline.js:118:42)",
+											"    at Generator.next (<anonymous>)",
+											"    at fulfilled (/app/node_modules/apollo-server-core/dist/requestPipeline.js:5:58)",
+											"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
                     ],
                 },
             },
         },
     ],
     data: {
-        send_add_email_token: null,
+        signin: null,
     }
 }
 
-test('register calls fetch with the wrong authorization token and returns error', async () => {
+test('register calls fetch with the wrong arguments and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
     const response = await mockFetch(sendData);
@@ -79,24 +65,29 @@ test('register calls fetch with the wrong authorization token and returns error'
             Accept: 'application/json',
         },
         body: `mutation {
-            send_add_email_token(
-                email: ${sendData.email}
-            )
+            signin(
+                password: ${sendData.password},
+            ) {
+            	access_token
+							refresh_token
+							expires_at
+							user_id
+            }
         }`,
     });
 
     expect(response).toHaveProperty('errors');
     expect(response).toHaveProperty('data');
     expect(response.errors[0]).toHaveProperty('message');
+    expect(response.errors[0].message).toContain('Field \\"signin\\" argument \\"password\\" of type \\"String!\\" is required, but it was not provided.');
     expect(response.errors[0]).toHaveProperty('locations');
-    expect(response.errors[0]).toHaveProperty('path');
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('send_add_email_token');
-    expect(response.data.send_add_email_token).toBeDefined();
-    expect(response.data.send_add_email_token).toBeNull();
+    expect(response.data).toHaveProperty('signin');
+    expect(response.data.signin).toBeDefined();
+    expect(response.data.signin).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -109,9 +100,14 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            send_add_email_token(
-                email: ${sendData.email}
-            )
+            signin(
+                password: ${sendData.password},
+            ) {
+            	access_token
+							refresh_token
+							expires_at
+							user_id
+            }
         }`,
     });
 

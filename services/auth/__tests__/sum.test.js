@@ -1,6 +1,6 @@
 'use strict';
 const { print } = require('graphql/language/printer');
-const forEach = require('./../sum');
+const forEach = require('../sum');
 const fetch = require('node-fetch');
 const gql = require('graphql-tag');
 const dotEnvFlow = require('dotenv-flow');

@@ -1,11 +1,9 @@
 'use strict';
 
-const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const dotEnv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
-const uuidv4 = require('uuid');
 
 const envConfig = dotEnv.parse(fs.readFileSync(path.resolve(__dirname, '../../.env.test')));
 for (const k in envConfig) {
@@ -19,21 +17,20 @@ const user = {
     id: 1,
     username: 'test',
     email: 'test@gmail.com',
-    phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    token: 'wrong-token',
+	token: 'right-token',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Wrong token is provided.',
+            message: 'Authorization token has not provided',
             locations: [
                 {
-                    line: 20,
+                    line: 45,
                     column: 3,
                 }
             ],
@@ -41,12 +38,20 @@ const serverResponseData = {
                 'add_email'
             ],
             extensions: {
-                code: 'BAD_USER_INPUT',
+                code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
-                        "Error: Wrong token is provided.",
-                        "    at addEmail (/app/services/user/add_email.js:73:9)",
-                        "    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
+						"Error: Authorization token has not provided",
+						"    at addEmail (/app/services/user/add_email.js:64:15)",
+						"    at add_email (/app/app.js:129:13)",
+						"    at field.resolve (/app/node_modules/graphql-extensions/dist/index.js:134:26)",
+						"    at field.resolve (/app/node_modules/apollo-server-core/dist/utils/schemaInstrumentation.js:52:26)",
+						"    at resolveField (/app/node_modules/graphql/execution/execute.js:466:18)",
+						"    at /app/node_modules/graphql/execution/execute.js:263:18",
+						"    at /app/node_modules/graphql/jsutils/promiseReduce.js:23:10",
+						"    at Array.reduce (<anonymous>)",
+						"    at promiseReduce (/app/node_modules/graphql/jsutils/promiseReduce.js:20:17)",
+						"    at executeFieldsSerially (/app/node_modules/graphql/execution/execute.js:260:37)",
                     ],
                 },
             },
@@ -57,12 +62,10 @@ const serverResponseData = {
     }
 }
 
-test('register calls fetch with the wrong arguments and returns error', async () => {
+test('register calls fetch with the wrong authorization token and returns error', async () => {
     fetch.mockReturnValue(Promise.resolve(new Response(JSON.stringify(serverResponseData))));
 
-    const accessToken = await generateClaimsJwtToken(user, uuidv4.v4() + '-' + (+new Date()));
-
-    const response = await mockFetch(sendData, accessToken);
+    const response = await mockFetch(sendData);
 
     expect(fetch).toHaveBeenCalledTimes(1);
 
@@ -71,7 +74,6 @@ test('register calls fetch with the wrong arguments and returns error', async ()
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
             add_email(
@@ -83,7 +85,7 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     expect(response).toHaveProperty('errors');
     expect(response).toHaveProperty('data');
     expect(response.errors[0]).toHaveProperty('message');
-    expect(response.errors[0].message).toContain('Wrong token is provided.');
+	expect(response.errors[0].message).toContain('Authorization token has not provided');
     expect(response.errors[0]).toHaveProperty('locations');
     expect(response.errors[0]).toHaveProperty('path');
     expect(response.errors[0]).toHaveProperty('extensions');
@@ -97,13 +99,12 @@ test('register calls fetch with the wrong arguments and returns error', async ()
     // expect(response).toEqual(responseData);
 });
 
-async function mockFetch(sendData, accessToken) {
+async function mockFetch(sendData) {
     const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
             add_email(
@@ -114,34 +115,3 @@ async function mockFetch(sendData, accessToken) {
 
     return response.json();
 }
-
-const generateJwtAccessToken = (payload) => {
-    const jwtOptions = {
-        algorithm: process.env.JWT_ALGORITHM,
-        expiresIn: `${process.env.JWT_TOKEN_EXPIRES_MIN}m`,
-    };
-
-    return jwt.sign(payload, process.env.JWT_PRIVATE_KEY, jwtOptions);
-}
-
-const generateClaimsJwtToken = (user, sessionId = null) => {
-    const headerPrefix = process.env.HASURA_GRAPHQL_HEADER_PREFIX;
-
-    let today = new Date();
-    let date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    let dateTime = date+' '+time;
-
-    const payload = {
-        [process.env.HASURA_GRAPHQL_CLAIMS_KEY]: {
-            [`${headerPrefix}allowed-roles`]: [user.role],
-            [`${headerPrefix}default-role`]: user.role,
-            [`${headerPrefix}role`]: user.role,
-            [`${headerPrefix}user-id`]: user.id.toString(),
-            [`${headerPrefix}session-id`]: sessionId,
-            [`${headerPrefix}signed-at`]: dateTime,
-        },
-    };
-
-    return generateJwtAccessToken(payload);
-};

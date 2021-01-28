@@ -16,16 +16,15 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const user = {
-    id: 1,
-    username: 'test',
-    email: 'test@gmail.com',
-	phone: '998997776611',
-    role: 'user',
+	id: 1,
+	username: 'test',
+	email: 'test@gmail.com',
+	phone: null,
+	role: 'user',
 };
 
 const sendData = {
 	phone: '998997776611',
-	token: '58615',
 }
 
 const serverResponseData = {
@@ -34,20 +33,20 @@ const serverResponseData = {
             message: 'Authorization token has not provided',
             locations: [
                 {
-                    line: 28,
+                    line: 24,
                     column: 3,
                 }
             ],
             path: [
-                'add_phone'
+                'send_add_phone_token'
             ],
             extensions: {
                 code: 'INTERNAL_SERVER_ERROR',
                 exception: {
                     stacktrace: [
 						"Error: Authorization token has not provided",
-						"    at addPhone (/app/services/user/add_phone.js:73:9)",
-						"    at add_phone (/app/app.js:135:13)",
+						"    at sendAddPhoneToken (/app/services/user/add_phone.js:18:9)",
+						"    at send_add_phone_token (/app/app.js:132:14)",
 						"    at field.resolve (/app/node_modules/graphql-extensions/dist/index.js:134:26)",
 						"    at field.resolve (/app/node_modules/apollo-server-core/dist/utils/schemaInstrumentation.js:52:26)",
 						"    at resolveField (/app/node_modules/graphql/execution/execute.js:466:18)",
@@ -62,7 +61,7 @@ const serverResponseData = {
         },
     ],
     data: {
-        add_phone: null,
+        send_add_phone_token: null,
     }
 }
 
@@ -80,9 +79,8 @@ test('register calls fetch with the wrong authorization token and returns error'
             Accept: 'application/json',
         },
         body: `mutation {
-            add_phone(
-            	phone: ${sendData.phone},
-                token: ${sendData.token}
+            send_add_phone_token(
+                phone: ${sendData.phone}
             )
         }`,
     });
@@ -90,16 +88,15 @@ test('register calls fetch with the wrong authorization token and returns error'
     expect(response).toHaveProperty('errors');
     expect(response).toHaveProperty('data');
     expect(response.errors[0]).toHaveProperty('message');
-	expect(response.errors[0].message).toContain('Authorization token has not provided');
     expect(response.errors[0]).toHaveProperty('locations');
     expect(response.errors[0]).toHaveProperty('path');
     expect(response.errors[0]).toHaveProperty('extensions');
     expect(response.errors[0].extensions).toHaveProperty('code');
     expect(response.errors[0].extensions).toHaveProperty('exception');
     expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('add_phone');
-    expect(response.data.add_phone).toBeDefined();
-    expect(response.data.add_phone).toBeNull();
+    expect(response.data).toHaveProperty('send_add_phone_token');
+    expect(response.data.send_add_phone_token).toBeDefined();
+    expect(response.data.send_add_phone_token).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -112,9 +109,8 @@ async function mockFetch(sendData) {
             Accept: 'application/json',
         },
         body: `mutation {
-            add_phone(
-            	phone: ${sendData.phone},
-                token: ${sendData.token}
+            send_add_phone_token(
+                phone: ${sendData.phone}
             )
         }`,
     });

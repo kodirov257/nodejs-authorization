@@ -4,7 +4,7 @@ export const typeDefs = gql`
     type AuthPayload {
         access_token: String!
         refresh_token: String!
-        expires_in: Int!
+        expires_at: String!
         user_id: ID!
     }
 

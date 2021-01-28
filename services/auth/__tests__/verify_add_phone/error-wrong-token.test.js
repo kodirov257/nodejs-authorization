@@ -19,40 +19,42 @@ const user = {
     id: 1,
     username: 'test',
     email: 'test@gmail.com',
+    phone: '998997776611',
     role: 'user',
 };
 
 const sendData = {
-    old_password: 'wrong-old-password',
-    new_password: 'new-password',
+	phone: '998997776611',
+	token: '586151',
 }
 
 const serverResponseData = {
     errors: [
         {
-            message: 'Invalid "password".',
+            message: 'Provided token is not equal to the current user.',
             locations: [
                 {
-                    line: 45,
+                    line: 28,
                     column: 3,
                 }
             ],
             path: [
-                'change_password'
+                'add_phone'
             ],
             extensions: {
-                code: 'INTERNAL_SERVER_ERROR',
+                code: 'BAD_USER_INPUT',
                 exception: {
                     stacktrace: [
-                        "Error: Invalid \"password\".",
-                        "    at changePassword (/app/services/user.js:30:15)",
+						"Error: Provided token is not equal to the current user.",
+						"    at addPhone (/app/services/user/add_phone.js:83:9)",
+						"    at processTicksAndRejections (internal/process/task_queues.js:93:5)",
                     ],
                 },
             },
         },
     ],
     data: {
-        change_password: null,
+        add_phone: null,
     }
 }
 
@@ -73,25 +75,26 @@ test('register calls fetch with the wrong arguments and returns error', async ()
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            add_phone(
+            	phone: ${sendData.phone},
+                token: ${sendData.token}
             )
         }`,
     });
 
-    expect(response).toHaveProperty('errors');
-    expect(response).toHaveProperty('data');
-    expect(response.errors[0]).toHaveProperty('message');
-    expect(response.errors[0]).toHaveProperty('locations');
-    expect(response.errors[0]).toHaveProperty('path');
-    expect(response.errors[0]).toHaveProperty('extensions');
-    expect(response.errors[0].extensions).toHaveProperty('code');
-    expect(response.errors[0].extensions).toHaveProperty('exception');
-    expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
-    expect(response.data).toHaveProperty('change_password');
-    expect(response.data.change_password).toBeDefined();
-    expect(response.data.change_password).toBeNull();
+	expect(response).toHaveProperty('errors');
+	expect(response).toHaveProperty('data');
+	expect(response.errors[0]).toHaveProperty('message');
+	expect(response.errors[0].message).toContain('Provided token is not equal to the current user.');
+	expect(response.errors[0]).toHaveProperty('locations');
+	expect(response.errors[0]).toHaveProperty('path');
+	expect(response.errors[0]).toHaveProperty('extensions');
+	expect(response.errors[0].extensions).toHaveProperty('code');
+	expect(response.errors[0].extensions).toHaveProperty('exception');
+	expect(response.errors[0].extensions.exception).toHaveProperty('stacktrace');
+	expect(response.data).toHaveProperty('add_phone');
+	expect(response.data.add_phone).toBeDefined();
+	expect(response.data.add_phone).toBeNull();
 
     // expect(response).toEqual(responseData);
 });
@@ -105,9 +108,9 @@ async function mockFetch(sendData, accessToken) {
             Authorization: `Bearer ${accessToken}`,
         },
         body: `mutation {
-            change_password(
-                old_password: ${sendData.old_password},
-                new_password: ${sendData.new_password}
+            add_phone(
+            	phone: ${sendData.phone},
+                token: ${sendData.token}
             )
         }`,
     });
