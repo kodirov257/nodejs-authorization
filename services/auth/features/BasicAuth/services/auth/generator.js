@@ -1,11 +1,28 @@
 import { v4 as uuidv4 } from 'uuid';
+import Boom from '@hapi/boom';
 import gql from 'graphql-tag';
 import get from 'lodash/get';
+import { JWT } from 'jose';
 
-import { generateClaimsJwtToken, generateJwtRefreshToken } from '../../../../core/helpers/auth-tools';
+import { checkEncryptionType } from '../../../../core/helpers/jwk';
 import { hasuraQuery } from '../../../../core/services';
+import {
+  HASURA_GRAPHQL_HEADER_PREFIX,
+  HASURA_GRAPHQL_CLAIMS_KEY,
+  JWT_REFRESH_EXPIRES_IN,
+  JWT_EXPIRES_IN,
+  JWT_ALGORITHM,
+  JWT_KEY,
+} from '../../../../core/config';
 
 export class Generator {
+  jwtKey;
+  newJwtExpiry;
+
+  constructor() {
+    this.jwtKey = checkEncryptionType(JWT_KEY);
+    this.newJwtExpiry = JWT_REFRESH_EXPIRES_IN * 60 * 1000;
+  }
 
   generateTokens = async (user, request = null) => {
     const ipAddress = request ? (
@@ -15,13 +32,14 @@ export class Generator {
 
     const [refreshToken, sessionId] = await this.createUserSession(user, userAgent, ipAddress);
 
-    const accessToken = await generateClaimsJwtToken(user, sessionId);
+    const accessToken = await this.generateClaimsJwtToken(user, sessionId);
 
     return {
       access_token: accessToken,
-      refresh_token: generateJwtRefreshToken({
+      refresh_token: this.generateJwtRefreshToken({
         token: refreshToken,
       }),
+      expires_in: this.newJwtExpiry,
       user_id: user.id,
     };
   }
@@ -63,7 +81,37 @@ export class Generator {
     }
   }
 
-  getExpiresDate = () => {
-    return new Date(Date.now() + process.env.REFRESH_TOKEN_EXPIRES_IN * 60 * 1000);
+  getExpiresDate = () => new Date(Date.now() + this.newJwtExpiry);
+
+  generateJwtAccessToken = (payload) =>
+    JWT.sign(payload, this.jwtKey, {
+      algorithm: JWT_ALGORITHM,
+      expiresIn: `${JWT_EXPIRES_IN}m`
+    });
+
+  generateJwtRefreshToken = (payload) =>
+    JWT.sign(payload, this.jwtKey, {
+      algorithm: JWT_ALGORITHM,
+      expiresIn: `${JWT_REFRESH_EXPIRES_IN}m`
+    });
+
+  generateClaimsJwtToken = (user, sessionId = null) =>
+    this.generateJwtAccessToken({[HASURA_GRAPHQL_CLAIMS_KEY]: this.generatePermissionVariables({user, sessionId}, true)});
+
+  generatePermissionVariables = ({ account_roles = [], user, sessionId }, jwt = true) => {
+    const headerPrefix = jwt ? HASURA_GRAPHQL_HEADER_PREFIX : '';
+
+    const accountRoles = account_roles.map(({ role: roleName }) => roleName);
+    if (!accountRoles.includes(user.role)) {
+      accountRoles.push(user.role);
+    }
+
+    return  {
+      [`${headerPrefix}allowed-roles`]: accountRoles,
+      [`${headerPrefix}default-role`]: user.role,
+      [`${headerPrefix}role`]: user.role,
+      [`${headerPrefix}user-id`]: user.id.toString(),
+      [`${headerPrefix}session-id`]: sessionId,
+    };
   }
 }

@@ -2,46 +2,29 @@ const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import get from 'lodash/get';
 
-import { getCurrentUserId, isAuthenticated } from '../../../../core/helpers/user';
-import { getUserById } from '../../../BasicAuth/services';
+import { AddInfo as BasicAddInfo } from '../../../BasicAuth/services/user/add_info';
+import { isAuthenticated } from '../../../../core/helpers/user';
 import { updateUser } from '../hasura/update-user';
-import * as constants from '../../helpers/values';
 import { UserFragment } from '../../fragments';
 import { GetUser } from '../hasura/get-user';
+import { Mail } from '../mail';
+import { Sms } from '../sms';
 
-export class AddInfo {
-    getUser;
-    smsService;
+export class AddInfo extends BasicAddInfo {
     mailService;
-    ctx;
+    smsService;
     token;
-    phone;
-    email;
 
     constructor({email = null, token = null, phone = null, ctx}) {
+        super({email, phone, ctx});
+
         this.getUser = new GetUser();
-        this.email = email;
-        this.phone = phone ? phone.replace(/^\++/, '') : null;
         this.token = token;
-        this.ctx = ctx;
+        this.mailService = Mail;
+        this.smsService = Sms;
     }
 
-    sendAddInfoToken = async (type = 'email') => {
-        if (!isAuthenticated(this.ctx.req)) {
-            throw new Error('Authorization token has not provided');
-        }
-
-        const currentUserId = getCurrentUserId(this.ctx.req);
-        const user = await getUserById(currentUserId, UserFragment);
-
-        if (!user) {
-            throw new Error('User not found.');
-        }
-
-        if (user.status !== constants.STATUS_ACTIVE) {
-            throw new Error('User not activated.');
-        }
-
+    validateAddInfo = (user, type = 'email') => {
         const userVerifications = user.user_verifications[0];
 
         if (type === 'email') {
@@ -52,22 +35,31 @@ export class AddInfo {
             }
         } else if (type === 'phone') {
             if (user.phone && user.phone === this.phone && userVerifications.phone_verified === false) {
-                return this.updateAddInfo(user.id, 'phone');
+                return this.sendAddInfo(user.id, 'phone');
             } else if (user.phone && userVerifications.phone_verified === true) {
                 throw new Error(`Phone number is already set.`);
             }
         }
-
-        const anotherUser = await this.getAnotherUser();
-
-        if (anotherUser && anotherUser.id !== user.id) {
-            throw new Error(`There is already active user with this ${type}.`);
-        }
-
-        return this.updateAddInfo(user.id, type);
+        return false;
     }
 
-    updateAddInfo = async (userId, type = 'email') => {
+    sendAddInfo = async (userId, type = 'email') => {
+        let {userData, verificationData} = await this.updateAddInfo(userId, type);
+
+        if (userData !== undefined && verificationData !== undefined) {
+            if (type === 'email') {
+                await (new this.mailService(userData.username, this.email, verificationData.email_verify_token)).sendAddEmailToken();
+            } else if (type === 'phone') {
+                await (new this.smsService(this.phone, verificationData.phone_verify_token)).sendSmsAddPhoneToken();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    updateAddInfo = async (userId, type) => {
         const _fields = {
             emailFields: { email: this.email },
             phoneFields: { phone: this.phone },
@@ -89,20 +81,10 @@ export class AddInfo {
         let userData = get(result, 'data.update_auth_users_by_pk');
         let verificationData = get(result, 'data.update_auth_user_verifications_by_pk');
 
-        if (userData !== undefined && verificationData !== undefined) {
-            if (type === 'email') {
-                await (new this.mailService(userData.username, this.email, verificationData.email_verify_token)).sendAddEmailToken();
-            } else if (type === 'phone') {
-                await (new this.smsService(this.phone, verificationData.phone_verify_token)).sendSmsAddPhoneToken();
-            }
-
-            return true;
-        }
-
-        return false;
+        return {userData, verificationData};
     }
 
-    addInfo = async (type = 'email') => {
+    verifyAddInfo = async (type = 'email') => {
         if (!isAuthenticated(this.ctx.req)) {
             throw new Error('Authorization token has not provided');
         }
@@ -115,7 +97,7 @@ export class AddInfo {
 
         const userVerifications = user.user_verifications[0];
 
-        this.validateAdd(userVerifications);
+        this.validateVerifyAddInfo(userVerifications);
 
         const _fields = {
             emailFields: {
@@ -134,7 +116,9 @@ export class AddInfo {
         return get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined;
     }
 
-    validateAdd = (verification) => {}
+    getUserFragment = () => UserFragment;
+
+    validateVerifyAddInfo = (verification) => {}
 
     getUserByToken = async () => null;
 

@@ -1,4 +1,4 @@
-import { ValidationError } from 'apollo-server-express';
+const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
@@ -6,6 +6,7 @@ import get from 'lodash/get';
 
 import { isEmail, isPhone, validateRegistration } from '../../../../core/validators';
 import * as constants from '../../../../core/helpers/values';
+import { ROLE_USER } from '../../../../core/helpers/values';
 import { UserFragment } from '../../fragments';
 import {
 	GetUser,
@@ -14,44 +15,49 @@ import {
 
 export class Register {
 	login;
-	// username;
-	// emailOrPhone;
 	password;
-	getUser;
+	getUserService;
 	registerData;
 	fragment;
 
 	constructor(login, password) {
 		this.login = login;
-		// this.username = username;
-		// this.emailOrPhone = emailOrPhone;
 		this.password = password;
 		this.fragment = UserFragment;
 
-		this.getUser = new GetUser();
+		this.getUserService = new GetUser();
 	};
 
 	validate = () => {
 		return validateRegistration(this.login, this.password);
 	};
 
-	// getUserByUsername = async () => {
-	// 	return await this.getUser.getUserByUsername(this.username, this.fragment);
-	// };
+	getUserByUsername = async () => {
+		return await this.getUserService.getUserByUsername(this.login, this.fragment);
+	};
 
 	getUserByEmail = async () => {
-		return await this.getUser.getUserByEmail(this.login, this.fragment);
+		return await this.getUserService.getUserByEmail(this.login, this.fragment);
 	};
 
 	getUserByPhone = async () => {
-		return await this.getUser.getUserByPhone(this.login, this.fragment);
+		return await this.getUserService.getUserByPhone(this.login, this.fragment);
 	};
+
+	getUser = async () => {
+		if (isEmail(this.login)) {
+			return this.getUserByEmail();
+		} else if (isPhone(this.login)) {
+			return this.getUserByPhone();
+		}
+		return this.getUserByUsername();
+	}
 
 	getParams = async () => {
 		const passwordHash = await bcrypt.hash(this.password, 10);
 
 		return {
-			// username: this.username.replace(/ /g, ''),
+			username: !isEmail(this.login) && !isPhone(this.login) ? this.login.replace(/ /g, '') : `${ROLE_USER}${moment().unix()}`,
 			email: isEmail(this.login) ? this.login : null,
 			phone: isPhone(this.login) ? this.login.replace(/^\++/, '') : null,
 			password: passwordHash,
@@ -65,20 +71,7 @@ export class Register {
 		const value = this.validate();
 		this.login = value.login;
 
-		// let user = await this.getUserByUsername();
-		//
-		// if (user) {
-		// 	throw new Error('Username already registered');
-		// }
-		let user;
-
-		if (isEmail(this.login)) {
-			user = await this.getUserByEmail();
-		} else if (isPhone(this.login)) {
-			user = await this.getUserByPhone();
-		} else {
-			throw new ValidationError('Wrong email or phone is given.');
-		}
+		let user = await this.getUser();
 
 		if (user) {
 			throw new Error('Username already registered');
@@ -103,10 +96,6 @@ export class Register {
 		);
 
 		console.log(result);
-		// console.log(result.errors[0].extensions);
-		// console.log(JSON.stringify(result));
-		// console.log(result.errors[0].extensions.internal.statement);
-		// console.log(result.errors[0]);
 
 		this.registerData = get(result, 'data.insert_auth_users.returning');
 

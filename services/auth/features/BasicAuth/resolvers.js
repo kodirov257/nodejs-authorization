@@ -1,12 +1,22 @@
 require('dotenv-flow').config();
 
-import { getUserById, Register, Signin, ChangePassword, RefreshToken } from './services';
+import { getUserById, Register, Signin, ChangePassword, RefreshToken, AddEmail, AddPhone } from './services';
 import { isAuthenticated, getCurrentUserId } from '../../core/helpers/user';
 
 export class BasicAuth {
-	hello = () => 'Hello world !';
+	addEmailService;
+	addPhoneService;
 
-	auth_me = async (_, args, ctx) => {
+	constructor() {
+		this.addEmailService = AddEmail;
+		this.addPhoneService = AddPhone;
+	}
+
+	hello() {
+		return 'Hello world !';
+	}
+
+	async auth_me(_, args, ctx) {
 		if (!isAuthenticated(ctx.req)) {
 			throw new Error('Authorization token has not provided');
 		}
@@ -40,6 +50,14 @@ export class BasicAuth {
 		return (new RefreshToken(refresh_token, ctx)).refreshToken();
 	}
 
+	add_email = async (_, {email}, ctx) => {
+		return (new this.addEmailService({email, ctx})).addEmail();
+	}
+
+	add_phone = async (_, {phone}, ctx) => {
+		return (new this.addPhoneService({phone, ctx})).addPhone();
+	}
+
 
 	resolvers() {
 		return {
@@ -56,6 +74,10 @@ export class BasicAuth {
 					this.change_password(_, {old_password, new_password}, ctx),
 				refresh_token: async (_, {refresh_token}, ctx) =>
 					this.refresh_token(_, {refresh_token}, ctx),
+				add_email: async (_, {email}, ctx) =>
+					this.add_email(_, {email}, ctx),
+				add_phone: async (_, {phone}, ctx) =>
+					this.add_phone(_, {phone}, ctx),
 			},
 		}
 	}

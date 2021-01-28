@@ -24,7 +24,7 @@ export class NetworkAuth extends VerifyAuth {
     return {
       Query: {
         hello: () => super.hello(),
-        auth_me: async () => super.auth_me(),
+        auth_me: async (_, args, ctx) => super.auth_me(_, args, ctx),
       },
       Mutation: {
         register: async (_, {login, password}) =>
@@ -51,14 +51,14 @@ export class NetworkAuth extends VerifyAuth {
           this.reset_via_email(_, {token, password}),
         reset_via_phone: async (_, {phone, token, password}) =>
           this.reset_via_phone(_, {phone, token, password}),
-        send_add_email_token: async (_, {email}, ctx) =>
-          this.send_add_email_token(_, {email}, ctx),
-        add_email: async (_, {token}, ctx) =>
-          this.add_email(_, {token}, ctx),
-        send_add_phone_token: async (_, {phone}, ctx) =>
-          this.send_add_phone_token(_, {phone}, ctx),
-        add_phone: async (_, {phone, token}, ctx) =>
-          this.add_phone(_, {phone, token}, ctx),
+        add_email: async (_, {email}, ctx) =>
+          this.add_email(_, {email}, ctx),
+        verify_add_email: async (_, {token}, ctx) =>
+          this.verify_add_email(_, {token}, ctx),
+        add_phone: async (_, {phone}, ctx) =>
+          this.add_phone(_, {phone}, ctx),
+        verify_add_phone: async (_, {phone, token}, ctx) =>
+          this.verify_add_phone(_, {phone, token}, ctx),
         auth_by_google: async (_, {token}, ctx) =>
           this.auth_by_google(token),
         auth_by_facebook: async (_, {token}, ctx) =>

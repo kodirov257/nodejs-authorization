@@ -13,17 +13,17 @@ export class AddPhone extends AddInfo {
 	sendAddPhoneToken = async () => {
 		validatePhone(this.phone);
 
-		return this.sendAddInfoToken('phone');
-	}
-
-	addPhone = async () => {
-		const value = validateVerifyPhone(this.phone, this.token);
-		this.token = value.token;
-
 		return this.addInfo('phone');
 	}
 
-	validateAdd = (verification) => {
+	verifyAddPhone = async () => {
+		const value = validateVerifyPhone(this.phone, this.token);
+		this.token = value.token;
+
+		return this.verifyAddInfo('phone');
+	}
+
+	validateVerifyAddInfo = (verification) => {
 		if (verification.phone_verify_token !== this.token) {
 			throw new Error('Provided token is not equal to the current user.');
 		}

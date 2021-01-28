@@ -4,6 +4,7 @@ export const typeDefs = gql`
 	type AuthPayload {
 		access_token: String!
 		refresh_token: String!
+		expires_in: Int!
 		user_id: ID!
 	}
 
@@ -35,6 +36,8 @@ export const typeDefs = gql`
 		register(login: String!, password: String!): Boolean
 		change_password(old_password: String!, new_password: String!): Boolean
 		refresh_token(refresh_token: String!): RefreshPayload
+		add_email(email: String!): Boolean
+		add_phone(phone: String!): Boolean
 	}
 
 	schema {

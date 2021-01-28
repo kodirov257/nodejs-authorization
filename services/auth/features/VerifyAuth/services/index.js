@@ -13,4 +13,5 @@ export * from './auth/reset-password';
 export * from './auth/verify';
 export * from './user/add_email';
 export * from './user/add_phone';
+export * from './user/add_info';
 export * from './user/change_password';

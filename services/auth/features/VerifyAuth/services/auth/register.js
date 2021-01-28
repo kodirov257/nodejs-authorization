@@ -4,31 +4,42 @@ import bcrypt from 'bcryptjs';
 
 import { isEmail, isPhone, validateRegistration } from '../../validators';
 import { Register as BasicRegister } from '../../../BasicAuth/services';
+import { ValidationError } from 'apollo-server-express';
 import { Mail, Sms, GetUser } from '../../services';
 import * as constants from '../../helpers/values';
+import { ROLE_USER } from '../../helpers/values';
 import { UserFragment } from '../../fragments';
 
 export class Register extends BasicRegister {
 	constructor(login, password) {
 		super(login, password);
 		this.fragment = UserFragment;
-		this.getUser = new GetUser();
+		this.getUserService = new GetUser();
 	}
 
 	validate = () => {
 		return validateRegistration(this.login, this.password);
 	}
 
-	// getUserByUsername = async () => {
-	// 	return await this.getUser.getUserByUsername(this.username, this.fragment);
-	// }
+	getUserByUsername = async () => {
+		return this.getUserService.getUserByUsername(this.login, this.fragment);
+	}
 
 	getUserByEmail = async () => {
-		return await this.getUser.getUserByEmail(this.login, this.fragment);
+		return this.getUserService.getUserByEmail(this.login, this.fragment);
 	}
 
 	getUserByPhone = async () => {
-		return await this.getUser.getUserByPhone(this.login, this.fragment);
+		return this.getUserService.getUserByPhone(this.login, this.fragment);
+	}
+
+	getUser = async () => {
+		if (isEmail(this.login)) {
+			return await this.getUserByEmail();
+		} else if (isPhone(this.login)) {
+			return this.getUserByPhone();
+		}
+		throw new ValidationError('Wrong email or phone is given.');
 	}
 
 	getParams = async () => {
@@ -43,7 +54,7 @@ export class Register extends BasicRegister {
 		const passwordHash = await bcrypt.hash(this.password, 10);
 
 		return {
-			// username: this.username.replace(/ /g, ''),
+			username: `${ROLE_USER}${moment().unix()}`,
 			email: isEmail(this.login) ? this.login : null,
 			phone: isPhone(this.login) ? this.login.replace(/^\++/, '') : null,
 			password: passwordHash,
