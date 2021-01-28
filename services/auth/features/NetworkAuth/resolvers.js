@@ -1,15 +1,17 @@
+import { Facebook, Google, VKontakte } from './services';
 import { VerifyAuth } from '../VerifyAuth/resolvers';
-import { Facebook, Google } from './services';
 
 export class NetworkAuth extends VerifyAuth {
   googleService;
   facebookService;
+  vkontakteService;
 
   constructor() {
     super();
 
     this.googleService = Google;
     this.facebookService = Facebook;
+    this.vkontakteService = VKontakte;
   }
 
   auth_by_google = async (token, ctx) => {
@@ -18,6 +20,10 @@ export class NetworkAuth extends VerifyAuth {
 
   auth_by_facebook = async (token, ctx) => {
     return (new this.facebookService(ctx)).authorize(token);
+  }
+
+  auth_by_vkontakte = async (token, ctx) => {
+    return (new this.vkontakteService(ctx)).authorize(token);
   }
 
   resolvers() {
@@ -65,6 +71,8 @@ export class NetworkAuth extends VerifyAuth {
           this.auth_by_google(token, ctx),
         auth_by_facebook: async (_, {token}, ctx) =>
           this.auth_by_facebook(token, ctx),
+        auth_by_vkontakte: async (_, {token}, ctx) =>
+          this.auth_by_vkontakte(token, ctx),
       },
     };
   }

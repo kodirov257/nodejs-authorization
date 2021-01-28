@@ -53,6 +53,7 @@ export const typeDefs = gql`
         verify_add_phone(phone: String!, token: String!): Boolean
         auth_by_google(token: String!): AuthPayload
         auth_by_facebook(token: String!): AuthPayload
+        auth_by_vkontakte(token: String!): AuthPayload
     }
 
     schema {

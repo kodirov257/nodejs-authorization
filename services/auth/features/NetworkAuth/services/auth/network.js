@@ -47,14 +47,14 @@ export class Network {
     }
 
     const userId = this.getUserId(userInfo);
-    console.log(userId);
+    // console.log(userId);
 
     const user = await this.getUser(userId);
 
     // console.log(user);
 
     if (user) {
-      return this.generator.generateTokens(user, null, this.ctx.res);
+      return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
     }
 
     const params = await this.getParams(userId, accessToken);
@@ -79,22 +79,21 @@ export class Network {
     const userData = get(result, 'data.insert_auth_users.returning');
 
     // console.log(result);
+    // console.log(result.errors[0].extensions);
     // console.log(userData);
 
     if (userData === undefined) {
       throw new Error('Error creating user.');
     }
 
-    return this.generator.generateTokens(userData[0], this.ctx.res);
+    return this.generator.generateTokens(userData[0], this.ctx.req, this.ctx.res);
   }
 
   getUser = async (identity) => null;
 
   getUserInfo = async (token) => null;
 
-  getUserId = (user) => {
-    return user.id;
-  }
+  getUserId = (user) => Number.isInteger(user.id) ? user.id.toString() : user.id;
 
   getParams = async (identity, accessToken) => {
     return {

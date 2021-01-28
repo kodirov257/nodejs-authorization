@@ -15,12 +15,8 @@ export class GetUser extends VerifyGetUser {
     return this.getUserByNetwork('google', identity);
   }
 
-  getUserByFaceBookToken = async (token) => {
-    return this.getUserByToken('facebook', token);
-  }
-
-  getUserByGoogleToken = async (token) => {
-    return this.getUserByToken('google', token);
+  getUserByVkontakte = async (identity) => {
+    return this.getUserByNetwork('vkontakte', identity);
   }
 
   getUserByToken = async (network, token) => {

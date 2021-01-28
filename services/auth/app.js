@@ -61,6 +61,7 @@ async function runServer() {
 
   app.use(bodyParser.json());
   app.use(cookieParser(COOKIE_SECRET));
+  // app.use(require('express-session')({secret:'keyboard cat', resave: true, saveUninitialized: true}));
   app.use('/', indexRouter);
   app.use('/jwk', jwkRouter);
 
