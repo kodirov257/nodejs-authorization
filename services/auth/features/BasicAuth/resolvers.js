@@ -20,8 +20,8 @@ export class BasicAuth {
 		}
 	}
 
-	register = async (_, {username, email_or_phone, password}) => {
-		return (new Register(username, email_or_phone, password)).register();
+	register = async (_, {login, password}) => {
+		return (new Register(login, password)).register();
 	}
 
 	signin = async (_, {login, password}, ctx) => {
@@ -48,8 +48,8 @@ export class BasicAuth {
 				auth_me: async (_, args, ctx) => this.auth_me(_, args, ctx),
 			},
 			Mutation: {
-				register: async (_, {username, email_or_phone, password}, ctx) =>
-					this.register(_, {username, email_or_phone, password}),
+				register: async (_, {login, password}, ctx) =>
+					this.register(_, {login, password}),
 				signin: async (_, {login, password}, ctx) =>
 					this.signin(_, {login, password}, ctx),
 				change_password: async (_, {old_password, new_password}, ctx) =>

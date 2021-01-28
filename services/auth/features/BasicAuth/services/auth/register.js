@@ -13,16 +13,18 @@ import {
 } from '../index';
 
 export class Register {
-	username;
-	emailOrPhone;
+	login;
+	// username;
+	// emailOrPhone;
 	password;
 	getUser;
 	registerData;
 	fragment;
 
-	constructor(username, emailOrPhone, password) {
-		this.username = username;
-		this.emailOrPhone = emailOrPhone;
+	constructor(login, password) {
+		this.login = login;
+		// this.username = username;
+		// this.emailOrPhone = emailOrPhone;
 		this.password = password;
 		this.fragment = UserFragment;
 
@@ -30,28 +32,28 @@ export class Register {
 	};
 
 	validate = () => {
-		return validateRegistration(this.username, this.emailOrPhone, this.password);
+		return validateRegistration(this.login, this.password);
 	};
 
-	getUserByUsername = async () => {
-		return await this.getUser.getUserByUsername(this.username, this.fragment);
-	};
+	// getUserByUsername = async () => {
+	// 	return await this.getUser.getUserByUsername(this.username, this.fragment);
+	// };
 
 	getUserByEmail = async () => {
-		return await this.getUser.getUserByEmail(this.emailOrPhone, this.fragment);
+		return await this.getUser.getUserByEmail(this.login, this.fragment);
 	};
 
 	getUserByPhone = async () => {
-		return await this.getUser.getUserByPhone(this.emailOrPhone, this.fragment);
+		return await this.getUser.getUserByPhone(this.login, this.fragment);
 	};
 
 	getParams = async () => {
 		const passwordHash = await bcrypt.hash(this.password, 10);
 
 		return {
-			username: this.username.replace(/ /g, ''),
-			email: isEmail(this.emailOrPhone) ? this.emailOrPhone : null,
-			phone: isPhone(this.emailOrPhone) ? this.emailOrPhone.replace(/^\++/, '') : null,
+			// username: this.username.replace(/ /g, ''),
+			email: isEmail(this.login) ? this.login : null,
+			phone: isPhone(this.login) ? this.login.replace(/^\++/, '') : null,
 			password: passwordHash,
 			role: constants.ROLE_USER,
 			secret_token: uuidv4() + '-' + (+new Date()),
@@ -61,17 +63,18 @@ export class Register {
 
 	async register() {
 		const value = this.validate();
-		this.emailOrPhone = value.emailOrPhone;
+		this.login = value.login;
 
-		let user = await this.getUserByUsername();
+		// let user = await this.getUserByUsername();
+		//
+		// if (user) {
+		// 	throw new Error('Username already registered');
+		// }
+		let user;
 
-		if (user) {
-			throw new Error('Username already registered');
-		}
-
-		if (isEmail(this.emailOrPhone)) {
+		if (isEmail(this.login)) {
 			user = await this.getUserByEmail();
-		} else if (isPhone(this.emailOrPhone)) {
+		} else if (isPhone(this.login)) {
 			user = await this.getUserByPhone();
 		} else {
 			throw new ValidationError('Wrong email or phone is given.');

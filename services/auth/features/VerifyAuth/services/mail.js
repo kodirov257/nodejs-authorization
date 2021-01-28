@@ -7,7 +7,7 @@ export class Mail {
 	transporter;
 
 	constructor(username, email, emailVerifyToken) {
-		this.username = username;
+		this.username = username ? username : email;
 		this.email = email;
 		this.emailVerifyToken = emailVerifyToken;
 

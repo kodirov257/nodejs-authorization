@@ -32,7 +32,7 @@ export const typeDefs = gql`
 
 	type Mutation {
 		signin(login: String!, password: String!): AuthPayload
-		register(username: String!, email_or_phone: String!, password: String!): Boolean
+		register(login: String!, password: String!): Boolean
 		change_password(old_password: String!, new_password: String!): Boolean
 		refresh_token(refresh_token: String!): RefreshPayload
 	}

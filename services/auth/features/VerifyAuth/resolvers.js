@@ -6,7 +6,6 @@ import {
 	Resend,
 	ResetPassword,
 	ChangePassword,
-	RefreshToken,
 	AddEmail,
 	AddPhone,
 } from './services';
@@ -18,25 +17,24 @@ export class VerifyAuth extends BasicAuth {
 	resendService;
 	resetService;
 	changePasswordService;
-	refreshTokenService;
 	addEmailService;
 	addPhoneService;
 
 	constructor() {
 		super();
 
-		this.registerService = new Register();
+		this.registerService = Register;
 		this.verifyService = Verify;
 		this.signinService = Signin;
 		this.resendService = Resend;
 		this.resetService = ResetPassword;
-		this.refreshTokenService = RefreshToken;
 		this.addEmailService = AddEmail;
 		this.addPhoneService = AddPhone;
+		this.changePasswordService = ChangePassword;
 	}
 
-	register = async (_, {username, email_or_phone, password}) => {
-		return (new Register(username, email_or_phone, password)).register();
+	register = async (_, {login, password}) => {
+		return (new this.registerService(login, password)).register();
 	}
 
 	verify_email = async (_, {token}, ctx) => {
@@ -76,7 +74,7 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	change_password = async (_, {old_password, new_password}, ctx) => {
-		return (new ChangePassword({old_password, new_password, ctx})).changePassword()
+		return (new this.changePasswordService({old_password, new_password, ctx})).changePassword();
 	}
 
 	send_add_email_token = async (_, {email}, ctx) => {
@@ -102,8 +100,8 @@ export class VerifyAuth extends BasicAuth {
 				auth_me: async () => super.auth_me(),
 			},
 			Mutation: {
-				register: async (_, {username, email_or_phone, password}) =>
-					this.register(_, {username, email_or_phone, password}),
+				register: async (_, {login, password}) =>
+					this.register(_, {login, password}),
 				verify_email: async (_, {token}, ctx) =>
 					this.verify_email(_, {token}, ctx),
 				verify_phone: async (_, {phone, token}, ctx) =>

@@ -27,8 +27,8 @@ export class NetworkAuth extends VerifyAuth {
         auth_me: async () => super.auth_me(),
       },
       Mutation: {
-        register: async (_, {username, email_or_phone, password}) =>
-          this.register(_, {username, email_or_phone, password}),
+        register: async (_, {login, password}) =>
+          this.register(_, {login, password}),
         verify_email: async (_, {token}, ctx) =>
           this.verify_email(_, {token}, ctx),
         verify_phone: async (_, {phone, token}, ctx) =>
