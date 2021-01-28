@@ -22,18 +22,24 @@ const services = [
 
 router.post('/hasura-event', async (req, res) => {
   const body = req.body;
+  const newData = body.event.data.new;
+  const value = newData.value;
+  console.log(body.table.schema);
+  console.log(body.table.name);
+  console.log(newData.key);
+  console.log(newData);
 
-  if (body.table.schema === 'public' && body.table.name === 'settings') {
+  if (body.table.schema === 'public' && body.table.name === 'settings' && newData.key === 'auth') {
     try {
-      if (!has(body, 'service')) {
+      if (!has(value, 'service')) {
         throw new Error('No service provided.');
       }
 
-      if (!services.includes(body.service)) {
+      if (!services.includes(value.service)) {
         throw new Error('Wrong service provided.');
       }
 
-      await setEnvironment(body.event.data.new.value);
+      setEnvironment(value);
 
       return res.send({
         data: {

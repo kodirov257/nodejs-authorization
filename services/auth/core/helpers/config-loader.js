@@ -1,7 +1,7 @@
 const path = require('path');
 import fs from 'fs';
 
-export const setEnvironment = async (value) => {
+export const setEnvironment = (value) => {
   const data = JSON.stringify(value);
   const fileName = path.resolve(__dirname, '../../env.json');
 
