@@ -38,11 +38,11 @@ export class VerifyAuth extends BasicAuth {
 	}
 
 	verify_email = async (_, {token}, ctx) => {
-		return (new this.verifyService({token})).verifyEmail();
+		return (new this.verifyService({token, ctx})).verifyEmail();
 	}
 
 	verify_phone = async (_, {phone, token}, ctx) => {
-		return (new this.verifyService({phone, token})).verifyPhone();
+		return (new this.verifyService({phone, token, ctx})).verifyPhone();
 	}
 
 	signin = async (_, {login, password}, ctx) => {

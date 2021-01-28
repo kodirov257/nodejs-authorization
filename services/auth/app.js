@@ -57,6 +57,7 @@ async function runServer() {
       log(error);
       throw error;
     },
+    introspection: true,
   });
 
   app.use(bodyParser.json());
@@ -72,8 +73,6 @@ async function runServer() {
       app.use('/network', networkRouter.router);
     case 'VerifyAuth':
       const userRouter = require('./routes/users');
-      const authRouter = require('./routes/auth');
-      app.use('/auth', authRouter);
       app.use('/users', userRouter);
     case 'BasicAuth':
       break;

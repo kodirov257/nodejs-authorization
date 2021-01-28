@@ -24,10 +24,6 @@ router.post('/hasura-event', async (req, res) => {
   const body = req.body;
   const newData = body.event.data.new;
   const value = newData.value;
-  console.log(body.table.schema);
-  console.log(body.table.name);
-  console.log(newData.key);
-  console.log(newData);
 
   if (body.table.schema === 'public' && body.table.name === 'settings' && newData.key === 'auth') {
     try {
