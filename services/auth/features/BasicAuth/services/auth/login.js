@@ -14,9 +14,14 @@ export class Signin {
 		this.ctx = ctx;
 	}
 
-	signin = async () => {
-		const user = await (new GetUser()).getUserByCredentials(this.usernameEmailOrPhone, this.password);
+	async signin() {
+		const user = await this.getUser();
+		// await this.generator.removeUserSession(user.id);
 
-		return this.generator.generateTokens(user, this.ctx.req);
+		return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
+	}
+
+	getUser = async () => {
+		return (new GetUser()).getUserByCredentials(this.usernameEmailOrPhone, this.password);
 	}
 }

@@ -1,12 +1,11 @@
 import fetch from 'node-fetch';
 
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '../../../../core/config/network';
-import { BASE_URL } from '../../../../core/config/app';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } from '../../../../core/config';
 import { Network } from './network';
 
 export class Google extends Network {
-  constructor() {
-    super();
+  constructor(ctx = null) {
+    super(ctx);
 
     this.clientID = GOOGLE_CLIENT_ID;
     this.clientSecret = GOOGLE_CLIENT_SECRET;

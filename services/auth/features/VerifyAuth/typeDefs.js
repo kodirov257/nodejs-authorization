@@ -3,8 +3,7 @@ import gql from 'graphql-tag';
 export const typeDefs = gql`
 	type AuthPayload {
 		access_token: String!
-		refresh_token: String!
-		expires_at: Int!
+		expires_at: String!
 		user_id: ID!
 	}
 
@@ -25,6 +24,8 @@ export const typeDefs = gql`
 	type Query {
 		hello: String
 		auth_me: User
+		abilities: [String]!
+		ability_values(type: String!): String
 	}
 
 	type Mutation {
@@ -39,7 +40,7 @@ export const typeDefs = gql`
 		reset_via_email(token: String!, password: String!): Boolean
 		reset_via_phone(phone: String!, token: String!, password: String!): Boolean
 		change_password(old_password: String!, new_password: String!): Boolean
-		refresh_token(refresh_token: String!): AuthPayload
+		refresh_token: AuthPayload
 		add_email(email: String!): Boolean
 		verify_add_email(token: String!): Boolean
 		add_phone(phone: String!): Boolean

@@ -1,12 +1,11 @@
 import fetch from 'node-fetch';
 
-import { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET } from '../../../../core/config/network';
-import { BASE_URL } from '../../../../core/config/app';
+import { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET, BASE_URL } from '../../../../core/config';
 import { Network } from './network';
 
 export class Facebook extends Network {
-  constructor() {
-    super();
+  constructor(ctx = null) {
+    super(ctx);
 
     this.clientID = FACEBOOK_CLIENT_ID;
     this.clientSecret = FACEBOOK_CLIENT_SECRET;

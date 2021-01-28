@@ -12,16 +12,23 @@ export class RefreshToken {
 	token;
 	ctx;
 
-	constructor(refreshToken, ctx) {
+	constructor(ctx) {
 		this.generator = new Generator();
-		this.token = refreshToken;
 		this.ctx = ctx;
+		const cookies = this.ctx.req.signedCookies;
+		if ('refresh_token' in cookies) {
+			console.log(`Refresh token: ${cookies.refresh_token}`);
+			this.token = cookies.refresh_token;
+		} else {
+			throw new Error('No refresh token is provided.');
+		}
 	}
 
 	async refreshToken () {
-		const refreshToken = this.getToken(this.token);
 
-		const userSession = await getUserSession(refreshToken);
+		// const refreshToken = this.getToken(this.token);
+
+		const userSession = await getUserSession(this.token);
 
 		const expireData = moment(userSession.expires_at);
 		if (!expireData.isAfter()) {
@@ -29,13 +36,9 @@ export class RefreshToken {
 		}
 
 		const user = await getUserById(userSession.user_id);
-		await this.removeUserSession(user.id);
+		// await this.generator.removeUserSession(user.id);
 
-		return this.generator.generateTokens(user, this.ctx.req);
-	}
-
-	removeUserSession = async (userId) => {
-		return deleteUserSession(userId);
+		return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
 	}
 
 	getToken = (refreshToken) => this.getFieldFromRefreshToken(refreshToken, 'token');

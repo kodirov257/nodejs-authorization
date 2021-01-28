@@ -1,7 +1,10 @@
 require('dotenv-flow').config();
+import path from 'path';
+import fs from 'fs';
 
 import { getUserById, Register, Signin, ChangePassword, RefreshToken, AddEmail, AddPhone } from './services';
 import { isAuthenticated, getCurrentUserId } from '../../core/helpers/user';
+import { services } from '../../core/config';
 
 export class BasicAuth {
 	addEmailService;
@@ -30,6 +33,33 @@ export class BasicAuth {
 		}
 	}
 
+	abilities = () => {
+		return services;
+	}
+
+	ability_values = (type) => {
+		if (!type || !services.includes(type)) {
+			throw new Error('Type is not provided.');
+		}
+
+		const fileName = path.resolve(__dirname, '../../env.json');
+		const environment = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+		const serviceName = type.split('Auth')[0].toLowerCase();
+		const templateEnv = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../env.${serviceName}.json`), 'utf-8'));
+
+		let result = {};
+		for (const value in templateEnv) {
+			if (environment[value]) {
+				result[value] = environment[value];
+			} else {
+				result[value] = templateEnv[value];
+			}
+		}
+
+		result.service = type;
+		return JSON.stringify(result);
+	}
+
 	register = async (_, {login, password}) => {
 		return (new Register(login, password)).register();
 	}
@@ -42,12 +72,8 @@ export class BasicAuth {
 		return (new ChangePassword(old_password, new_password, ctx)).changePassword();
 	}
 
-	refresh_token = async (_, {refresh_token}, ctx) => {
-		if (!refresh_token) {
-			throw new Error('Refresh token is not provided.');
-		}
-
-		return (new RefreshToken(refresh_token, ctx)).refreshToken();
+	refresh_token = async (_, ctx) => {
+		return (new RefreshToken(ctx)).refreshToken();
 	}
 
 	add_email = async (_, {email}, ctx) => {
@@ -64,6 +90,8 @@ export class BasicAuth {
 			Query: {
 				hello: () => this.hello(),
 				auth_me: async (_, args, ctx) => this.auth_me(_, args, ctx),
+				abilities: (_, args, ctx) => this.abilities(),
+				ability_values: (_, {type}, ctx) => this.ability_values(type),
 			},
 			Mutation: {
 				register: async (_, {login, password}, ctx) =>
@@ -72,8 +100,8 @@ export class BasicAuth {
 					this.signin(_, {login, password}, ctx),
 				change_password: async (_, {old_password, new_password}, ctx) =>
 					this.change_password(_, {old_password, new_password}, ctx),
-				refresh_token: async (_, {refresh_token}, ctx) =>
-					this.refresh_token(_, {refresh_token}, ctx),
+				refresh_token: async (_, args, ctx) =>
+					this.refresh_token(_, ctx),
 				add_email: async (_, {email}, ctx) =>
 					this.add_email(_, {email}, ctx),
 				add_phone: async (_, {phone}, ctx) =>
@@ -82,6 +110,3 @@ export class BasicAuth {
 		}
 	}
 }
-
-
-

@@ -98,6 +98,8 @@ export class VerifyAuth extends BasicAuth {
 			Query: {
 				hello: () => super.hello(),
 				auth_me: async () => super.auth_me(),
+				abilities: (_, args, ctx) => this.abilities(),
+				ability_values: (_, {type}, ctx) => this.ability_values(type),
 			},
 			Mutation: {
 				register: async (_, {login, password}) =>
@@ -110,8 +112,8 @@ export class VerifyAuth extends BasicAuth {
 					this.signin(_, {login, password}, ctx),
 				change_password: async (_, {old_password, new_password}, ctx) =>
 					this.change_password(_, {old_password, new_password}, ctx),
-				refresh_token: async (_, {refresh_token}, ctx) =>
-					this.refresh_token(_, {refresh_token}, ctx),
+				refresh_token: async (_, args, ctx) =>
+					this.refresh_token(_, ctx),
 				resend_email: async (_, {email}) =>
 					this.resend_email(_, {email}),
 				resend_phone: async (_, {phone}) =>

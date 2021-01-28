@@ -1,8 +1,8 @@
 require('dotenv-flow').config();
 import { ApolloServer } from 'apollo-server-express';
 import { buildContext } from 'graphql-passport';
+import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import { log } from './core/services';
 import express from 'express';
 import fs from 'fs';
 
@@ -12,7 +12,8 @@ import { typeDefs as basicTypeDef } from './features/BasicAuth/typeDefs';
 import { NetworkAuth } from './features/NetworkAuth/resolvers';
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
-import { reloadServer } from './core/helpers/server';
+import { COOKIE_SECRET } from './core/config';
+import { log } from './core/services';
 const indexRouter = require('./routes/index');
 const jwkRouter = require('./routes/jwk');
 
@@ -58,10 +59,10 @@ async function runServer() {
     },
   });
 
-  app.use(bodyParser.json())
+  app.use(bodyParser.json());
+  app.use(cookieParser(COOKIE_SECRET));
   app.use('/', indexRouter);
   app.use('/jwk', jwkRouter);
-  app.get('/settings/reload-server', reloadServer);
 
   switch (service.service) {
     case 'NetworkAuth':

@@ -8,16 +8,16 @@ export class NetworkAuth extends VerifyAuth {
   constructor() {
     super();
 
-    this.googleService = new Google();
-    this.facebookService = new Facebook();
+    this.googleService = Google;
+    this.facebookService = Facebook;
   }
 
-  auth_by_google = async (token) => {
-    return this.googleService.authorize(token);
+  auth_by_google = async (token, ctx) => {
+    return (new this.googleService(ctx)).authorize(token);
   }
 
-  auth_by_facebook = async (token) => {
-    return this.facebookService.authorize(token);
+  auth_by_facebook = async (token, ctx) => {
+    return (new this.facebookService(ctx)).authorize(token);
   }
 
   resolvers() {
@@ -25,6 +25,8 @@ export class NetworkAuth extends VerifyAuth {
       Query: {
         hello: () => super.hello(),
         auth_me: async (_, args, ctx) => super.auth_me(_, args, ctx),
+        abilities: (_, args, ctx) => this.abilities(),
+        ability_values: (_, {type}, ctx) => this.ability_values(type),
       },
       Mutation: {
         register: async (_, {login, password}) =>
@@ -37,8 +39,8 @@ export class NetworkAuth extends VerifyAuth {
           this.signin(_, {login, password}, ctx),
         change_password: async (_, {old_password, new_password}, ctx) =>
           this.change_password(_, {old_password, new_password}, ctx),
-        refresh_token: async (_, {refresh_token}, ctx) =>
-          this.refresh_token(_, {refresh_token}, ctx),
+        refresh_token: async (_, args, ctx) =>
+          this.refresh_token(_, ctx),
         resend_email: async (_, {email}) =>
           this.resend_email(_, {email}),
         resend_phone: async (_, {phone}) =>
@@ -60,9 +62,9 @@ export class NetworkAuth extends VerifyAuth {
         verify_add_phone: async (_, {phone, token}, ctx) =>
           this.verify_add_phone(_, {phone, token}, ctx),
         auth_by_google: async (_, {token}, ctx) =>
-          this.auth_by_google(token),
+          this.auth_by_google(token, ctx),
         auth_by_facebook: async (_, {token}, ctx) =>
-          this.auth_by_facebook(token),
+          this.auth_by_facebook(token, ctx),
       },
     };
   }

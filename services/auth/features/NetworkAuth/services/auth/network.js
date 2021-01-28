@@ -16,11 +16,13 @@ export class Network {
   callbackUrl;
   profileFields;
   network;
+  ctx;
 
-  constructor() {
+  constructor(ctx) {
     this.getUserService = new GetUser();
     this.generator = new Generator();
     this.profileFields = [];
+    this.ctx = ctx;
   }
 
   options = () => {
@@ -52,7 +54,7 @@ export class Network {
     // console.log(user);
 
     if (user) {
-      return this.generator.generateTokens(user);
+      return this.generator.generateTokens(user, null, this.ctx.res);
     }
 
     const params = await this.getParams(userId, accessToken);
@@ -83,7 +85,7 @@ export class Network {
       throw new Error('Error creating user.');
     }
 
-    return this.generator.generateTokens(userData[0]);
+    return this.generator.generateTokens(userData[0], this.ctx.res);
   }
 
   getUser = async (identity) => null;
