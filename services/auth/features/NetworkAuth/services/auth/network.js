@@ -1,12 +1,12 @@
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import gql from 'graphql-tag';
 import get from 'lodash/get';
 
-import {Generator} from '../../../BasicAuth/services/auth/generator';
+import { Generator } from '../../../BasicAuth/services/auth/generator';
 import * as constants from '../../../../core/helpers/values';
-import {hasuraQuery} from '../../../../core/services';
-import {UserFragment} from '../../fragments';
-import {GetUser} from '../hasura/get-user';
+import { hasuraQuery } from '../../../../core/services';
+import { UserFragment } from '../../fragments';
+import { GetUser } from '../hasura/get-user';
 
 export class Network {
   getUserService;

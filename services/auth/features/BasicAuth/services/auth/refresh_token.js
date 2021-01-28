@@ -1,19 +1,21 @@
 const moment = require('moment');
-import { v4 as uuidv4 } from 'uuid';
-import jwt from 'jsonwebtoken';
 import get from 'lodash/get';
+import { JWT } from 'jose';
 
-import { generateClaimsJwtToken } from '../../../../core/helpers/auth-tools';
+import { deleteUserSession } from '../hasura/delete-user-session';
 import { getUserSession } from '../hasura/get-user-session';
 import { getUserById } from '../hasura/get-user-by-id';
+import { Generator } from './generator';
 
 export class RefreshToken {
+	generator;
 	token;
 	ctx;
 
 	constructor(refreshToken, ctx) {
-		this.ctx = ctx;
+		this.generator = new Generator();
 		this.token = refreshToken;
+		this.ctx = ctx;
 	}
 
 	async refreshToken () {
@@ -27,18 +29,20 @@ export class RefreshToken {
 		}
 
 		const user = await getUserById(userSession.user_id);
-		const accessToken = await generateClaimsJwtToken(user, uuidv4() + '-' + (+new Date()));
+		await this.removeUserSession(user.id);
 
-		return {
-			access_token: accessToken,
-		};
+		return this.generator.generateTokens(user, this.ctx.req);
 	}
 
-	getToken = (refreshToken) =>
-		this.getFieldFromRefreshToken(refreshToken, 'token');
+	removeUserSession = async (userId) => {
+		return deleteUserSession(userId);
+	}
+
+	getToken = (refreshToken) => this.getFieldFromRefreshToken(refreshToken, 'token');
 
 	getFieldFromRefreshToken = (refreshToken, field) => {
 		const verifiedToken = this.getDataFromRefreshToken(refreshToken);
+		console.log(verifiedToken);
 
 		return get(
 			verifiedToken,
@@ -47,6 +51,6 @@ export class RefreshToken {
 	}
 
 	getDataFromRefreshToken = (refreshToken) => {
-		return jwt.verify(refreshToken, process.env.JWT_PRIVATE_REFRESH_KEY);
+		return JWT.verify(refreshToken, this.generator.jwtKey);
 	}
 }
