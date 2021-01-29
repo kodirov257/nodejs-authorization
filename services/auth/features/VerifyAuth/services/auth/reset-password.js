@@ -1,3 +1,5 @@
+import {Generator} from "../../../BasicAuth/services/auth/generator";
+
 const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
@@ -15,19 +17,23 @@ import { Mail } from '../mail';
 import { Sms } from '../sms';
 
 export class ResetPassword {
+	generator;
 	getUser;
 	user;
 	email;
 	phone;
 	token;
 	password;
+	ctx;
 
-	constructor({email = null, phone = null, token = null, password = null}) {
+	constructor({email = null, phone = null, token = null, password = null, ctx}) {
+		this.generator = new Generator();
 		this.getUser = new GetUser();
 		this.email = email;
 		this.phone = phone ? phone.replace(/^\++/, '') : null;
 		this.token = token;
 		this.password = password;
+		this.ctx = ctx;
 	}
 
 	async sendResetEmail() {
@@ -132,7 +138,7 @@ export class ResetPassword {
 		const result = await updateUser(user.id, {password: passwordHash}, _fields[type + 'Fields']);
 
 		if (result.user && result.verification) {
-			return true;
+			return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
 		}
 
 		return this.revertChanges(user, type);

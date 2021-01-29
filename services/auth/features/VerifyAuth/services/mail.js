@@ -70,13 +70,13 @@ export class Mail {
 			subject: 'Reset password',
 			text: `Thanks for using our service!
             \nPlease refer to the following link:
-            \n${FRONT_URL}/reset-password?token=${this.emailVerifyToken}
+            \n${FRONT_URL}/auth/reset-password?token=${this.emailVerifyToken}
             \nThank you,
             \n${this.username}
         `,
 			html: `<b>Thanks for using our service!</b>
             <br>Please refer to the following link:<br/>
-            <p><a href="${FRONT_URL}/reset-password?token=${this.emailVerifyToken}">Reset password</a></p>
+            <p><a href="${FRONT_URL}/auth/reset-password?token=${this.emailVerifyToken}">Reset password</a></p>
             Thank you,<br>
             ${this.username}
         `,

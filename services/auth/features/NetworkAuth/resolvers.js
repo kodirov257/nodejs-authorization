@@ -55,10 +55,10 @@ export class NetworkAuth extends VerifyAuth {
           this.send_reset_email(_, {email}),
         send_reset_phone: async (_, {phone}) =>
           this.send_reset_phone(_, {phone}),
-        reset_via_email: async (_, {token, password}) =>
-          this.reset_via_email(_, {token, password}),
-        reset_via_phone: async (_, {phone, token, password}) =>
-          this.reset_via_phone(_, {phone, token, password}),
+        reset_via_email: async (_, {token, password}, ctx) =>
+          this.reset_via_email(_, {token, password}, ctx),
+        reset_via_phone: async (_, {phone, token, password}, ctx) =>
+          this.reset_via_phone(_, {phone, token, password}, ctx),
         add_email: async (_, {email}, ctx) =>
           this.add_email(_, {email}, ctx),
         verify_add_email: async (_, {token}, ctx) =>

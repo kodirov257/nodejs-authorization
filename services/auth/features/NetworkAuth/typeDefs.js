@@ -43,8 +43,8 @@ export const typeDefs = gql`
         resend_phone(phone: String!): Boolean
         send_reset_email(email: String!): Boolean
         send_reset_phone(phone: String!): Boolean
-        reset_via_email(token: String!, password: String!): Boolean
-        reset_via_phone(phone: String!, token: String!, password: String!): Boolean
+        reset_via_email(token: String!, password: String!): AuthPayload
+        reset_via_phone(phone: String!, token: String!, password: String!): AuthPayload
         change_password(old_password: String!, new_password: String!): Boolean
         refresh_token: AuthPayload
         add_email(email: String!): Boolean

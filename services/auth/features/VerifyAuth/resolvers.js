@@ -65,12 +65,12 @@ export class VerifyAuth extends BasicAuth {
 		return (new this.resetService({phone})).sendResetPhone();
 	}
 
-	reset_via_email = async (_, {token, password}) => {
-		return (new this.resetService({token, password})).resetViaEmail();
+	reset_via_email = async (_, {token, password}, ctx) => {
+		return (new this.resetService({token, password, ctx})).resetViaEmail();
 	}
 
-	reset_via_phone = async (_, {phone, token, password}) => {
-		return (new this.resetService({phone, token, password})).resetViaPhone();
+	reset_via_phone = async (_, {phone, token, password}, ctx) => {
+		return (new this.resetService({phone, token, password, ctx})).resetViaPhone();
 	}
 
 	change_password = async (_, {old_password, new_password}, ctx) => {
@@ -122,10 +122,10 @@ export class VerifyAuth extends BasicAuth {
 					this.send_reset_email(_, {email}),
 				send_reset_phone: async (_, {phone}) =>
 					this.send_reset_phone(_, {phone}),
-				reset_via_email: async (_, {token, password}) =>
-					this.reset_via_email(_, {token, password}),
-				reset_via_phone: async (_, {phone, token, password}) =>
-					this.reset_via_phone(_, {phone, token, password}),
+				reset_via_email: async (_, {token, password}, ctx) =>
+					this.reset_via_email(_, {token, password}, ctx),
+				reset_via_phone: async (_, {phone, token, password}, ctx) =>
+					this.reset_via_phone(_, {phone, token, password}, ctx),
 				add_email: async (_, {email}, ctx) =>
 					this.add_email(_, {email}, ctx),
 				verify_add_email: async (_, {token}, ctx) =>
