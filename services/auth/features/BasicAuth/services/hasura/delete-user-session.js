@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import get from 'lodash/get';
 
 import { hasuraQuery } from '../../../../core/services';
 import { UserSessionFragment } from '../../fragments';
@@ -23,10 +24,10 @@ export const deleteUserSession = async (id) => {
       }
     );
 
-    console.log(response);
-    console.log(response.data);
+    // console.log(response);
+    // console.log(response.data);
 
-    return response.data.delete_auth_user_sessions[0] === undefined;
+    return get(response, 'data.delete_auth_user_sessions[0]') || undefined;
   } catch (e) {
     throw new Error('Could not delete the user');
   }

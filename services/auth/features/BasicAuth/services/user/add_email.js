@@ -2,8 +2,8 @@ import { validateEmail } from '../../../../core/validators';
 import { AddInfo } from './add_info';
 
 export class AddEmail extends AddInfo {
-  constructor({email = null, ctx}) {
-    super({email, ctx});
+  constructor({email, ctx}) {
+    super({email, ctx, type: 'email'});
   }
 
   addEmail = async () => {

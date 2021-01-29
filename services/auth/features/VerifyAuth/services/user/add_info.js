@@ -15,8 +15,8 @@ export class AddInfo extends BasicAddInfo {
     smsService;
     token;
 
-    constructor({email = null, token = null, phone = null, ctx}) {
-        super({email, phone, ctx});
+    constructor({email = null, token = null, phone = null, type = 'email', ctx}) {
+        super({email, phone, type, ctx});
 
         this.getUser = new GetUser();
         this.token = token;
@@ -24,16 +24,16 @@ export class AddInfo extends BasicAddInfo {
         this.smsService = Sms;
     }
 
-    validateAddInfo = (user, type = 'email') => {
+    validateAddInfo = (user) => {
         const userVerifications = user.user_verifications[0];
 
-        if (type === 'email') {
+        if (this.type === 'email') {
             if (user.email && user.email === this.email && userVerifications.email_verified === false) {
                 return true;
             } else if (user.email && userVerifications.email_verified === true) {
                 throw new Error('Email is already set.');
             }
-        } else if (type === 'phone') {
+        } else if (this.type === 'phone') {
             if (user.phone && user.phone === this.phone && userVerifications.phone_verified === false) {
                 return this.sendAddInfo(user.id, 'phone');
             } else if (user.phone && userVerifications.phone_verified === true) {
@@ -43,13 +43,13 @@ export class AddInfo extends BasicAddInfo {
         return false;
     }
 
-    sendAddInfo = async (userId, type = 'email') => {
-        let {userData, verificationData} = await this.updateAddInfo(userId, type);
+    sendAddInfo = async (userId) => {
+        let {userData, verificationData} = await this.updateAddInfo(userId, this.type);
 
-        if (userData !== undefined && verificationData !== undefined) {
-            if (type === 'email') {
+        if (userData && verificationData) {
+            if (this.type === 'email') {
                 await (new this.mailService(userData.username, this.email, verificationData.email_verify_token)).sendAddEmailToken();
-            } else if (type === 'phone') {
+            } else if (this.type === 'phone') {
                 await (new this.smsService(this.phone, verificationData.phone_verify_token)).sendSmsAddPhoneToken();
             }
 
@@ -59,7 +59,7 @@ export class AddInfo extends BasicAddInfo {
         return false;
     }
 
-    updateAddInfo = async (userId, type) => {
+    updateAddInfo = async (userId) => {
         const _fields = {
             emailFields: { email: this.email },
             phoneFields: { phone: this.phone },
@@ -77,14 +77,16 @@ export class AddInfo extends BasicAddInfo {
             },
         };
 
-        const result = await updateUser(userId, _fields[`${type}Fields`], _verificationFields[`${type}Fields`]);
-        let userData = get(result, 'data.update_auth_users_by_pk');
-        let verificationData = get(result, 'data.update_auth_user_verifications_by_pk');
+        const {userData, verificationData} = await updateUser(userId, _fields[`${this.type}Fields`], _verificationFields[`${this.type}Fields`]);
+
+        if (!userData || !verificationData) {
+            throw new Error(`${this.type} is not added.`);
+        }
 
         return {userData, verificationData};
     }
 
-    verifyAddInfo = async (type = 'email') => {
+    verifyAddInfo = async () => {
         if (!isAuthenticated(this.ctx.req)) {
             throw new Error('Authorization token has not provided');
         }
@@ -92,7 +94,7 @@ export class AddInfo extends BasicAddInfo {
         const user = await this.getUserByToken();
 
         if (!user) {
-            throw new Error(`Wrong ${type} is provided.`);
+            throw new Error(`Wrong ${this.type} is provided.`);
         }
 
         const userVerifications = user.user_verifications[0];
@@ -111,9 +113,13 @@ export class AddInfo extends BasicAddInfo {
             }
         };
 
-        const result = await updateUser(user.id, {}, _fields[`${type}Fields`]);
+        const result = await updateUser(user.id, {}, _fields[`${this.type}Fields`]);
 
-        return get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined;
+        if (!result.user || !result.verification) {
+            throw new Error(`${this.type} addition is not verified.`);
+        }
+
+        return true;
     }
 
     getUserFragment = () => UserFragment;

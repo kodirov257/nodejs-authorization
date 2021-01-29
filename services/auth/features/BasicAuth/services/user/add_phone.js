@@ -3,7 +3,7 @@ import { AddInfo } from './add_info';
 
 export class AddPhone extends AddInfo {
   constructor({phone, ctx}) {
-    super({phone, ctx});
+    super({phone, ctx, type: 'phone'});
   }
 
   addPhone = async () => {

@@ -72,17 +72,17 @@ export class Network {
           }
       `,
       {
-        user: params
+        user: params,
       }
     );
 
-    const userData = get(result, 'data.insert_auth_users.returning');
+    const userData = get(result, 'data.insert_auth_users.returning') || undefined;
 
     // console.log(result);
     // console.log(result.errors[0].extensions);
     // console.log(userData);
 
-    if (userData === undefined) {
+    if (!userData) {
       throw new Error('Error creating user.');
     }
 

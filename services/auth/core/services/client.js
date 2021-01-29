@@ -22,7 +22,7 @@ export const hasuraQuery = async (document, variables) => {
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            'x-hasura-admin-secret': 'losandijoncity!@$@'
+            'x-hasura-admin-secret': process.env.JWT_PRIVATE_KEY,
             // ...getDefaultHeaders(),      // TODO: fix environments
         },
         body: JSON.stringify({

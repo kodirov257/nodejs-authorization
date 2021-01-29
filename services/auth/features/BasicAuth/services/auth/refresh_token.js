@@ -2,7 +2,6 @@ const moment = require('moment');
 import get from 'lodash/get';
 import { JWT } from 'jose';
 
-import { deleteUserSession } from '../hasura/delete-user-session';
 import { getUserSession } from '../hasura/get-user-session';
 import { getUserById } from '../hasura/get-user-by-id';
 import { Generator } from './generator';
@@ -17,7 +16,6 @@ export class RefreshToken {
 		this.ctx = ctx;
 		const cookies = this.ctx.req.signedCookies;
 		if ('refresh_token' in cookies) {
-			console.log(`Refresh token: ${cookies.refresh_token}`);
 			this.token = cookies.refresh_token;
 		} else {
 			throw new Error('No refresh token is provided.');
@@ -25,7 +23,6 @@ export class RefreshToken {
 	}
 
 	async refreshToken () {
-
 		// const refreshToken = this.getToken(this.token);
 
 		const userSession = await getUserSession(this.token);
@@ -36,6 +33,9 @@ export class RefreshToken {
 		}
 
 		const user = await getUserById(userSession.user_id);
+		if (!user) {
+			throw new Error('User is not found.');
+		}
 		// await this.generator.removeUserSession(user.id);
 
 		return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
@@ -45,7 +45,7 @@ export class RefreshToken {
 
 	getFieldFromRefreshToken = (refreshToken, field) => {
 		const verifiedToken = this.getDataFromRefreshToken(refreshToken);
-		console.log(verifiedToken);
+		// console.log(verifiedToken);
 
 		return get(
 			verifiedToken,

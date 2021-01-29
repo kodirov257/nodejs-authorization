@@ -19,15 +19,19 @@ export class VKontakte extends Network {
   }
 
   getUserInfo = async (token) => {
-    const response = await fetch(`https://api.vk.com/method/users.get?fields=uid,first_name,last_name,screen_name,sex,photo_200&access_token=${token}&v=5.126`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    try {
+      const response = await fetch(`https://api.vk.com/method/users.get?fields=uid,first_name,last_name,screen_name,sex,photo_200&access_token=${token}&v=5.126`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-    let responseJson = await response.json();
+      let responseJson = await response.json();
 
-    return responseJson.response[0];
+      return responseJson.response[0];
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 }

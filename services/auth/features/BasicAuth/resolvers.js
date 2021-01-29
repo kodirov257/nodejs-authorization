@@ -26,10 +26,14 @@ export class BasicAuth {
 
 		try {
 			const currentUserId = getCurrentUserId(ctx.req);
+			const user = await getUserById(currentUserId);
+			if (!user) {
+				throw new Error('Not logged in');
+			}
 
-			return await getUserById(currentUserId);
+			return user;
 		} catch (error) {
-			throw new Error('Not logged in');
+			throw new Error(error.message);
 		}
 	}
 
@@ -110,3 +114,6 @@ export class BasicAuth {
 		}
 	}
 }
+
+
+

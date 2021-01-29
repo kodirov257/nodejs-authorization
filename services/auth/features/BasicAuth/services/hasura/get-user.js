@@ -19,13 +19,13 @@ export class GetUser {
 		}
 
 		if (!user) {
-			throw new Error('Invalid "username" or "password"');
+			throw new Error('Invalid "login" or "password"');
 		}
 
 		const passwordMatch = await bcrypt.compare(password, user.password);
 
 		if (!passwordMatch) {
-			throw new Error('Invalid "username" or "password"');
+			throw new Error('Invalid "login" or "password"');
 		}
 
 		if (user.status !== constants.STATUS_ACTIVE) {
@@ -65,7 +65,7 @@ export class GetUser {
 				condition,
 			);
 
-			return get(response, 'data.auth_users[0]');
+			return get(response, 'data.auth_users[0]') || undefined;
 		} catch (e) {
 			// throw new Error('Unable to find the email');
 			throw new Error(e.message);

@@ -1,6 +1,5 @@
 import * as nodemailer from 'nodemailer';
 
-import { FRONT_URL } from '../../../core/config/app';
 import {
 	MAIL_FROM_ADDRESS,
 	MAIL_PASSWORD,
@@ -8,7 +7,8 @@ import {
 	MAIL_SECURE,
 	MAIL_PORT,
 	MAIL_HOST,
-} from '../../../core/config/registration';
+	FRONT_URL,
+} from '../../../core/config';
 
 export class Mail {
 	username;
@@ -28,7 +28,7 @@ export class Mail {
 				user: MAIL_USERNAME,
 				pass: MAIL_PASSWORD,
 			},
-			secure: MAIL_SECURE !== 'false',
+			secure: typeof MAIL_SECURE === 'boolean' ? (MAIL_SECURE !== false) : MAIL_SECURE !== 'false',
 		});
 	}
 
@@ -39,13 +39,13 @@ export class Mail {
 			subject: 'Registration',
 			text: `Thanks for registration!
             \nPlease refer to the following link:
-            \n${FRONT_URL}/login?token=${this.emailVerifyToken}
+            \n${FRONT_URL}/auth/login?token=${this.emailVerifyToken}
             \nThank you,
             \n${this.username}
         `,
 			html: `<b>Thanks for registration!</b>
             <br>Please refer to the following link:<br/>
-            <p><a href="${FRONT_URL}/login?token=${this.emailVerifyToken}">Verify Email</a></p>
+            <p><a href="${FRONT_URL}/auth/login?token=${this.emailVerifyToken}">Verify Email</a></p>
             Thank you,<br>
             ${this.username}
         `,
@@ -55,7 +55,7 @@ export class Mail {
 
 		await this.transporter.sendMail(mailData, (error, info) => {
 			if (error) {
-				throw new Error('The email is not sent', {
+				throw new Error('The email is not sent' + ` ${error.toString()}`, {
 					'error': error,
 				});
 			}

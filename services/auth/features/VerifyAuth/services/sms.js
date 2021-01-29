@@ -7,7 +7,7 @@ import {
 	SMS_CODING,
 	SMS_FROM,
 	SMS_SMSC,
-} from '../../../core/config/registration';
+} from '../../../core/config';
 
 export class Sms {
 	phone;

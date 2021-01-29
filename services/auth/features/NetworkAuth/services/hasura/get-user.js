@@ -19,14 +19,6 @@ export class GetUser extends VerifyGetUser {
     return this.getUserByNetwork('vkontakte', identity);
   }
 
-  getUserByToken = async (network, token) => {
-    const userNetwork = await this.getUserNetwork(network, 'access_token', token);
-    if (!userNetwork) {
-      throw new Error('Wrong token is provided.');
-    }
-    return getUserById(userNetwork.user_id, UserFragment);
-  }
-
   getUserByNetwork = async (network, identity) => {
     const userNetwork = await this.getUserNetwork(network, 'identity', identity);
     if (!userNetwork) {

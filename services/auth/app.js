@@ -55,7 +55,14 @@ async function runServer() {
     formatError: (error) => {
       console.log(error);
       log(error);
-      throw error;
+      return error;
+    },
+    formatResponse: (response) => {
+      if ((has(response, 'errors') && response.errors) && has(response, 'data')) {
+        delete response.data;
+      }
+
+      return response;
     },
     introspection: true,
   });

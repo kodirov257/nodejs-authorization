@@ -81,7 +81,7 @@ export class GetUser extends BasicGetUser {
 				condition,
 			);
 
-			return get(response, 'data.auth_user_verifications[0]');
+			return get(response, 'data.auth_user_verifications[0]') || undefined;
 		} catch (e) {
 			throw new Error(e.message);
 		}

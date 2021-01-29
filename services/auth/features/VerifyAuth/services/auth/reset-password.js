@@ -54,6 +54,10 @@ export class ResetPassword {
 			throw new Error('No parameters are provided.');
 		}
 
+		if (!user) {
+			throw new Error(`Invalid ${type} provided`);
+		}
+
 		const _fields = {
 			emailFields: {
 				email_verify_token: uuidv4() + '-' + (+new Date()),
@@ -64,15 +68,11 @@ export class ResetPassword {
 			}
 		};
 
-		if (!user) {
-			throw new Error(`Invalid ${type} provided`);
-		}
-
 		const result = await updateUser(user.id, {}, _fields[type + 'Fields']);
 
-		let data = get(result, 'data.update_auth_user_verifications_by_pk');
+		let data = result.verification;
 
-		if (data !== undefined) {
+		if (data) {
 			if (type === 'email') {
 				await (new Mail(user.username, user.email, data.email_verify_token)).sendEmailResetToken();
 			}
@@ -131,7 +131,7 @@ export class ResetPassword {
 
 		const result = await updateUser(user.id, {password: passwordHash}, _fields[type + 'Fields']);
 
-		if (get(result, 'data.update_auth_users_by_pk') !== undefined && get(result, 'data.update_auth_user_verifications_by_pk') !== undefined) {
+		if (result.user && result.verification) {
 			return true;
 		}
 

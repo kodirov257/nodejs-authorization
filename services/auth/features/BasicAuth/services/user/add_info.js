@@ -1,5 +1,3 @@
-import get from 'lodash/get';
-
 import { getCurrentUserId, isAuthenticated } from '../../../../core/helpers/user';
 import * as constants from '../../../../core/helpers/values';
 import { getUserById } from '../hasura/get-user-by-id';
@@ -12,22 +10,24 @@ export class AddInfo {
   ctx;
   phone;
   email;
+  type;
 
-  constructor({email = null, phone = null, ctx}) {
+  constructor({email = null, phone = null, type = 'email', ctx}) {
     this.getUser = new GetUser();
     this.email = email;
     this.phone = phone ? phone.replace(/^\++/, '') : null;
+    this.type = type;
     this.ctx = ctx;
   }
 
-  addInfo = async (type = 'email') => {
+  addInfo = async () => {
     if (!isAuthenticated(this.ctx.req)) {
       throw new Error('Authorization token has not provided');
     }
 
     const currentUserId = getCurrentUserId(this.ctx.req);
     const user = await getUserById(currentUserId, this.getUserFragment());
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       throw new Error('User not found.');
@@ -37,7 +37,7 @@ export class AddInfo {
       throw new Error('User not activated.');
     }
 
-    let validatedData = this.validateAddInfo(user, type);
+    let validatedData = this.validateAddInfo(user, this.type);
     if (validatedData === true || validatedData.hasOwnProperty('userData')) {
       return validatedData;
     }
@@ -45,24 +45,24 @@ export class AddInfo {
     const anotherUser = await this.getAnotherUser();
 
     if (anotherUser && anotherUser.id !== user.id) {
-      throw new Error(`There is already active user with this ${type}.`);
+      throw new Error(`There is already active user with this ${this.type}.`);
     }
 
-    return this.sendAddInfo(user.id, type);
+    return this.sendAddInfo(user.id, this.type);
   }
 
-  validateAddInfo = (user, type = 'email') => {
-    if (type === 'email' && user.email) {
+  validateAddInfo = (user) => {
+    if (this.type === 'email' && user.email) {
       throw new Error('Email is already set.');
-    } else if (type === 'phone' && user.phone) {
+    } else if (this.type === 'phone' && user.phone) {
       throw new Error(`Phone number is already set.`);
     }
     return false;
   }
 
-  sendAddInfo = async (userId, type = 'email') => {
+  sendAddInfo = async (userId) => {
     let {userData} = await this.updateAddInfo(userId);
-    return userData !== undefined;
+    return userData;
   }
 
   updateAddInfo = async (userId) => {
@@ -71,10 +71,12 @@ export class AddInfo {
       phoneFields: { phone: this.phone },
     };
 
-    const result = await updateUser(userId, _fields[`${type}Fields`]);
-    let userData = get(result, 'data.update_auth_users_by_pk');
+    const result = await updateUser(userId, _fields[`${this.type}Fields`]);
+    if (!result) {
+      throw new Error(`${this.type} is not added.`);
+    }
 
-    return {userData};
+    return {result};
   }
 
   getUserFragment = () => UserFragment;

@@ -18,17 +18,19 @@ export class Google extends Network {
   }
 
   getUserInfo = async (token) => {
-    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    try {
+      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-    return response.json();
+      return response.json();
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 
-  getUserId = (user) => {
-    return user.sub;
-  }
+  getUserId = (user) => Number.isInteger(user.sub) ? user.sub.toString() : user.sub;
 }

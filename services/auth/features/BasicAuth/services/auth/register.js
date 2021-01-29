@@ -95,10 +95,11 @@ export class Register {
 			}
 		);
 
-		console.log(result);
+		this.registerData = get(result, 'data.insert_auth_users.returning') || undefined;
+		if (!this.registerData) {
+			throw new Error('User is not registered.');
+		}
 
-		this.registerData = get(result, 'data.insert_auth_users.returning');
-
-		return this.registerData !== undefined;
+		return true;
 	};
 }

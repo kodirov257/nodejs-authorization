@@ -19,13 +19,17 @@ export class Facebook extends Network {
   }
 
   getUserInfo = async (token) => {
-    const response = await fetch(`https://graph.facebook.com/me?fields=first_name,last_name,email,gender,picture&access_token=${token}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    try {
+      const response = await fetch(`https://graph.facebook.com/me?fields=first_name,last_name,email,gender,picture&access_token=${token}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-    return response.json();
+      return response.json();
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 }

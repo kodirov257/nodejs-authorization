@@ -57,9 +57,9 @@ export class Resend {
 		}
 		const result = await updateUser(user.id, {status: STATUS_VERIFIED}, _fields[type + 'Fields']);
 
-		let data = get(result, 'data.update_auth_user_verifications_by_pk');
+		let data = result.verification;
 
-		if (data !== undefined) {
+		if (data) {
 			if (type === 'email' || type === 'both') {
 				await (new Mail(user.username, user.email, data.email_verify_token)).sendEmailVerifyToken();
 			}
