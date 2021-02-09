@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import get from 'lodash/get';
 
 import { isAuthenticated, getCurrentUserId } from '../../../../core/helpers/user';
 import { validateChangePassword } from '../../../../core/validators';
@@ -53,7 +52,10 @@ export class ChangePassword {
 		};
 
 		const result = await updateUser(user.id, fields);
+		if (!result) {
+			throw new Error('Password is not changed.');
+		}
 
-		return get(result, 'data.update_users_by_pk') !== undefined;
+		return true;
 	}
 }

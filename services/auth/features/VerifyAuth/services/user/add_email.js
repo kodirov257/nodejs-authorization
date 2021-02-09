@@ -11,17 +11,17 @@ export class AddEmail extends AddInfo {
 	sendEmailAddEmailToken = async () => {
 		validateEmail(this.email);
 
-		return this.sendAddInfoToken('email');
-	}
-
-	addEmail = async () => {
-		const value = validateVerifyEmail(this.token);
-		this.token = value.token;
-
 		return this.addInfo('email');
 	}
 
-	validateAdd = (verification) => {
+	verifyAddEmail = async () => {
+		const value = validateVerifyEmail(this.token);
+		this.token = value.token;
+
+		return this.verifyAddInfo('email');
+	}
+
+	validateVerifyAddInfo = (verification) => {
 		if (verification.email_verify_token !== this.token) {
 			throw new Error('Provided token is not equal to the current user.');
 		}

@@ -1,4 +1,5 @@
 'use strict';
+
 const fetch = require('node-fetch');
 const dotEnv = require('dotenv');
 const path = require('path');
@@ -15,6 +16,10 @@ jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
 const date = +new Date();
+const newJwtExpiry = (process.env.REFRESH_TOKEN_EXPIRES_IN_MIN) || 10080 * 60 * 1000;
+
+const getExpiresDate = () => new Date(Date.now() + newJwtExpiry);
+
 const user = {
     id: 1,
     username: 'test',
@@ -34,6 +39,9 @@ const serverResponseData = {
     data: {
         refresh_token: {
             access_token: 'access-token',
+						refresh_token: 'refresh-token',
+						expires_at: getExpiresDate(),
+						user_id: '1',
         },
     },
 }
@@ -63,6 +71,9 @@ test('register calls fetch with the right refresh token and returns boolean true
                 refresh_token: ${sendData.refresh_token}
             ) {
                 access_token
+                refresh_token
+                expires_at
+                user_id
             }
         }`,
     });
@@ -70,6 +81,8 @@ test('register calls fetch with the right refresh token and returns boolean true
     expect(response).toHaveProperty('data');
     expect(response.data).toHaveProperty('refresh_token');
     expect(response.data.refresh_token).toHaveProperty('access_token');
+    expect(response.data.refresh_token).toHaveProperty('expires_at');
+    expect(response.data.refresh_token).toHaveProperty('user_id');
     expect(response.data.refresh_token.access_token).toContain(accessToken);
 });
 
@@ -85,6 +98,9 @@ async function mockFetch(sendData) {
                 refresh_token: ${sendData.refresh_token}
             ) {
                 access_token
+                refresh_token
+                expires_at
+                user_id
             }
         }`,
     });

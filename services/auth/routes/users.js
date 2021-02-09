@@ -23,7 +23,7 @@ function hasChanged(newUser, oldUser) {
 router.post('/update', async function (req, res, next) {
   const body = req.body;
 
-  if (body.table.schema === 'public' && body.table.name === 'users') {
+  if (body.table.schema === 'auth' && body.table.name === 'users') {
     const oldUser = body.event.data.old;
     const newUser = body.event.data.new;
     const {changed, fields} = hasChanged(newUser, oldUser);
@@ -34,8 +34,8 @@ router.post('/update', async function (req, res, next) {
       const resend = new Resend(fields);
       return res.send({
         success: changed === 'both' ? await resend.resendBoth() :
-            changed === 'email' ? await resend.resendEmail() :
-                changed === 'phone' ? await resend.resendPhone() : false
+          changed === 'email' ? await resend.resendEmail() :
+            changed === 'phone' ? await resend.resendPhone() : false
       });
     }
   }

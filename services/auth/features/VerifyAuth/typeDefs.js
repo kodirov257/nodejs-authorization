@@ -3,12 +3,8 @@ import gql from 'graphql-tag';
 export const typeDefs = gql`
 	type AuthPayload {
 		access_token: String!
-		refresh_token: String!
+		expires_at: String!
 		user_id: ID!
-	}
-
-	type RefreshPayload {
-		access_token: String!
 	}
 
 	type User {
@@ -25,39 +21,30 @@ export const typeDefs = gql`
 		last_seen_at: String
 	}
 
-	type Profile {
-		user_id: User!
-		first_name: String
-		middle_name: String
-		last_name: String
-		date_of_birth: String
-		gender: Int
-		biography: String
-		avatar: String
-	}
-
 	type Query {
 		hello: String
 		auth_me: User
+		abilities: [String]!
+		ability_values(type: String!): String
 	}
 
 	type Mutation {
 		signin(login: String!, password: String!): AuthPayload
-		register(username: String!, email_or_phone: String!, password: String!): Boolean
-		verify_email(token: String!): Boolean
-		verify_phone(phone: String!, token: String!): Boolean
+		register(login: String!, password: String!): Boolean
+		verify_email(token: String!): AuthPayload
+		verify_phone(phone: String!, token: String!): AuthPayload
 		resend_email(email: String!): Boolean
 		resend_phone(phone: String!): Boolean
 		send_reset_email(email: String!): Boolean
 		send_reset_phone(phone: String!): Boolean
-		reset_via_email(token: String!, password: String!): Boolean
-		reset_via_phone(phone: String!, token: String!, password: String!): Boolean
+		reset_via_email(token: String!, password: String!): AuthPayload
+		reset_via_phone(phone: String!, token: String!, password: String!): AuthPayload
 		change_password(old_password: String!, new_password: String!): Boolean
-		refresh_token(refresh_token: String!): RefreshPayload
-		send_add_email_token(email: String!): Boolean
-		add_email(token: String!): Boolean
-		send_add_phone_token(phone: String!): Boolean
-		add_phone(phone: String!, token: String!): Boolean
+		refresh_token: AuthPayload
+		add_email(email: String!): Boolean
+		verify_add_email(token: String!): Boolean
+		add_phone(phone: String!): Boolean
+		verify_add_phone(phone: String!, token: String!): Boolean
 	}
 
 	schema {

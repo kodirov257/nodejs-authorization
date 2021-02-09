@@ -1,10 +1,10 @@
 import { UserInputError } from "apollo-server-express";
 const Joi = require('@hapi/joi');
 
-export const validateRegistration = (username, emailOrPhone, password) => {
-    return validateGeneral({username, emailOrPhone, password}, {
-        username: Joi.string().alphanum().min(3).max(30).required(),
-        emailOrPhone: Joi.string().min(5).max(50).required(),
+export const validateRegistration = (login, password) => {
+    return validateGeneral({login, password}, {
+        // username: Joi.string().alphanum().min(3).max(30).required(),
+        login: Joi.string().min(5).max(50).required(),
         password: Joi.string().min(5).max(50).required(),
     }, 'Failed to register the user.');
 }

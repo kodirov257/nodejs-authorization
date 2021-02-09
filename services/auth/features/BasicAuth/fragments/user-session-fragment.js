@@ -1,7 +1,7 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 export const UserSessionFragment = gql`
-    fragment UserSession on user_sessions {
+    fragment UserSession on auth_user_sessions {
         id
         user_id
         refresh_token

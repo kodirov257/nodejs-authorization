@@ -1,4 +1,4 @@
-import { ValidationError } from 'apollo-server-express';
+const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
@@ -6,6 +6,7 @@ import get from 'lodash/get';
 
 import { isEmail, isPhone, validateRegistration } from '../../../../core/validators';
 import * as constants from '../../../../core/helpers/values';
+import { ROLE_USER } from '../../../../core/helpers/values';
 import { UserFragment } from '../../fragments';
 import {
 	GetUser,
@@ -13,45 +14,52 @@ import {
 } from '../index';
 
 export class Register {
-	username;
-	emailOrPhone;
+	login;
 	password;
-	getUser;
+	getUserService;
 	registerData;
 	fragment;
 
-	constructor(username, emailOrPhone, password) {
-		this.username = username;
-		this.emailOrPhone = emailOrPhone;
+	constructor(login, password) {
+		this.login = login;
 		this.password = password;
 		this.fragment = UserFragment;
 
-		this.getUser = new GetUser();
+		this.getUserService = new GetUser();
 	};
 
 	validate = () => {
-		return validateRegistration(this.username, this.emailOrPhone, this.password);
+		return validateRegistration(this.login, this.password);
 	};
 
 	getUserByUsername = async () => {
-		return await this.getUser.getUserByUsername(this.username, this.fragment);
+		return await this.getUserService.getUserByUsername(this.login, this.fragment);
 	};
 
 	getUserByEmail = async () => {
-		return await this.getUser.getUserByEmail(this.emailOrPhone, this.fragment);
+		return await this.getUserService.getUserByEmail(this.login, this.fragment);
 	};
 
 	getUserByPhone = async () => {
-		return await this.getUser.getUserByPhone(this.emailOrPhone, this.fragment);
+		return await this.getUserService.getUserByPhone(this.login, this.fragment);
 	};
+
+	getUser = async () => {
+		if (isEmail(this.login)) {
+			return this.getUserByEmail();
+		} else if (isPhone(this.login)) {
+			return this.getUserByPhone();
+		}
+		return this.getUserByUsername();
+	}
 
 	getParams = async () => {
 		const passwordHash = await bcrypt.hash(this.password, 10);
 
 		return {
-			username: this.username.replace(/ /g, ''),
-			email: isEmail(this.emailOrPhone) ? this.emailOrPhone : null,
-			phone: isPhone(this.emailOrPhone) ? this.emailOrPhone.replace(/^\++/, '') : null,
+			username: !isEmail(this.login) && !isPhone(this.login) ? this.login.replace(/ /g, '') : `${ROLE_USER}${moment().unix()}`,
+			email: isEmail(this.login) ? this.login : null,
+			phone: isPhone(this.login) ? this.login.replace(/^\++/, '') : null,
 			password: passwordHash,
 			role: constants.ROLE_USER,
 			secret_token: uuidv4() + '-' + (+new Date()),
@@ -61,21 +69,9 @@ export class Register {
 
 	async register() {
 		const value = this.validate();
-		this.emailOrPhone = value.emailOrPhone;
+		this.login = value.login;
 
-		let user = await this.getUserByUsername();
-
-		if (user) {
-			throw new Error('Username already registered');
-		}
-
-		if (isEmail(this.emailOrPhone)) {
-			user = await this.getUserByEmail();
-		} else if (isPhone(this.emailOrPhone)) {
-			user = await this.getUserByPhone();
-		} else {
-			throw new ValidationError('Wrong email or phone is given.');
-		}
+		let user = await this.getUser();
 
 		if (user) {
 			throw new Error('Username already registered');
@@ -86,8 +82,8 @@ export class Register {
 		const result = await hasuraQuery(
 			gql`
 				${this.fragment}
-				mutation ($user: users_insert_input!) {
-					insert_users(objects: [$user]) {
+				mutation ($user: auth_users_insert_input!) {
+					insert_auth_users(objects: [$user]) {
 						returning {
 							...User
 						}
@@ -99,14 +95,11 @@ export class Register {
 			}
 		);
 
-		// console.log(result);
-		// console.log(result.errors[0].extensions);
-		// console.log(JSON.stringify(result));
-		// console.log(result.errors[0].extensions.internal.statement);
-		// console.log(result.errors[0]);
+		this.registerData = get(result, 'data.insert_auth_users.returning') || undefined;
+		if (!this.registerData) {
+			throw new Error('User is not registered.');
+		}
 
-		this.registerData = get(result, 'data.insert_users.returning');
-
-		return this.registerData !== undefined;
+		return true;
 	};
 }

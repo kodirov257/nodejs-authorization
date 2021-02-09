@@ -1,3 +1,5 @@
+import {Generator} from "../../../BasicAuth/services/auth/generator";
+
 const moment = require('moment');
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
@@ -15,19 +17,23 @@ import { Mail } from '../mail';
 import { Sms } from '../sms';
 
 export class ResetPassword {
+	generator;
 	getUser;
 	user;
 	email;
 	phone;
 	token;
 	password;
+	ctx;
 
-	constructor({email = null, phone = null, token = null, password = null}) {
+	constructor({email = null, phone = null, token = null, password = null, ctx}) {
+		this.generator = new Generator();
 		this.getUser = new GetUser();
 		this.email = email;
 		this.phone = phone ? phone.replace(/^\++/, '') : null;
 		this.token = token;
 		this.password = password;
+		this.ctx = ctx;
 	}
 
 	async sendResetEmail() {
@@ -54,6 +60,10 @@ export class ResetPassword {
 			throw new Error('No parameters are provided.');
 		}
 
+		if (!user) {
+			throw new Error(`Invalid ${type} provided`);
+		}
+
 		const _fields = {
 			emailFields: {
 				email_verify_token: uuidv4() + '-' + (+new Date()),
@@ -64,15 +74,11 @@ export class ResetPassword {
 			}
 		};
 
-		if (!user) {
-			throw new Error(`Invalid ${type} provided`);
-		}
-
 		const result = await updateUser(user.id, {}, _fields[type + 'Fields']);
 
-		let data = get(result, 'data.update_user_verifications_by_pk');
+		let data = result.verification;
 
-		if (data !== undefined) {
+		if (data) {
 			if (type === 'email') {
 				await (new Mail(user.username, user.email, data.email_verify_token)).sendEmailResetToken();
 			}
@@ -131,8 +137,8 @@ export class ResetPassword {
 
 		const result = await updateUser(user.id, {password: passwordHash}, _fields[type + 'Fields']);
 
-		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
-			return true;
+		if (result.user && result.verification) {
+			return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
 		}
 
 		return this.revertChanges(user, type);

@@ -72,6 +72,9 @@ test('register calls fetch with the expired refresh token and returns error', as
                 refresh_token: ${sendData.refresh_token}
             ) {
                 access_token
+                refresh_token
+                expires_at
+                user_id
             }
         }`,
     });
@@ -106,6 +109,9 @@ async function mockFetch(sendData) {
                 refresh_token: ${sendData.refresh_token}
             ) {
                 access_token
+                refresh_token
+                expires_at
+                user_id
             }
         }`,
     });

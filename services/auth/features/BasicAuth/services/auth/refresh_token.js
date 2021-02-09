@@ -1,25 +1,31 @@
 const moment = require('moment');
-import { v4 as uuidv4 } from 'uuid';
-import jwt from 'jsonwebtoken';
 import get from 'lodash/get';
+import { JWT } from 'jose';
 
-import { generateClaimsJwtToken } from '../../../../core/helpers/auth-tools';
 import { getUserSession } from '../hasura/get-user-session';
 import { getUserById } from '../hasura/get-user-by-id';
+import { Generator } from './generator';
 
 export class RefreshToken {
+	generator;
 	token;
 	ctx;
 
-	constructor(refreshToken, ctx) {
+	constructor(ctx) {
+		this.generator = new Generator();
 		this.ctx = ctx;
-		this.token = refreshToken;
+		const cookies = this.ctx.req.signedCookies;
+		if ('refresh_token' in cookies) {
+			this.token = cookies.refresh_token;
+		} else {
+			throw new Error('No refresh token is provided.');
+		}
 	}
 
 	async refreshToken () {
-		const refreshToken = this.getToken(this.token);
+		// const refreshToken = this.getToken(this.token);
 
-		const userSession = await getUserSession(refreshToken);
+		const userSession = await getUserSession(this.token);
 
 		const expireData = moment(userSession.expires_at);
 		if (!expireData.isAfter()) {
@@ -27,18 +33,19 @@ export class RefreshToken {
 		}
 
 		const user = await getUserById(userSession.user_id);
-		const accessToken = await generateClaimsJwtToken(user, uuidv4() + '-' + (+new Date()));
+		if (!user) {
+			throw new Error('User is not found.');
+		}
+		// await this.generator.removeUserSession(user.id);
 
-		return {
-			access_token: accessToken,
-		};
+		return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
 	}
 
-	getToken = (refreshToken) =>
-		this.getFieldFromRefreshToken(refreshToken, 'token');
+	getToken = (refreshToken) => this.getFieldFromRefreshToken(refreshToken, 'token');
 
 	getFieldFromRefreshToken = (refreshToken, field) => {
 		const verifiedToken = this.getDataFromRefreshToken(refreshToken);
+		// console.log(verifiedToken);
 
 		return get(
 			verifiedToken,
@@ -47,6 +54,6 @@ export class RefreshToken {
 	}
 
 	getDataFromRefreshToken = (refreshToken) => {
-		return jwt.verify(refreshToken, process.env.JWT_PRIVATE_REFRESH_KEY);
+		return JWT.verify(refreshToken, this.generator.jwtKey);
 	}
 }

@@ -1,6 +1,6 @@
-import { memoize } from "lodash";
-import fetch from "node-fetch";
-import { print } from "graphql/language/printer";
+import { print } from 'graphql/language/printer';
+import { memoize } from 'lodash'
+import fetch from 'node-fetch';
 require('dotenv-flow').config();
 
 const getDefaultHeaders = memoize(() => {
@@ -8,7 +8,7 @@ const getDefaultHeaders = memoize(() => {
 
     if (!adminSecret) {
         throw Error(
-            'The environment "HASURA_GRAPHQL_ADMIN_SECRET" has not provided',
+          'The environment "HASURA_GRAPHQL_ADMIN_SECRET" has not provided',
         );
     }
     return Object.freeze({
@@ -22,7 +22,7 @@ export const hasuraQuery = async (document, variables) => {
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            'x-hasura-admin-secret': 'losandijoncity!@$@'
+            'x-hasura-admin-secret': process.env.JWT_PRIVATE_KEY,
             // ...getDefaultHeaders(),      // TODO: fix environments
         },
         body: JSON.stringify({

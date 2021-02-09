@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 
 export const UserVerificationFragment = gql`
-	fragment UserVerification on user_verifications {
+	fragment UserVerification on auth_user_verifications {
 		user_id
 		email_verify_token
 		email_verified

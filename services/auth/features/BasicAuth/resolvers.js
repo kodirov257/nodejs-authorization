@@ -1,27 +1,71 @@
 require('dotenv-flow').config();
+import path from 'path';
+import fs from 'fs';
 
-import { getUserById, Register, Signin, ChangePassword, RefreshToken } from './services';
+import { getUserById, Register, Signin, ChangePassword, RefreshToken, AddEmail, AddPhone } from './services';
 import { isAuthenticated, getCurrentUserId } from '../../core/helpers/user';
+import { services } from '../../core/config';
 
 export class BasicAuth {
-	hello = () => 'Hello world !';
+	addEmailService;
+	addPhoneService;
 
-	auth_me = async (_, args, ctx) => {
+	constructor() {
+		this.addEmailService = AddEmail;
+		this.addPhoneService = AddPhone;
+	}
+
+	hello() {
+		return 'Hello world !';
+	}
+
+	async auth_me(_, args, ctx) {
 		if (!isAuthenticated(ctx.req)) {
 			throw new Error('Authorization token has not provided');
 		}
 
 		try {
 			const currentUserId = getCurrentUserId(ctx.req);
+			const user = await getUserById(currentUserId);
+			if (!user) {
+				throw new Error('Not logged in');
+			}
 
-			return await getUserById(currentUserId);
+			return user;
 		} catch (error) {
-			throw new Error('Not logged in');
+			throw new Error(error.message);
 		}
 	}
 
-	register = async (_, {username, email_or_phone, password}) => {
-		return (new Register(username, email_or_phone, password)).register();
+	abilities = () => {
+		return services;
+	}
+
+	ability_values = (type) => {
+		if (!type || !services.includes(type)) {
+			throw new Error('Type is not provided.');
+		}
+
+		const fileName = path.resolve(__dirname, '../../env.json');
+		const environment = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+		const serviceName = type.split('Auth')[0].toLowerCase();
+		const templateEnv = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../env.${serviceName}.json`), 'utf-8'));
+
+		let result = {};
+		for (const value in templateEnv) {
+			if (environment[value]) {
+				result[value] = environment[value];
+			} else {
+				result[value] = templateEnv[value];
+			}
+		}
+
+		result.service = type;
+		return JSON.stringify(result);
+	}
+
+	register = async (_, {login, password}) => {
+		return (new Register(login, password)).register();
 	}
 
 	signin = async (_, {login, password}, ctx) => {
@@ -32,12 +76,16 @@ export class BasicAuth {
 		return (new ChangePassword(old_password, new_password, ctx)).changePassword();
 	}
 
-	refresh_token = async (_, {refresh_token}, ctx) => {
-		if (!refresh_token) {
-			throw new Error('Refresh token is not provided.');
-		}
+	refresh_token = async (_, ctx) => {
+		return (new RefreshToken(ctx)).refreshToken();
+	}
 
-		return (new RefreshToken(refresh_token, ctx)).refreshToken();
+	add_email = async (_, {email}, ctx) => {
+		return (new this.addEmailService({email, ctx})).addEmail();
+	}
+
+	add_phone = async (_, {phone}, ctx) => {
+		return (new this.addPhoneService({phone, ctx})).addPhone();
 	}
 
 
@@ -46,16 +94,22 @@ export class BasicAuth {
 			Query: {
 				hello: () => this.hello(),
 				auth_me: async (_, args, ctx) => this.auth_me(_, args, ctx),
+				abilities: (_, args, ctx) => this.abilities(),
+				ability_values: (_, {type}, ctx) => this.ability_values(type),
 			},
 			Mutation: {
-				register: async (_, {username, email_or_phone, password}, ctx) =>
-					this.register(_, {username, email_or_phone, password}),
+				register: async (_, {login, password}, ctx) =>
+					this.register(_, {login, password}),
 				signin: async (_, {login, password}, ctx) =>
 					this.signin(_, {login, password}, ctx),
 				change_password: async (_, {old_password, new_password}, ctx) =>
 					this.change_password(_, {old_password, new_password}, ctx),
-				refresh_token: async (_, {refresh_token}, ctx) =>
-					this.refresh_token(_, {refresh_token}, ctx),
+				refresh_token: async (_, args, ctx) =>
+					this.refresh_token(_, ctx),
+				add_email: async (_, {email}, ctx) =>
+					this.add_email(_, {email}, ctx),
+				add_phone: async (_, {phone}, ctx) =>
+					this.add_phone(_, {phone}, ctx),
 			},
 		}
 	}

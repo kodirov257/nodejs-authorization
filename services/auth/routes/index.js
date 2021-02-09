@@ -1,54 +1,55 @@
 let express = require('express');
 let router = express.Router();
 import has from 'lodash/has';
-import path from 'path';
-import fs from 'fs';
+
+import { setEnvironment } from '../core/helpers/config-loader';
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', async (req, res) => {
+  return res.send({ title: 'Express' });
+});
+
+router.get('/test', async (req, res) => {
+  res.status(200);
+  return res.send({ title: 'Test' });
 });
 
 const services = [
-  'BaseAuth',
+  'BasicAuth',
   'VerifyAuth',
+  'NetworkAuth',
 ];
 
 router.post('/hasura-event', async (req, res) => {
   const body = req.body;
+  const newData = body.event.data.new;
+  const value = newData.value;
 
-  try {
-    if (!has(body, 'service')) {
-      throw new Error('No service provided.');
-    }
-
-    if (!services.includes(body.service)) {
-      throw new Error('Wrong service provided.');
-    }
-
-    if (Object.keys(body).length > 1) {
-      throw new Error('Wrong parameters provided.');
-    }
-
-    const data = JSON.stringify(body);
-    const fileName = path.resolve(__dirname, '../service.json');
-
-
-    fs.writeFileSync(fileName, data);
-    fs.chmodSync(fileName, '0666');
-
-    return res.send({
-      data: {
-        'hasura-event': true,
+  if (body.table.schema === 'public' && body.table.name === 'settings' && newData.key === 'auth') {
+    try {
+      if (!has(value, 'service')) {
+        throw new Error('No service provided.');
       }
-    });
-  } catch (e) {
-    return res.send({
-      data: {
-        'hasura-event': false,
-        message: e.message,
+
+      if (!services.includes(value.service)) {
+        throw new Error('Wrong service provided.');
       }
-    });
+
+      setEnvironment(value);
+
+      return res.send({
+        data: {
+          'hasura-event': true,
+        }
+      });
+    } catch (e) {
+      return res.send({
+        data: {
+          'hasura-event': false,
+          message: e.message,
+        }
+      });
+    }
   }
 });
 

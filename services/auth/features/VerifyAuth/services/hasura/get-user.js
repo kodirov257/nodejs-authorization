@@ -72,8 +72,8 @@ export class GetUser extends BasicGetUser {
 			const response = await hasuraQuery(
 				gql`
 					${fragment}
-					query($where: user_verifications_bool_exp) {
-						user_verifications(where: $where) {
+					query($where: auth_user_verifications_bool_exp) {
+						auth_user_verifications(where: $where) {
 							...UserVerification
 						}
 					}
@@ -81,7 +81,7 @@ export class GetUser extends BasicGetUser {
 				condition,
 			);
 
-			return get(response, 'data.user_verifications[0]');
+			return get(response, 'data.auth_user_verifications[0]') || undefined;
 		} catch (e) {
 			throw new Error(e.message);
 		}

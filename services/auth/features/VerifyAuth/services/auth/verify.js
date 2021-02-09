@@ -2,18 +2,23 @@ const moment = require('moment');
 import get from 'lodash/get';
 
 import { validateVerifyEmail, validateVerifyPhone } from '../../validators';
+import { Generator } from '../../../BasicAuth/services/auth/generator';
 import * as constants from '../../helpers/values';
 import { GetUser, updateUser } from '../index';
 
 export class Verify {
+	generator;
 	getUser;
 	token;
 	phone;
+	ctx;
 
-	constructor({token, phone = null}) {
+	constructor({token, phone = null, ctx}) {
+		this.generator = new Generator();
 		this.getUser = new GetUser();
 		this.token = token;
 		this.phone = phone ? phone.replace(/^\++/, '') : null;
+		this.ctx = ctx;
 	}
 
 	async verifyEmail() {
@@ -81,8 +86,8 @@ export class Verify {
 
 		const result = await updateUser(user.id, fields, _verificationFields[type + 'Fields']);
 
-		if (get(result, 'data.update_users_by_pk') !== undefined && get(result, 'data.update_user_verifications_by_pk') !== undefined) {
-			return true;
+		if (result.user && result.verification) {
+			return this.generator.generateTokens(user, this.ctx.req, this.ctx.res);
 		}
 
 		return this.revertChanges(user, user.user_verifications[0], type);

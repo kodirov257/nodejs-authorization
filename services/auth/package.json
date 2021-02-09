@@ -7,6 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@hapi/boom": "9.1.0",
     "@hapi/joi": "^17.1.1",
     "apollo-server-express": "^2.19.0",
     "bcryptjs": "^2.4.3",
@@ -21,6 +22,7 @@
     "graphql-passport": "^0.6.3",
     "graphql-tag": "^2.11.0",
     "http-errors": "~1.6.3",
+    "jose": "1.26.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "moment": "^2.29.1",
@@ -28,8 +30,9 @@
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.16",
     "passport": "^0.4.1",
-    "passport-jwt": "^4.0.0",
-    "passport-oauth": "^1.0.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth": "^2.0.0",
+    "passport-vkontakte": "^0.5.0",
     "pug": "2.0.0-beta11",
     "uuid": "^8.3.1"
   },

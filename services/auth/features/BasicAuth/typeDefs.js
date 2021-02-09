@@ -3,12 +3,8 @@ import gql from 'graphql-tag';
 export const typeDefs = gql`
 	type AuthPayload {
 		access_token: String!
-		refresh_token: String!
+		expires_at: String!
 		user_id: ID!
-	}
-
-	type RefreshPayload {
-		access_token: String!
 	}
 
 	type User {
@@ -25,27 +21,20 @@ export const typeDefs = gql`
 		last_seen_at: String
 	}
 
-	type Profile {
-		user_id: User!
-		first_name: String
-		middle_name: String
-		last_name: String
-		date_of_birth: String
-		gender: Int
-		biography: String
-		avatar: String
-	}
-
 	type Query {
 		hello: String
 		auth_me: User
+		abilities: [String]!
+		ability_values(type: String!): String
 	}
 
 	type Mutation {
 		signin(login: String!, password: String!): AuthPayload
-		register(username: String!, email_or_phone: String!, password: String!): Boolean
+		register(login: String!, password: String!): Boolean
 		change_password(old_password: String!, new_password: String!): Boolean
-		refresh_token(refresh_token: String!): RefreshPayload
+		refresh_token: AuthPayload
+		add_email(email: String!): Boolean
+		add_phone(phone: String!): Boolean
 	}
 
 	schema {
