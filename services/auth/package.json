@@ -5,7 +5,7 @@
   "main": "app.js",
   "private": true,
   "scripts": {
-    "start": "if [[ $NODE_ENV == 'production' ]]; then node ./bin/www; else nodemon ./bin/www; fi",
+    "start": "if [[ $NODE_ENV == 'production' ]]; then node bin/www; else nodemon ./bin/www; fi",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
