@@ -1,0 +1,56 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:14
+    ports:
+      - 54321:5432
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+  hasura-auth:
+    build:
+      context: ./../services/auth
+    depends_on:
+      - "graphql-engine"
+    restart: always
+    volumes:
+      - ./../services/auth:/app
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}" # change this with your strong password
+      JWT_ALGORITHM: HS256
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "3EK6FD+o0+c7tzBNVfjpMkNDi2yARAAKzQlk8O2IKoxQu4nF7EdAh8s3TwpHwrdWT6R"}'
+      # change the jwt private key
+      JWT_PRIVATE_KEY: 9e519add75013cd5e159e9ee57475ea4db626c86dc51311a6e5b46ef1349530b
+      REFRESH_TOKEN_EXPIRES_IN: 54000
+  graphql-engine:
+    image: hasura/graphql-engine:v2.0.10
+    ports:
+    - "8080:8080"
+    depends_on:
+    - "postgres"
+    command:
+      - graphql-engine
+      - serve
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: "${DB_DATABASE_URL}"
+      ## enable the console served by server
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "${HASURA_ENABLE_CONSOLE}" # set to "false" to disable console
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_JWT_SECRET: "${HASURA_GRAPHQL_JWT_SECRET}"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      ## uncomment next line to set an admin secret
+      HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}"
+volumes:
+  db_data:
+
