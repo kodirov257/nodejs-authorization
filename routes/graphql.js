@@ -18,8 +18,14 @@ var schema = buildSchema(`
     rollThreeDice: [Int]
     rollDice(numDice: Int!, numSides: Int): [Int]
     getDie(numSides: Int): RandomDie
+    ip: String
   }
 `);
+
+const loggingMiddleware = (req, res, next) => {
+  console.log('ip:', req.ip);
+  next();
+}
 
 // This class implements the RandomDie GraphQL type
 class RandomDie {
@@ -63,10 +69,14 @@ var root = {
   },
   getDie: ({numSides}) => {
     return new RandomDie(numSides || 6);
+  },
+  ip: function (args, request) {
+    return request.ip;
   }
 };
 
 /* Graphql page. */
+router.use(loggingMiddleware);
 router.use('/', graphqlHTTP({
   schema: schema,
   rootValue: root,
