@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres:13.5-alpine3.15
     ports:
-      - 54321:5432
+      - 54331:5432
     restart: always
     volumes:
     - db_data:/var/lib/postgresql/data
@@ -20,10 +20,10 @@ services:
     volumes:
       - ./../services/auth:/app
     ports:
-      - "4000:4000"
+      - "4004:4000"
     environment:
       PORT: 4000
-      HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/graphql
+      HASURA_GRAPHQL_ENDPOINT: ${HASURA_GRAPHQL_ENDPOINT}
       HASURA_GRAPHQL_ADMIN_SECRET: "${HASURA_GRAPHQL_ADMIN_SECRET}" # change this with your strong password
       JWT_ALGORITHM: HS256
       HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "3EK6FD+o0+c7tzBNVfjpMkNDi2yARAAKzQlk8O2IKoxQu4nF7EdAh8s3TwpHwrdWT6R"}'
@@ -33,7 +33,7 @@ services:
   graphql-engine:
     image: hasura/graphql-engine:v2.0.10
     ports:
-    - "8080:8080"
+    - "${PORT}:8080"
     depends_on:
     - "postgres"
     command:
