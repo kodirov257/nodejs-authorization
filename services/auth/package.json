@@ -4,27 +4,39 @@
   "license": "MIT",
   "main": "app.js",
   "private": true,
+  "type": "module",
+  "exports": "./dist/app.js",
   "scripts": {
-    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start2": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./app.js; else nodemon -r esm ./app.js; fi",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "nodemon --watch './**/*.{ts,graphql}' --exec 'node --experimental-specifier-resolution=node --loader ts-node/esm' ./app.ts",
+    "start": "tsc-watch --onSuccess \"npm run watch\""
   },
   "dependencies": {
+    "apollo-server-core": "^3.5.0",
     "apollo-server-express": "^3.5.0",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.1",
     "cookie-parser": "~1.4.4",
     "custom-env": "^2.0.1",
     "debug": "~2.6.9",
     "esm": "^3.2.25",
     "express": "~4.17.1",
     "express-graphql": "^0.12.0",
-    "graphql": "^15.3.0",
+    "graphql": "^15.4.0",
+    "graphql-tag": "^2.12.6",
     "http-errors": "~1.6.3",
     "lodash": "^4.17.21",
     "node-fetch": "^3.1.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.11.12",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0",
+    "tsc-watch": "^4.5.0",
+    "typescript": "^4.5.4"
   },
   "repository": {
     "type": "git",
