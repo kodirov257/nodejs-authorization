@@ -4,11 +4,11 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import { ApolloServer } from 'apollo-server-express';
-import { graphqlRouter } from './routes/graphql';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import http from 'http';
 
 import { indexRouter } from './routes';
+import { graphqlRouter } from './routes/graphql';
 import { usersRouter } from './routes/users';
 import { resolvers } from './routes/auth';
 

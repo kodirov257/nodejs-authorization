@@ -1,15 +1,17 @@
 import { print } from 'graphql/language/printer';
 import lodash from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { ASTNode } from 'graphql';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
-const { get, memoize } = lodash;
+const { get } = lodash;
 
 const STATUS_INACTIVE = 1;
 const STATUS_ACTIVE = 5;
 
-const adminSecret = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
+const adminSecret: string = process.env.HASURA_GRAPHQL_ADMIN_SECRET!;
+const endpoint: string = process.env.HASURA_GRAPHQL_ENDPOINT!;
 
 const userFragment = gql`
     fragment User on auth_users {
@@ -26,12 +28,25 @@ const userFragment = gql`
     }
 `;
 
-async function hasuraQuery(document, variables) {
-    const response = await fetch(process.env.HASURA_GRAPHQL_ENDPOINT, {
+interface User {
+    id: number;
+    username: string;
+    email: string;
+    phone: string;
+    password: string;
+    status: number;
+    secret_token: string;
+    created_at: string;
+    updated_at: string;
+    last_seen_at: string;
+}
+
+async function hasuraQuery(document: ASTNode, variables: any): Promise<User> {
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Accept: 'application/json',
+            'Accept': 'application/json',
             'x-hasura-admin-secret': adminSecret
         },
         body: JSON.stringify({
@@ -43,7 +58,7 @@ async function hasuraQuery(document, variables) {
     return response.json();
 }
 
-async function getUserByUsername(username) {
+async function getUserByUsername(username: string) {
     try {
         const response = await hasuraQuery(
             gql`
@@ -66,14 +81,14 @@ async function getUserByUsername(username) {
         // console.log(get(response, 'data.users'));
 
         return get(response, 'data.users[0]');
-    } catch (e) {
+    } catch (e: any) {
         // throw new Error('Unable to find the email');
         throw new Error(e.message);
     }
 }
 
-async function getUserByCredentials(username, password) {
-    const user = getUserByUsername(username);
+async function getUserByCredentials(username: string, password: string) {
+    const user: User = await getUserByUsername(username);
 
     if (!user) {
         throw new Error('Invalid "email" or "password"');
@@ -98,7 +113,7 @@ const resolvers = {
         hello: () => 'Hello world !',
     },
     Mutation: {
-        async auth_register (_, {username, email, phone, password}) {
+        async auth_register (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}) {
             const user = await getUserByUsername(email);
 
             if (user) {
@@ -132,7 +147,7 @@ const resolvers = {
             // console.log(result.data.insert_users.returning);
             return get(result, 'data.insert_users.returning') !== undefined;
         },
-        async auth_login (_, {username, email, phone, password}) {
+        async auth_login (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}) {
             const user = getUserByCredentials(username, password);
         },
     }
