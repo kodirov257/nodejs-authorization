@@ -1,3 +1,3 @@
-exports.register = function (_, {username, email, phone, password}) {
+exports.register = function (args, request) {
     return request.ip;
 };

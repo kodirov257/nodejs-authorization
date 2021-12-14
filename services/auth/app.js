@@ -8,6 +8,8 @@ import { usersRouter } from './routes/users';
 import { graphqlRouter } from './routes/graphql';
 import { authRouter } from './routes/auth';
 
+require('custom-env').env();
+
 let app = express();
 
 app.use(express.json());

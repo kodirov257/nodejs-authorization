@@ -71,4 +71,8 @@ router.use('/', graphqlHTTP({
     graphiql: true,
 }));
 
-export const authRouter = router;
+const authRouter = router;
+
+export {
+    authRouter,
+};
