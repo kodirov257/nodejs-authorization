@@ -1,2 +1,3 @@
+- "!include auth_profiles.yaml"
 - "!include auth_user_sessions.yaml"
 - "!include auth_users.yaml"
