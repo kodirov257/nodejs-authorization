@@ -1,13 +1,13 @@
-let createError = require('http-errors');
-let express = require('express');
-let path = require('path');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
 
-let indexRouter = require('./routes');
-let usersRouter = require('./routes/users');
-let graphqlRouter = require('./routes/graphql');
-let authRouter = require('./routes/auth');
+import { indexRouter } from './routes';
+import { usersRouter } from './routes/users';
+import { graphqlRouter } from './routes/graphql';
+import { authRouter } from './routes/auth';
 
 let app = express();
 

@@ -1,7 +1,8 @@
-let express = require('express');
+import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { buildSchema } from 'graphql';
+
 let router = express.Router();
-let { graphqlHTTP } = require('express-graphql');
-let { buildSchema } = require('graphql');
 
 // Construct a schema, using GraphQL schema language
 let schema = buildSchema(`
@@ -83,4 +84,4 @@ router.use('/', graphqlHTTP({
   graphiql: true,
 }));
 
-module.exports = router;
+export const graphqlRouter = router;

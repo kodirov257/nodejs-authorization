@@ -1,10 +1,12 @@
-let express = require('express');
-let router = express.Router();
-let { graphqlHTTP } = require('express-graphql');
-let { buildSchema } = require('graphql');
+import express from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { buildSchema } from 'graphql';
 
-let auth = require('../controllers/auth');
-let types = require('../typeDefs');
+import auth from '../controllers/auth';
+import types from '../typeDefs';
+
+
+let router = express.Router();
 
 // Construct a schema, using GraphQL schema language
 // let schema = buildSchema(types);
@@ -69,4 +71,4 @@ router.use('/', graphqlHTTP({
     graphiql: true,
 }));
 
-module.exports = router;
+export const authRouter = router;

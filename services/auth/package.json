@@ -5,12 +5,13 @@
   "main": "app.js",
   "private": true,
   "scripts": {
-    "start": "if [[ $NODE_ENV == 'production' ]]; then node bin/www; else nodemon ./bin/www; fi",
+    "start": "if [[ $NODE_ENV == 'production' ]]; then node -r esm ./bin/www; else nodemon -r esm ./bin/www; fi",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "esm": "^3.2.25",
     "express": "~4.16.1",
     "express-graphql": "^0.12.0",
     "graphql": "^16.1.0",
