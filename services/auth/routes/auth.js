@@ -4,7 +4,7 @@ let { graphqlHTTP } = require('express-graphql');
 let { buildSchema } = require('graphql');
 
 let auth = require('../controllers/auth');
-let types = require('../types');
+let types = require('../typeDefs');
 
 // Construct a schema, using GraphQL schema language
 // let schema = buildSchema(types);
