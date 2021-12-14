@@ -1,0 +1,11 @@
+table:
+  name: users
+  schema: auth
+array_relationships:
+- name: user_sessions
+  using:
+    foreign_key_constraint_on:
+      column: user_id
+      table:
+        name: user_sessions
+        schema: auth
