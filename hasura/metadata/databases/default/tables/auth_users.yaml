@@ -17,3 +17,34 @@ array_relationships:
       table:
         name: user_sessions
         schema: auth
+select_permissions:
+- permission:
+    columns:
+    - created_at
+    - email
+    - id
+    - last_seen_at
+    - password
+    - phone
+    - role
+    - status
+    - updated_at
+    - username
+    filter:
+      id:
+        _eq: X-Hasura-User-Id
+    limit: 1
+  role: user
+update_permissions:
+- permission:
+    check:
+      id:
+        _eq: X-Hasura-User-Id
+    columns:
+    - email
+    - phone
+    - username
+    filter:
+      id:
+        _eq: X-Hasura-User-Id
+  role: user
