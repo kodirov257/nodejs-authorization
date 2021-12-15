@@ -1,12 +1,11 @@
-import {print} from 'graphql/language/printer';
-import lodash from 'lodash';
-import {v4 as uuidv4} from 'uuid';
-import {ASTNode} from 'graphql';
+import { print } from 'graphql/language/printer';
 import fetch, {Response} from 'node-fetch';
+import { v4 as uuidv4 } from 'uuid';
+import { ASTNode } from 'graphql';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
-const { get } = lodash;
+import { UserFragment } from '../fragments';
 
 const STATUS_INACTIVE = 1;
 const STATUS_ACTIVE = 5;
@@ -16,21 +15,6 @@ const ROLE_ADMIN = 'admin';
 
 const adminSecret: string = process.env.HASURA_GRAPHQL_ADMIN_SECRET!;
 const endpoint: string = process.env.HASURA_GRAPHQL_ENDPOINT!;
-
-const userFragment = gql`
-    fragment User on auth_users {
-        id
-        username
-        email
-        phone
-        password
-        status
-        secret_token
-        created_at
-        updated_at
-        last_seen_at
-    }
-`;
 
 interface User {
     id: number;
@@ -51,7 +35,7 @@ type JSONResponse<T> = {
 }
 
 async function hasuraQuery<T>(document: ASTNode, variables: any): Promise<JSONResponse<T>> {
-    const response: Response = await fetch('http://graphql-engine:8080/v1/graphql', {
+    const response: Response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -68,29 +52,22 @@ async function hasuraQuery<T>(document: ASTNode, variables: any): Promise<JSONRe
 }
 
 async function getUserByUsername(username: string): Promise<User|undefined> {
-    console.log('getUserByUsername Before');
-    const response = await hasuraQuery<{auth_users: User[]}>(
-        gql`
-            ${userFragment}
-            query($where: auth_users_bool_exp) {
-                auth_users(where: $where) {
-                    ...User
-                }
-            }
-        `,
-        {
-            where: {
-                username: { _eq: username },
-            },
-        },
-    );
     try {
-        console.log('getUserByUsername After');
-
-        console.log(response);
-        console.log(response.data?.auth_users);
-        console.log(response.data?.auth_users ?? null);
-        console.log(get(response, 'data.auth_users'));
+        const response = await hasuraQuery<{auth_users: User[]}>(
+            gql`
+                ${UserFragment}
+                query($where: auth_users_bool_exp) {
+                    auth_users(where: $where) {
+                        ...User
+                    }
+                }
+            `,
+            {
+                where: {
+                    username: { _eq: username },
+                },
+            },
+        );
 
         return response.data?.auth_users[0] ?? undefined;
     } catch (e: any) {
@@ -136,7 +113,7 @@ const resolvers = {
 
             const result = await hasuraQuery<{insert_auth_users: { returning : User[] }}>(
                 gql`
-                    ${userFragment}
+                    ${UserFragment}
                     mutation ($user: auth_users_insert_input!) {
                         insert_auth_users(objects: [$user]) {
                             returning {
