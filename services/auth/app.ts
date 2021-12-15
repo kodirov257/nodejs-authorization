@@ -1,15 +1,17 @@
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
-import { ApolloServer, gql } from 'apollo-server-express';
+import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
+import { ApolloServer } from 'apollo-server-express';
+import { buildContext } from 'graphql-passport';
+import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import passport from 'passport';
 import express from 'express';
 import http from 'http';
-import path from 'path';
-import cookieParser from 'cookie-parser';
 
-import { indexRouter } from './routes';
 import { graphqlRouter } from './routes/graphql';
 import { usersRouter } from './routes/users';
 import { resolvers } from './routes/auth';
+import { indexRouter } from './routes';
 
 import { typeDefs } from './typeDefs';
 
@@ -19,6 +21,7 @@ async function listen(port: number) {
   // app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
+  app.use(passport.initialize());
 
   app.use('/', indexRouter);
   app.use('/users', usersRouter);
@@ -30,6 +33,7 @@ async function listen(port: number) {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    context: ({ req, res }) => buildContext({ req, res })
   })
   await server.start()
 
