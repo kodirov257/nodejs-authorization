@@ -15,7 +15,7 @@ services:
     build:
       context: ./../services/auth
     depends_on:
-      - "graphql-engine"
+      - graphql-engine
     restart: always
     volumes:
       - ./../services/auth:/app
@@ -33,9 +33,9 @@ services:
   graphql-engine:
     image: hasura/graphql-engine:v2.0.10
     ports:
-    - "${PORT}:8080"
+    - "${PORT}:${INTERNAL_PORT}"
     depends_on:
-    - "postgres"
+    - postgres
     command:
       - graphql-engine
       - serve
