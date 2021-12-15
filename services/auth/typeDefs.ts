@@ -2,9 +2,9 @@ import gql from 'graphql-tag';
 
 export const typeDefs = gql`
     type AuthPayload {
-        accessToken: String!
-        refreshToken: String!
-        userId: ID!
+        access_token: String!
+        refresh_token: String!
+        user_id: ID!
     }
 
     type User {
