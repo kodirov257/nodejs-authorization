@@ -1,10 +1,10 @@
-import { print } from 'graphql/language/printer';
-import fetch, {Response} from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
-import { ASTNode } from 'graphql';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
+import { generateClaimsJwtToken, generateJwtRefreshToken } from '../helpers/auth-tool';
+import { createUserSession, hasuraQuery } from '../services';
+import { ContextModel, User } from '../models';
 import { UserFragment } from '../fragments';
 
 const STATUS_INACTIVE = 1;
@@ -12,44 +12,6 @@ const STATUS_ACTIVE = 5;
 
 const ROLE_USER = 'user';
 const ROLE_ADMIN = 'admin';
-
-const adminSecret: string = process.env.HASURA_GRAPHQL_ADMIN_SECRET!;
-const endpoint: string = process.env.HASURA_GRAPHQL_ENDPOINT!;
-
-interface User {
-    id: number;
-    username: string;
-    email: string;
-    phone: string;
-    password: string;
-    status: number;
-    secret_token: string;
-    created_at: string;
-    updated_at: string;
-    last_seen_at: string;
-}
-
-type JSONResponse<T> = {
-    data?: T,
-    errors?: Array<{message: string}>,
-}
-
-async function hasuraQuery<T>(document: ASTNode, variables: any): Promise<JSONResponse<T>> {
-    const response: Response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'x-hasura-admin-secret': adminSecret
-        },
-        body: JSON.stringify({
-            query: print(document),
-            variables,
-        })
-    });
-
-    return await response.json() as JSONResponse<T>;
-}
 
 async function getUserByUsername(username: string): Promise<User|undefined> {
     try {
@@ -76,7 +38,7 @@ async function getUserByUsername(username: string): Promise<User|undefined> {
     }
 }
 
-async function getUserByCredentials(username: string, password: string) {
+async function getUserByCredentials(username: string, password: string): Promise<User> {
     const user: User|undefined = await getUserByUsername(username);
 
     if (!user) {
@@ -138,9 +100,25 @@ const resolvers = {
 
             return result.data?.insert_auth_users.returning !== undefined;
         },
-        // async auth_login (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}) {
-        //     const user = getUserByCredentials(username, password);
-        // },
+        async auth_login (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}, ctx: ContextModel) {
+            const user: User = await getUserByCredentials(username, password);
+
+            const ipAddress = (
+                <string>(ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress || '')
+            ).split(',')[0].trim();
+
+            const {refreshToken, sessionId} = await createUserSession(user, ctx.req.headers['user-agent'], ipAddress);
+
+            const accessToken = generateClaimsJwtToken(user, sessionId);
+
+            return {
+                access_token: accessToken,
+                refresh_token: generateJwtRefreshToken({
+                    token: refreshToken,
+                }),
+                user_id: user.id,
+            };
+        },
     }
 };
 

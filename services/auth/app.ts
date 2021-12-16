@@ -4,6 +4,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildContext } from 'graphql-passport';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import * as dotenv from 'dotenv';
 import passport from 'passport';
 import express from 'express';
 import http from 'http';
@@ -13,7 +14,10 @@ import { usersRouter } from './routes/users';
 import { resolvers } from './routes/auth';
 import { indexRouter } from './routes';
 
+import { ContextModel } from './models';
 import { typeDefs } from './typeDefs';
+
+dotenv.config();
 
 async function listen(port: number) {
   const app = express()
@@ -33,7 +37,7 @@ async function listen(port: number) {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    context: ({ req, res }) => buildContext({ req, res })
+    context: ({ req, res }: ContextModel) => buildContext({ req, res })
   })
   await server.start()
 
