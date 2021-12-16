@@ -3,18 +3,20 @@ import jwt, { Algorithm } from 'jsonwebtoken';
 import { JwtOptions, User } from '../models';
 
 export const generateJwtAccessToken = (payload: any): string => {
+    const tokenExpiresIn = +process.env.JWT_TOKEN_EXPIRES!
     const jwtOptions: JwtOptions = {
         algorithm: process.env.JWT_ALGORITHM! as Algorithm,
-        expiresIn: +process.env.JWT_TOKEN_EXPIRES! * 1000,
+        expiresIn: `${tokenExpiresIn}m`,
     };
 
     return jwt.sign(payload, process.env.JWT_PRIVATE_KEY!, jwtOptions);
 }
 
 export const generateJwtRefreshToken = (payload: any): string => {
+    const refreshTokenTime = +process.env.REFRESH_TOKEN_EXPIRES_IN!;
     const jwtOptions: JwtOptions = {
         algorithm: process.env.JWT_ALGORITHM as Algorithm,
-        expiresIn: +process.env.REFRESH_TOKEN_EXPIRES_IN! * 60 * 1000,
+        expiresIn: `${refreshTokenTime}m`,
     };
 
     return jwt.sign(payload, process.env.JWT_PRIVATE_KEY!, jwtOptions);
@@ -25,7 +27,7 @@ export const generateClaimsJwtToken = (user: User, sessionId: string|null = null
 
     let today: Date = new Date();
     let date: string = `${today.getFullYear()}-${(today.getMonth()+1)}-${today.getDate()}`;
-    let time: string = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
+    let time: string = `${`0${today.getHours()}`.slice(-2)}:${`0${today.getMinutes()}`.slice(-2)}:${`0${today.getSeconds()}`.slice(-2)}`;
     let dateTime: string = `${date} ${time}`;
 
     const payload: any = {

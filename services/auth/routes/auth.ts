@@ -70,7 +70,7 @@ const resolvers = {
             try {
                 const currentUserId = getCurrentUserId(ctx.req);
 
-                return getUserById(currentUserId);
+                return await getUserById(currentUserId);
             } catch (e: any) {
                 throw new Error('Not logged in');
             }

@@ -21,16 +21,33 @@ export const getDataFromVerifiedAuthorizationToken = (req: Request) => {
 }
 
 export const isAuthenticated = (req: Request) => {
-    return !!getDataFromVerifiedAuthorizationToken(req);
+    const headers = req.headers;
+    const headerPrefix = process.env.HASURA_GRAPHQL_HEADER_PREFIX!;
+
+    if (headers === undefined || headers[headerPrefix+'role'] === 'anonymous') {
+        return !!getDataFromVerifiedAuthorizationToken(req);
+    }
+
+    return true;
 }
 
 const getFieldFromDataAuthorizationToken = (req: Request, field: string) => {
     const claimsKey = process.env.HASURA_GRAPHQL_CLAIMS_KEY!;
     const headerPrefix = process.env.HASURA_GRAPHQL_HEADER_PREFIX!;
+    const headers = req.headers;
 
-    const verifiedToken = getDataFromVerifiedAuthorizationToken(req);
+    const data = get(
+        headers,
+        `${process.env.HASURA_GRAPHQL_HEADER_PREFIX}${field}`,
+    );
 
-    return get(verifiedToken, `["${claimsKey}"]${headerPrefix}${field}`);
+    if (data === undefined) {
+        const verifiedToken = getDataFromVerifiedAuthorizationToken(req);
+
+        return get(verifiedToken, `["${claimsKey}"]${headerPrefix}${field}`);
+    }
+
+    return data;
 }
 
 export const getCurrentUserId = (req: Request) => getFieldFromDataAuthorizationToken(req, 'user-id');
