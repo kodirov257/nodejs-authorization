@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
+import Joi from 'joi';
 
 import {
     createUserSession,
@@ -17,6 +18,7 @@ import { ValidationError } from 'apollo-server-express';
 import { isEmail, isPhone } from '../validators';
 import { ContextModel, User } from '../models';
 import { UserFragment } from '../fragments';
+import {validateRegistration} from "../validators/auth";
 
 const STATUS_INACTIVE = 1;
 const STATUS_ACTIVE = 5;
@@ -64,16 +66,19 @@ const resolvers = {
     },
     Mutation: {
         async auth_register (_: void, {username, email_or_phone, password}: {username: string, email_or_phone: string, password: string}) {
-            let user: User|undefined = await getUserByUsername(username);
+            const value: {username: string, email_or_phone: string, password: string}
+                = validateRegistration(username, email_or_phone, password);
+
+            let user: User|undefined = await getUserByUsername(value.username);
 
             if (user) {
                 throw new Error('Username already registered');
             }
 
-            if (isEmail(email_or_phone)) {
-                user = await getUserByEmail(email_or_phone);
-            } else if (isPhone(email_or_phone)) {
-                user = await getUserByPhone(email_or_phone);
+            if (isEmail(value.email_or_phone)) {
+                user = await getUserByEmail(value.email_or_phone);
+            } else if (isPhone(value.email_or_phone)) {
+                user = await getUserByPhone(value.email_or_phone);
             } else {
                 throw new ValidationError('Wrong email or phone is given.')
             }
@@ -98,8 +103,8 @@ const resolvers = {
                 {
                     user: {
                         username: username,
-                        email: isEmail(email_or_phone) ? email_or_phone : null,
-                        phone: isPhone(email_or_phone) ? email_or_phone : null,
+                        email: isEmail(value.email_or_phone) ? value.email_or_phone : null,
+                        phone: isPhone(value.email_or_phone) ? value.email_or_phone : null,
                         password: passwordHash,
                         secret_token: uuidv4(),
                         status: STATUS_ACTIVE,
