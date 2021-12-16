@@ -3,9 +3,6 @@ import jwt, { Algorithm } from 'jsonwebtoken';
 import { JwtOptions, User } from '../models';
 
 export const generateJwtAccessToken = (payload: any): string => {
-    console.log('Expires in');
-    console.log(process.env.JWT_TOKEN_EXPIRES!);
-    console.log(+(+process.env.JWT_TOKEN_EXPIRES! * 1000));
     const jwtOptions: JwtOptions = {
         algorithm: process.env.JWT_ALGORITHM! as Algorithm,
         expiresIn: +process.env.JWT_TOKEN_EXPIRES! * 1000,

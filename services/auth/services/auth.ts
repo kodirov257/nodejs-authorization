@@ -9,14 +9,6 @@ export const createUserSession = async (user: User, userAgent: string|null = nul
                                         ipAddress: string|null = null): Promise<{refreshToken: string, sessionId: string}> => {
     const refreshToken: string = uuid4();
     try {
-        console.log({
-            user_id: user.id,
-            expires_at: getExpireDate(),
-            refresh_token: refreshToken,
-            user_agent: userAgent,
-            ip_address: ipAddress,
-        });
-
         const expiresAt = getExpireDate();
 
         const result = await hasuraQuery<{insert_auth_user_sessions: {returning: UserSession[]}}>(
@@ -40,8 +32,6 @@ export const createUserSession = async (user: User, userAgent: string|null = nul
                 }
             }
         );
-
-        console.log(result);
 
         const session: UserSession|undefined = result.data?.insert_auth_user_sessions.returning[0] ?? undefined;
         if (session === undefined) {
