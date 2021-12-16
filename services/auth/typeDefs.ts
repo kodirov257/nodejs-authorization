@@ -8,12 +8,13 @@ export const typeDefs = gql`
     }
 
     type User {
-        id: Int
+        id: String
         username: String
         email: String
         phone: String
         password: String
         status: Int
+        role: String
         secret_token: String
         created_at: String
         updated_at: String
@@ -33,6 +34,7 @@ export const typeDefs = gql`
 
     type Query {
         hello: String
+        auth_me: User
     }
 
     type Mutation {

@@ -8,6 +8,7 @@ export const UserFragment = gql`
         phone
         password
         status
+        role
         secret_token
         created_at
         updated_at

@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
+import { createUserSession, getCurrentUserId, getUserById, hasuraQuery, isAuthenticated } from '../services';
 import { generateClaimsJwtToken, generateJwtRefreshToken } from '../helpers/auth-tool';
-import { createUserSession, hasuraQuery } from '../services';
 import { ContextModel, User } from '../models';
 import { UserFragment } from '../fragments';
 
@@ -62,6 +62,19 @@ async function getUserByCredentials(username: string, password: string): Promise
 const resolvers = {
     Query: {
         hello: () => 'Hello world !',
+        auth_me: async (_: void, args: any, ctx: ContextModel) => {
+            if (!isAuthenticated(ctx.req)) {
+                throw new Error('Authorization token has not provided')
+            }
+
+            try {
+                const currentUserId = getCurrentUserId(ctx.req);
+
+                return getUserById(currentUserId);
+            } catch (e: any) {
+                throw new Error('Not logged in');
+            }
+        }
     },
     Mutation: {
         async auth_register (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}) {
