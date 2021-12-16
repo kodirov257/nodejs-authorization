@@ -2,8 +2,19 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
-import { createUserSession, getCurrentUserId, getUserById, hasuraQuery, isAuthenticated } from '../services';
+import {
+    createUserSession,
+    getUserByUsername,
+    getCurrentUserId,
+    isAuthenticated,
+    getUserByEmail,
+    getUserByPhone,
+    getUserById,
+    hasuraQuery,
+} from '../services';
 import { generateClaimsJwtToken, generateJwtRefreshToken } from '../helpers/auth-tool';
+import { ValidationError } from 'apollo-server-express';
+import { isEmail, isPhone } from '../validators';
 import { ContextModel, User } from '../models';
 import { UserFragment } from '../fragments';
 
@@ -12,31 +23,6 @@ const STATUS_ACTIVE = 5;
 
 const ROLE_USER = 'user';
 const ROLE_ADMIN = 'admin';
-
-async function getUserByUsername(username: string): Promise<User|undefined> {
-    try {
-        const response = await hasuraQuery<{auth_users: User[]}>(
-            gql`
-                ${UserFragment}
-                query($where: auth_users_bool_exp) {
-                    auth_users(where: $where) {
-                        ...User
-                    }
-                }
-            `,
-            {
-                where: {
-                    username: { _eq: username },
-                },
-            },
-        );
-
-        return response.data?.auth_users[0] ?? undefined;
-    } catch (e: any) {
-        // throw new Error('Unable to find the email');
-        throw new Error(e.message);
-    }
-}
 
 async function getUserByCredentials(username: string, password: string): Promise<User> {
     const user: User|undefined = await getUserByUsername(username);
@@ -77,11 +63,23 @@ const resolvers = {
         }
     },
     Mutation: {
-        async auth_register (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}) {
-            const user: User|undefined = await getUserByUsername(email);
+        async auth_register (_: void, {username, email_or_phone, password}: {username: string, email_or_phone: string, password: string}) {
+            let user: User|undefined = await getUserByUsername(username);
 
             if (user) {
-                throw new Error('Email already registered');
+                throw new Error('Username already registered');
+            }
+
+            if (isEmail(email_or_phone)) {
+                user = await getUserByEmail(email_or_phone);
+            } else if (isPhone(email_or_phone)) {
+                user = await getUserByPhone(email_or_phone);
+            } else {
+                throw new ValidationError('Wrong email or phone is given.')
+            }
+
+            if (user) {
+                throw new Error('Email or phone is already registered.')
             }
 
             const passwordHash = await bcrypt.hash(password, 10);
@@ -100,6 +98,8 @@ const resolvers = {
                 {
                     user: {
                         username: username,
+                        email: isEmail(email_or_phone) ? email_or_phone : null,
+                        phone: isPhone(email_or_phone) ? email_or_phone : null,
                         password: passwordHash,
                         secret_token: uuidv4(),
                         status: STATUS_ACTIVE,
@@ -107,9 +107,6 @@ const resolvers = {
                     }
                 }
             );
-
-            // console.log('auth_register: After');
-            // console.log(result.data?.insert_auth_users.returning);
 
             return result.data?.insert_auth_users.returning !== undefined;
         },
