@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
-import { hasuraQuery } from '../client';
-import { UserFragment } from '../../fragments';
-import { User } from '../../models';
+import { hasuraQuery } from '../../../../core/services/client';
+import { UserFragment } from '../../../../core/fragments';
+import { User } from '../../../../core/models';
 
 export const getUserById = async (id: string) => {
     const response = await hasuraQuery<{auth_users_by_pk: User}>(

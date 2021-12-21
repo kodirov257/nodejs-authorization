@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
 
 import {
+    getUserByCredentials,
     createUserSession,
     getUserByUsername,
     getCurrentUserId,
@@ -11,45 +12,15 @@ import {
     getUserByPhone,
     getUserById,
     hasuraQuery,
-} from '../services';
-import { generateClaimsJwtToken, generateJwtRefreshToken } from '../helpers/auth-tool';
-import { isEmail, isPhone, validateRegistration } from '../validators';
+} from './services';
+import { generateClaimsJwtToken, generateJwtRefreshToken } from '../../core/helpers/auth-tool';
+import { isEmail, isPhone, validateRegistration } from '../../core/validators';
+import { ROLE_USER, STATUS_ACTIVE } from '../../core/helpers/values';
 import { ValidationError } from 'apollo-server-express';
-import { ContextModel, User } from '../models';
-import { UserFragment } from '../fragments';
+import { ContextModel, User } from '../../core/models';
+import { UserFragment } from '../../core/fragments';
 
-const STATUS_INACTIVE = 1;
-const STATUS_ACTIVE = 5;
 
-const ROLE_USER = 'user';
-const ROLE_ADMIN = 'admin';
-
-async function getUserByCredentials(usernameEmailOrPhone: string, password: string): Promise<User> {
-    let user: User|undefined;
-    if (isEmail(usernameEmailOrPhone)) {
-        user = await getUserByEmail(usernameEmailOrPhone);
-    } else if (isPhone(usernameEmailOrPhone)) {
-        user = await getUserByPhone(usernameEmailOrPhone);
-    } else {
-        user = await getUserByUsername(usernameEmailOrPhone);
-    }
-
-    if (!user) {
-        throw new Error('Invalid "email" or "password"');
-    }
-
-    if (user.status !== STATUS_ACTIVE) {
-        throw new Error('User not activated.');
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatch) {
-        throw new Error('Invalid "email" or "password"');
-    }
-
-    return user;
-}
 
 // Provide resolver functions for your schema fields
 const resolvers = {

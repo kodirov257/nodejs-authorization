@@ -11,10 +11,10 @@ import http from 'http';
 
 import { graphqlRouter } from './routes/graphql';
 import { usersRouter } from './routes/users';
-import { resolvers } from './routes/auth';
+import { resolvers } from './features/BasicAuth/resolvers';
 import { indexRouter } from './routes';
 
-import { ContextModel } from './models';
+import { ContextModel } from './core/models';
 import { typeDefs } from './typeDefs';
 
 dotenv.config();

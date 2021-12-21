@@ -1,9 +1,9 @@
 import { v4 as uuid4 } from 'uuid';
 import gql from 'graphql-tag';
 
-import { UserSessionFragment } from '../fragments';
-import { User, UserSession } from '../models';
-import { hasuraQuery } from './client';
+import { UserSessionFragment } from '../../../core/fragments';
+import { User, UserSession } from '../../../core/models';
+import { hasuraQuery } from '../../../core/services/client';
 
 export const createUserSession = async (user: User, userAgent: string|null = null,
                                         ipAddress: string|null = null): Promise<{refreshToken: string, sessionId: string}> => {
