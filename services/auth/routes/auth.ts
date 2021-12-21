@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import gql from 'graphql-tag';
-import Joi from 'joi';
 
 import {
     createUserSession,
@@ -14,11 +13,10 @@ import {
     hasuraQuery,
 } from '../services';
 import { generateClaimsJwtToken, generateJwtRefreshToken } from '../helpers/auth-tool';
+import { isEmail, isPhone, validateRegistration } from '../validators';
 import { ValidationError } from 'apollo-server-express';
-import { isEmail, isPhone } from '../validators';
 import { ContextModel, User } from '../models';
 import { UserFragment } from '../fragments';
-import {validateRegistration} from "../validators/auth";
 
 const STATUS_INACTIVE = 1;
 const STATUS_ACTIVE = 5;
@@ -26,8 +24,15 @@ const STATUS_ACTIVE = 5;
 const ROLE_USER = 'user';
 const ROLE_ADMIN = 'admin';
 
-async function getUserByCredentials(username: string, password: string): Promise<User> {
-    const user: User|undefined = await getUserByUsername(username);
+async function getUserByCredentials(usernameEmailOrPhone: string, password: string): Promise<User> {
+    let user: User|undefined;
+    if (isEmail(usernameEmailOrPhone)) {
+        user = await getUserByEmail(usernameEmailOrPhone);
+    } else if (isPhone(usernameEmailOrPhone)) {
+        user = await getUserByPhone(usernameEmailOrPhone);
+    } else {
+        user = await getUserByUsername(usernameEmailOrPhone);
+    }
 
     if (!user) {
         throw new Error('Invalid "email" or "password"');
@@ -102,7 +107,7 @@ const resolvers = {
                 `,
                 {
                     user: {
-                        username: username,
+                        username: username.replace(/ /g, ''),
                         email: isEmail(value.email_or_phone) ? value.email_or_phone : null,
                         phone: isPhone(value.email_or_phone) ? value.email_or_phone : null,
                         password: passwordHash,
@@ -115,8 +120,8 @@ const resolvers = {
 
             return result.data?.insert_auth_users.returning !== undefined;
         },
-        async auth_login (_: void, {username, email, phone, password}: {username: string, email: string, phone: string, password: string}, ctx: ContextModel) {
-            const user: User = await getUserByCredentials(username, password);
+        async auth_login (_: void, {username_email_or_phone, password}: {username_email_or_phone: string, password: string}, ctx: ContextModel) {
+            const user: User = await getUserByCredentials(username_email_or_phone, password);
 
             const ipAddress = (
                 <string>(ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress || '')
