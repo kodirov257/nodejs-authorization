@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 
 import { UserSessionFragment } from '../../../core/fragments';
 import { User, UserSession } from '../../../core/models';
-import { hasuraQuery } from '../../../core/services/client';
+import { hasuraQuery } from '../../../core/services';
 
 export const createUserSession = async (user: User, userAgent: string|null = null,
                                         ipAddress: string|null = null): Promise<{refreshToken: string, sessionId: string}> => {

@@ -20,8 +20,6 @@ import { ValidationError } from 'apollo-server-express';
 import { ContextModel, User } from '../../core/models';
 import { UserFragment } from '../../core/fragments';
 
-
-
 // Provide resolver functions for your schema fields
 const resolvers = {
     Query: {
@@ -94,11 +92,13 @@ const resolvers = {
         async auth_login (_: void, {username_email_or_phone, password}: {username_email_or_phone: string, password: string}, ctx: ContextModel) {
             const user: User = await getUserByCredentials(username_email_or_phone, password);
 
-            const ipAddress = (
-                <string>(ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress || '')
-            ).split(',')[0].trim();
+            let ipAddress: string;
 
-            const {refreshToken, sessionId} = await createUserSession(user, ctx.req.headers['user-agent'], ipAddress);
+            const remoteAddress: string = <string>(ctx.req.headers['x-forwarded-for'] || ctx.req.socket.remoteAddress || '');
+            ipAddress = remoteAddress.split(',')[0] ?? '';
+            ipAddress = ipAddress.trim();
+
+            const { refreshToken, sessionId } = await createUserSession(user, ctx.req.headers['user-agent'] ?? null, ipAddress ?? null);
 
             const accessToken = generateClaimsJwtToken(user, sessionId);
 

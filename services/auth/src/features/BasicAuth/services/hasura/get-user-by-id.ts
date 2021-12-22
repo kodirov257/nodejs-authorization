@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
-import { hasuraQuery } from '../../../../core/services/client';
 import { UserFragment } from '../../../../core/fragments';
+import { hasuraQuery } from '../../../../core/services';
 import { User } from '../../../../core/models';
 
 export const getUserById = async (id: string) => {
