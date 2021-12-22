@@ -1,8 +1,10 @@
 import Joi from 'joi';
+
 import { UserInputError } from 'apollo-server-express';
+import { RegistrationForm } from '../forms';
 
 export const validateRegistration = (username: string, email_or_phone: string, password: string) => {
-    return validateGeneral<{username: string, email_or_phone: string, password: string}>({username, email_or_phone, password}, {
+    return validateGeneral<RegistrationForm>({username, email_or_phone, password}, {
         username: Joi.string().alphanum().min(3).max(50).required(),
         email_or_phone: Joi.string().min(5).max(50).required(),
         password: Joi.string().min(5).max(50).required(),

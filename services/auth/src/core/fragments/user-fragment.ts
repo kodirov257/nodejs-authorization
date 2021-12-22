@@ -1,6 +1,7 @@
+import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
 
-export const UserFragment = gql`
+export const UserFragment: DocumentNode = gql`
     fragment User on auth_users {
         id
         username
