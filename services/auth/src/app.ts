@@ -17,12 +17,15 @@ import { indexRouter } from './routes';
 import { ContextModel } from './core/models';
 import { typeDefs } from './typeDefs';
 import envJson from './env.json';
+import {VerifyAuth} from "./features/VerifyAuth/resolvers";
 
 const { service }: { service: string } = envJson;
 dotenv.config();
 
 const resolvers = (): IResolvers => {
   switch (service) {
+    case 'VerifyAuth':
+      return (new VerifyAuth()).resolvers();
     case 'BasicAuth':
       return (new BasicAuth()).resolvers();
     default:

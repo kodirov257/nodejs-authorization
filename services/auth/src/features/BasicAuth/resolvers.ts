@@ -3,18 +3,21 @@ import { IResolvers } from '@graphql-tools/utils';
 import {
     getCurrentUserId,
     isAuthenticated,
-    getUserById,
 } from './services';
-import { LoginForm, RegistrationForm } from '../../core/forms';
+
+import {
+    getUserById,
+} from './repositories';
 import { ContextModel, User } from '../../core/models';
-import { Register, Login } from './services';
+import { LoginForm, RegistrationForm } from './forms';
+import { Register, LoginService } from './services';
 
 export class BasicAuth {
-    public hello() {
+    protected hello() {
         return 'Hello world !';
     }
 
-    public auth_me = async (ctx: ContextModel): Promise<User|undefined> => {
+    protected auth_me = async (ctx: ContextModel): Promise<User|undefined> => {
         if (!isAuthenticated(ctx.req)) {
             throw new Error('Authorization token has not provided')
         }
@@ -22,19 +25,19 @@ export class BasicAuth {
         try {
             const currentUserId = getCurrentUserId(ctx.req);
 
-            return await getUserById(currentUserId);
+            return await getUserById<User>(currentUserId);
         } catch (e: any) {
             throw new Error('Not logged in');
         }
     }
 
-    public auth_register = async (args: RegistrationForm): Promise<boolean> => {
+    protected register = async (args: RegistrationForm): Promise<boolean> => {
         const user: User = await (new Register(args.username, args.email_or_phone, args.password)).register();
         return !!user;
     }
 
-    public async auth_login (args: LoginForm, ctx: ContextModel) {
-        return (new Login(args.login, args.password, ctx)).signin();
+    protected async login (args: LoginForm, ctx: ContextModel) {
+        return (new LoginService(args.login, args.password, ctx)).signin();
     }
 
     public resolvers(): IResolvers {
@@ -44,8 +47,8 @@ export class BasicAuth {
                 auth_me: async (_: void, args: any, ctx: ContextModel) => this.auth_me(ctx),
             },
             Mutation: {
-                auth_register: async (_: void, args: RegistrationForm, ctx: ContextModel) => this.auth_register(args),
-                auth_login: async (_: void, args: LoginForm, ctx: ContextModel) => this.auth_login(args, ctx),
+                auth_register: async (_: void, args: RegistrationForm, ctx: ContextModel) => this.register(args),
+                auth_login: async (_: void, args: LoginForm, ctx: ContextModel) => this.login(args, ctx),
             }
         }
     }

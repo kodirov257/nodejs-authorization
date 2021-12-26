@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { v4 as uuid4 } from 'uuid';
 import gql from 'graphql-tag';
 
-import { generateClaimsJwtToken, generateJwtRefreshToken } from '../../../../core/helpers/auth-tool';
-import { UserSessionFragment } from '../../../../core/fragments';
-import { User, UserSession } from '../../../../core/models';
-import { hasuraQuery } from '../../../../core/services';
+import { generateClaimsJwtToken, generateJwtRefreshToken } from '../../helpers/auth-tool';
+import { UserSessionFragment } from '../../fragments';
+import { hasuraQuery } from '../../helpers/client';
+import { User, UserSession } from '../../models';
+import { GeneratorModel } from '../../models';
 
-export class Generator {
-    public generateTokens = async (user: User, request: Request|null = null, response: Response|null = null) => {
+export abstract class BasicGeneratorService<TUser extends User> {
+    public generateTokens = async (user: TUser, request: Request|null = null, response: Response|null = null): Promise<GeneratorModel> => {
         let ipAddress: string|null = null;
         if (request) {
             const remoteAddress: string = <string>(request.headers['x-forwarded-for'] || request.socket.remoteAddress || '');
@@ -19,7 +20,7 @@ export class Generator {
 
         const { refreshToken, sessionId } = await this.createUserSession(user, userAgent, ipAddress ?? null);
 
-        const accessToken = generateClaimsJwtToken(user, sessionId);
+        const accessToken: string = generateClaimsJwtToken(user, sessionId);
 
         return {
             access_token: accessToken,
@@ -30,7 +31,7 @@ export class Generator {
         };
     }
 
-    public createUserSession = async (user: User, userAgent: string|null = null,
+    public createUserSession = async (user: TUser, userAgent: string|null = null,
                                ipAddress: string|null = null): Promise<{refreshToken: string, sessionId: string}> => {
         const refreshToken: string = uuid4();
         try {
@@ -69,7 +70,7 @@ export class Generator {
         }
     }
 
-    private getExpireDate = () => {
+    protected getExpireDate = () => {
         return new Date(Date.now() + (+process.env.REFRESH_TOKEN_EXPIRES_IN!) * 60 * 1000);
     }
 }

@@ -1,5 +1,5 @@
 export interface User {
-    id: number;
+    id: string;
     username: string;
     email: string;
     phone: string;
@@ -7,7 +7,4 @@ export interface User {
     role: string;
     status: number;
     secret_token: string;
-    created_at: string;
-    updated_at: string;
-    last_seen_at: string;
 }

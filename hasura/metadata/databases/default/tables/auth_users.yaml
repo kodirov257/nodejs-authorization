@@ -17,6 +17,15 @@ array_relationships:
       table:
         name: user_sessions
         schema: auth
+- name: user_verifications
+  using:
+    manual_configuration:
+      column_mapping:
+        id: user_id
+      insertion_order: null
+      remote_table:
+        name: user_verifications
+        schema: auth
 select_permissions:
 - permission:
     columns:
