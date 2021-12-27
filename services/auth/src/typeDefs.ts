@@ -42,6 +42,8 @@ export const typeDefs = gql`
         auth_register(username: String!, email_or_phone: String!, password: String!): Boolean
         verify_email(token: String!): AuthPayload
         verify_phone(phone: String!, token: String!): AuthPayload
+        resend_email(email: String!): Boolean
+        resend_phone(phone: String!): Boolean
         auth_change_password(user_id: ID!, new_password: String!): Boolean
         auth_activate_account(username: ID!, secret_token: String!): Boolean
         auth_refresh_token: AuthPayload

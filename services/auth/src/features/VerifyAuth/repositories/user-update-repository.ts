@@ -27,7 +27,7 @@ export const updateUser = async (userId: string, userFields: any, userVerificati
                         ...User
                     }
                     update_auth_user_verifications_by_pk(_set: $verification, pk_columns: $user_id) {
-                        ...User
+                        ...UserVerification
                     }
                 }
             `,
