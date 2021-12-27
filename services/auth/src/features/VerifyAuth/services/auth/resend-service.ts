@@ -1,16 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
+import { IResendServiceResolver } from '../../../../core/resolvers';
 import { updateUser, UserGetRepository } from '../../repositories';
 import { validateEmail, validatePhone } from '../../validators';
 import { Mail } from '../../../BasicAuth/services/mail';
 import { STATUS_VERIFIED } from '../../helpers/values';
-import { Sms } from '../../../BasicAuth/services/sms';
 import { User, UserVerification } from '../../models';
+import { Sms } from '../../../BasicAuth/services/sms';
 import { VerificationForm } from '../../forms';
 import { UserFragment } from '../../fragments';
 
-export class ResendService {
+export class ResendService implements IResendServiceResolver {
     private readonly email: string | null;
     private readonly phone: string | null;
     private userGetRepository: UserGetRepository;
