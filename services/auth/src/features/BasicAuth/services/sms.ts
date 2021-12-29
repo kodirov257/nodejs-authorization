@@ -26,6 +26,12 @@ export class Sms implements ISmsServiceResolver {
         return this.sendSms(text);
     }
 
+    public async sendSmsResetToken(): Promise<boolean> {
+        const text: string = `Enter the code to reset: ${this.token}`;
+
+        return this.sendSms(text);
+    }
+
     private sendSms = async (text: string): Promise<boolean> => {
         console.log('Phone number: ' + this.phone);
         const params: string = `username=${SMS_USERNAME}&password=${SMS_PASSWORD}&smsc=${SMS_SMSC}&from=${SMS_FROM}&to=${this.phone}&charset=${SMS_CHARSET}&coding=${SMS_CODING}&text=${encodeURI(text)}`;

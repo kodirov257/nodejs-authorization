@@ -5,12 +5,14 @@ import { ContextModel, GeneratorModel, User } from '../../core/models';
 import { RegistrationForm } from '../../core/forms';
 import { BasicAuth } from '../BasicAuth/resolvers';
 import { LoginForm } from '../BasicAuth/forms';
+import {ResetPasswordService} from "./services/auth/reset-password-service";
 
 export class VerifyAuth extends BasicAuth {
     private registerService: typeof RegisterService;
     private verifyService: typeof VerifyService;
     private signinService: typeof LoginService;
     private resendService: typeof ResendService;
+    private resetService: typeof ResetPasswordService;
 
     constructor() {
         super();
@@ -19,6 +21,7 @@ export class VerifyAuth extends BasicAuth {
         this.verifyService = VerifyService;
         this.signinService = LoginService;
         this.resendService = ResendService;
+        this.resetService = ResetPasswordService;
     }
 
     protected override register = async (args: RegistrationForm): Promise<boolean> => {
@@ -46,6 +49,24 @@ export class VerifyAuth extends BasicAuth {
         return (new this.signinService(args.login, args.password, ctx)).signin();
     }
 
+    protected send_reset_email = async (email: string, ctx: ContextModel) => {
+        return (new this.resetService(ctx)).sendResetEmail(email);
+    }
+
+    protected send_reset_phone = async (phone: string, ctx: ContextModel) => {
+        return (new this.resetService(ctx)).sendResetPhone(phone);
+    }
+
+    reset_via_email = async (args: {token: string, password: string}, ctx: ContextModel) => {
+        const accessToken: GeneratorModel|boolean = await (new this.resetService(ctx)).resetViaEmail(args.token, args.password);
+        return !!accessToken;
+    }
+
+    reset_via_phone = async (args: {phone: string, token: string, password: string}, ctx: ContextModel) => {
+        const accessToken: GeneratorModel|boolean = await (new this.resetService(ctx)).resetViaPhone(args.phone, args.token, args.password);
+        return !!accessToken;
+    }
+
     public override resolvers(): IResolvers {
         return {
             Query: {
@@ -65,6 +86,14 @@ export class VerifyAuth extends BasicAuth {
                     this.resend_phone(args.phone),
                 auth_login: async (_: void, args: LoginForm, ctx: ContextModel) =>
                     this.login(args, ctx),
+                send_reset_email: async (_: void, args: {email: string}, ctx: ContextModel) =>
+                    this.send_reset_email(args.email, ctx),
+                send_reset_phone: async (_: void, args: {phone: string}, ctx: ContextModel) =>
+                    this.send_reset_phone(args.phone, ctx),
+                reset_via_email: async (_: void, args: {token: string, password: string}, ctx: ContextModel) =>
+                    this.reset_via_email(args, ctx),
+                reset_via_phone: async (_: void, args: {phone: string, token: string, password: string}, ctx: ContextModel) =>
+                    this.reset_via_phone(args, ctx),
             }
         }
     }

@@ -38,6 +38,7 @@ export class Mail implements IMailServiceResolver {
         const mailData: Mailer.Options = {
             from: MAIL_FROM_ADDRESS,
             to: this.email,
+            subject: 'Registration',
             text: `Thanks for registration!
                 \nPlease refer to the following link:
                 \n${FRONT_URL}/auth/login?token=${this.emailVerifyToken}
@@ -47,6 +48,40 @@ export class Mail implements IMailServiceResolver {
             html: `<b>Thanks for registration!</b>
                 <br>Please refer to the following link:<br/>
                 <p><a href="${FRONT_URL}/auth/login?token=${this.emailVerifyToken}">Verify Email</a></p>
+                Thank you,<br>
+                ${this.username}
+            `,
+        };
+
+        await this.transporter.sendMail(mailData, (error: Error|null, info) => {
+            if (error) {
+                throw new Error(`Tha email is not sent ${error.toString()}`/*, {
+                    'error': error,
+                }*/);
+            }
+
+            return true;
+        });
+
+        return true;
+    }
+
+    public async sendEmailResetToken(): Promise<boolean> {
+        const mailData: Mailer.Options = {
+            from: MAIL_FROM_ADDRESS,
+            to: this.email,
+            subject: 'Reset password',
+            text: `Thanks for using our service!
+                \nPlease refer to the following link:
+                \n${FRONT_URL}/auth/login?token=${this.emailVerifyToken}
+                \nto reset your password.
+                \nThank you,
+                \n${this.username}
+            `,
+            html: `<br>Thanks for using our service!<br/>
+                <br>Please refer to the following link:<br/>
+                <p><a href="${FRONT_URL}/auth/reset-password?token=${this.emailVerifyToken}">Reset password</a></p>
+                to reset your password.<br>
                 Thank you,<br>
                 ${this.username}
             `,
