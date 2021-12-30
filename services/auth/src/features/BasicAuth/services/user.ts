@@ -15,7 +15,10 @@ export const getDataFromVerifiedAuthorizationToken = (req: Request) => {
 
     try {
         return jwt.verify(token, process.env.JWT_PRIVATE_KEY!);
-    } catch (e) {
+    } catch (e: any) {
+        if (e instanceof Error) {
+            throw new Error(e.message);
+        }
         return void 0;
     }
 }

@@ -1,11 +1,11 @@
 import { IResolvers } from '@graphql-tools/utils';
 
-import {LoginService, RegisterService, ResendService, VerifyService} from './services';
+import {ChangePasswordService, LoginService, RegisterService, ResendService, VerifyService} from './services';
+import { ResetPasswordService } from './services/auth/reset-password-service';
 import { ContextModel, GeneratorModel, User } from '../../core/models';
 import { RegistrationForm } from '../../core/forms';
 import { BasicAuth } from '../BasicAuth/resolvers';
 import { LoginForm } from '../BasicAuth/forms';
-import {ResetPasswordService} from "./services/auth/reset-password-service";
 
 export class VerifyAuth extends BasicAuth {
     private registerService: typeof RegisterService;
@@ -13,6 +13,7 @@ export class VerifyAuth extends BasicAuth {
     private signinService: typeof LoginService;
     private resendService: typeof ResendService;
     private resetService: typeof ResetPasswordService;
+    private changePasswordService: typeof ChangePasswordService;
 
     constructor() {
         super();
@@ -22,6 +23,7 @@ export class VerifyAuth extends BasicAuth {
         this.signinService = LoginService;
         this.resendService = ResendService;
         this.resetService = ResetPasswordService;
+        this.changePasswordService = ChangePasswordService;
     }
 
     protected override register = async (args: RegistrationForm): Promise<boolean> => {
@@ -67,6 +69,11 @@ export class VerifyAuth extends BasicAuth {
         return !!accessToken;
     }
 
+    protected override change_password = async (oldPassword: string, newPassword: string, ctx: ContextModel) => {
+        const user: User = await (new this.changePasswordService(oldPassword, newPassword, ctx)).changePassword();
+        return !!user;
+    }
+
     public override resolvers(): IResolvers {
         return {
             Query: {
@@ -94,6 +101,8 @@ export class VerifyAuth extends BasicAuth {
                     this.reset_via_email(args, ctx),
                 reset_via_phone: async (_: void, args: {phone: string, token: string, password: string}, ctx: ContextModel) =>
                     this.reset_via_phone(args, ctx),
+                change_password: async (_: void, args: {old_password: string, new_password: string}, ctx: ContextModel) =>
+                    this.change_password(args.old_password, args.new_password, ctx),
             }
         }
     }

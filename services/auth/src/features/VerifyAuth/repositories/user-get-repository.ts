@@ -4,8 +4,8 @@ import gql from 'graphql-tag';
 import { UserFragment, UserVerificationFragment } from '../fragments';
 import { BasicUserGetRepository } from '../../../core/abstracts';
 import { isEmail, isPhone } from '../../../core/validators';
-import { getUserById } from '../../BasicAuth/repositories';
 import { hasuraQuery } from '../../../core/helpers/client';
+import { getUserById } from '../../../core/repositories';
 import { User, UserVerification } from '../models';
 import * as constants from '../helpers/values';
 

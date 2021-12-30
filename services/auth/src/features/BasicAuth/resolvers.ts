@@ -1,6 +1,7 @@
 import { IResolvers } from '@graphql-tools/utils';
 
 import {
+    ChangePasswordService,
     getCurrentUserId,
     isAuthenticated,
 } from './services';
@@ -40,6 +41,11 @@ export class BasicAuth {
         return (new LoginService(args.login, args.password, ctx)).signin();
     }
 
+    protected change_password = async (oldPassword: string, newPassword: string, ctx: ContextModel) => {
+        const user: User = await (new ChangePasswordService(oldPassword, newPassword, ctx)).changePassword();
+        return !!user;
+    }
+
     public resolvers(): IResolvers {
         return {
             Query: {
@@ -49,6 +55,8 @@ export class BasicAuth {
             Mutation: {
                 auth_register: async (_: void, args: RegistrationForm, ctx: ContextModel) => this.register(args),
                 auth_login: async (_: void, args: LoginForm, ctx: ContextModel) => this.login(args, ctx),
+                change_password: async (_: void, args: {old_password: string, new_password: string}, ctx: ContextModel) =>
+                    this.change_password(args.old_password, args.new_password, ctx),
             }
         }
     }

@@ -1,14 +1,21 @@
+import { UserInputError } from 'apollo-server-express';
 import Joi from 'joi';
 
-import { UserInputError } from 'apollo-server-express';
-import { RegistrationForm } from '../forms';
+import { ChangePasswordForm, RegistrationForm } from '../forms';
 
-export const validateRegistration = (username: string, email_or_phone: string, password: string) => {
+export const validateRegistration = (username: string, email_or_phone: string, password: string): RegistrationForm => {
     return validateGeneral<RegistrationForm>({username, email_or_phone, password}, {
         username: Joi.string().alphanum().min(3).max(50).required(),
         email_or_phone: Joi.string().min(5).max(50).required(),
         password: Joi.string().min(5).max(50).required(),
     }, 'Failed to register the user.');
+}
+
+export const validateChangePassword = (oldPassword: string, newPassword: string): ChangePasswordForm => {
+    return validateGeneral<ChangePasswordForm>({oldPassword, newPassword}, {
+        oldPassword: Joi.string().min(5).max(50).required(),
+        newPassword: Joi.string().min(5).max(50).required(),
+    }, 'Failed to change password.');
 }
 
 export const validateGeneral = <T>(payload: any, validator: any, errorMessage: string): T => {
