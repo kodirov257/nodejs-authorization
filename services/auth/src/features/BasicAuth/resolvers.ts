@@ -3,7 +3,7 @@ import { IResolvers } from '@graphql-tools/utils';
 import {
     ChangePasswordService,
     getCurrentUserId,
-    isAuthenticated,
+    isAuthenticated, RefreshTokenService,
 } from './services';
 
 import {
@@ -46,6 +46,10 @@ export class BasicAuth {
         return !!user;
     }
 
+    protected refresh_token = async (refreshToken: string, ctx: ContextModel) => {
+        return (new RefreshTokenService(refreshToken, ctx)).refreshToken();
+    }
+
     public resolvers(): IResolvers {
         return {
             Query: {
@@ -57,6 +61,8 @@ export class BasicAuth {
                 auth_login: async (_: void, args: LoginForm, ctx: ContextModel) => this.login(args, ctx),
                 change_password: async (_: void, args: {old_password: string, new_password: string}, ctx: ContextModel) =>
                     this.change_password(args.old_password, args.new_password, ctx),
+                refresh_token: async (_: void, args: {refresh_token: string}, ctx: ContextModel) =>
+                    this.refresh_token(args.refresh_token, ctx),
             }
         }
     }

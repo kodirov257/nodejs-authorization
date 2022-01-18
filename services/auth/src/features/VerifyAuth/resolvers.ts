@@ -103,6 +103,8 @@ export class VerifyAuth extends BasicAuth {
                     this.reset_via_phone(args, ctx),
                 change_password: async (_: void, args: {old_password: string, new_password: string}, ctx: ContextModel) =>
                     this.change_password(args.old_password, args.new_password, ctx),
+                refresh_token: async (_: void, args: {refresh_token: string}, ctx: ContextModel) =>
+                    this.refresh_token(args.refresh_token, ctx),
             }
         }
     }

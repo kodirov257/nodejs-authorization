@@ -1,5 +1,4 @@
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import { ApolloServer } from 'apollo-server-express';
 import { IResolvers } from '@graphql-tools/utils';
 import { buildContext } from 'graphql-passport';
@@ -10,14 +9,14 @@ import passport from 'passport';
 import express from 'express';
 import http from 'http';
 
+import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 import { usersRouter } from './routes/users';
-import { indexRouter } from './routes';
 
 import { ContextModel } from './core/models';
+import { indexRouter } from './routes';
 import { typeDefs } from './typeDefs';
 import envJson from './env.json';
-import {VerifyAuth} from "./features/VerifyAuth/resolvers";
 
 const { service }: { service: string } = envJson;
 dotenv.config();

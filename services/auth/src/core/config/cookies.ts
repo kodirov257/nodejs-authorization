@@ -1,0 +1,1 @@
+export const COOKIE_SECRET: string|null = process.env.COOKIE_SECRET || null;
