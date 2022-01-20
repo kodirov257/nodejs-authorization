@@ -25,7 +25,7 @@ export class RegisterService extends BasicRegisterService<User, UserCreateForm, 
     }
 
     public override getUserByUsername = async (): Promise<User|undefined> => {
-        return this.userGetService.getUserByUsername(this.login, this.fragment);
+        return this.userGetService.getUserByUsername(this.username, this.fragment);
     }
 
     public override getUserByEmail = async (): Promise<User|undefined> => {
