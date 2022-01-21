@@ -1,25 +1,30 @@
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import {ApolloServerPluginDrainHttpServer, GraphQLResponse} from 'apollo-server-core';
 import { ApolloServer } from 'apollo-server-express';
 import { IResolvers } from '@graphql-tools/utils';
 import { buildContext } from 'graphql-passport';
 import cookieParser from 'cookie-parser';
+import { GraphQLError } from 'graphql';
 import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import passport from 'passport';
 import express from 'express';
 import http from 'http';
+import lodash from 'lodash';
 
 import { VerifyAuth } from './features/VerifyAuth/resolvers';
 import { BasicAuth } from './features/BasicAuth/resolvers';
 import { usersRouter } from './routes/users';
 
 import { ContextModel } from './core/models';
+import { LogService } from './core/services';
 import { indexRouter } from './routes';
 import { typeDefs } from './typeDefs';
 import envJson from './env.json';
 
 const { service }: { service: string } = envJson;
 dotenv.config();
+
+const { has } = lodash;
 
 const resolvers = (): IResolvers => {
   switch (service) {
@@ -49,7 +54,35 @@ async function listen(port: number) {
     typeDefs,
     resolvers: resolvers(),
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    context: ({ req, res }: ContextModel) => buildContext({ req, res })
+    context: ({ req, res }: ContextModel) => buildContext({ req, res }),
+    formatError: (error: GraphQLError) => {
+      const logService: LogService = new LogService();
+      logService.log(error);
+
+      if (process.env.NODE_ENV === 'development') {
+        return {
+          message: error.message,
+          ...(error.locations && {locations: error.locations}),
+          ...(error.path && {path: error.path}),
+          extensions: error.extensions,
+        };
+      }
+
+      return {
+        message: error.message,
+        ...(error.path && {path: error.path}),
+      };
+    },
+    // formatResponse: (response: GraphQLResponse) => {
+    //   console.log(response);
+    //   if ((has(response, 'errors') && response.errors) && has(response, 'data')) {
+    //     delete response.data;
+    //   }
+    //   console.log(response);
+    //
+    //   return response;
+    // },
+    introspection: true,
   })
   await server.start()
 
