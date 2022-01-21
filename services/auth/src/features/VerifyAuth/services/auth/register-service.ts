@@ -8,12 +8,12 @@ import { isEmail, isPhone, validateRegistration } from '../../validators';
 import { IRegisterServiceResolver } from '../../../../core/resolvers';
 import { BasicRegisterService } from '../../../../core/abstracts';
 import { RegistrationForm } from '../../../../core/forms';
-import { Mail } from '../../../BasicAuth/services/mail';
 import { UserGetRepository } from '../../repositories';
 import { User, UserVerification } from '../../models';
-import { Sms } from '../../../BasicAuth/services/sms';
 import * as constants from '../../helpers/values';
 import { UserFragment } from '../../fragments';
+import { MailService } from '../mail-service';
+import { SmsService } from '../sms-service';
 
 export class RegisterService extends BasicRegisterService<User, UserCreateForm, UserGetRepository> implements IRegisterServiceResolver<User> {
     constructor(username: string, login: string, password: string) {
@@ -81,9 +81,9 @@ export class RegisterService extends BasicRegisterService<User, UserCreateForm, 
 
         const userVerificationData: UserVerification = this.registerData.user_verifications[0];
         if (this.registerData.email) {
-            await (new Mail(this.registerData.username, this.registerData.email, userVerificationData.email_verify_token)).sendEmailVerifyToken();
+            await (new MailService(this.registerData.username, this.registerData.email, userVerificationData.email_verify_token)).sendEmailVerifyToken();
         } else {
-            await (new Sms(this.registerData.phone, userVerificationData.phone_verify_token)).sendSmsVerifyToken();
+            await (new SmsService(this.registerData.phone, userVerificationData.phone_verify_token)).sendSmsVerifyToken();
         }
 
         return this.registerData;

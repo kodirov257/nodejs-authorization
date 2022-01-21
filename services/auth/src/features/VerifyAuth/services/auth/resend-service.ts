@@ -4,12 +4,12 @@ import moment from 'moment';
 import { IResendServiceResolver } from '../../../../core/resolvers';
 import { updateUser, UserGetRepository } from '../../repositories';
 import { validateEmail, validatePhone } from '../../validators';
-import { Mail } from '../../../BasicAuth/services/mail';
 import { STATUS_VERIFIED } from '../../helpers/values';
 import { User, UserVerification } from '../../models';
-import { Sms } from '../../../BasicAuth/services/sms';
 import { VerificationForm } from '../../forms';
 import { UserFragment } from '../../fragments';
+import { MailService } from '../mail-service';
+import { SmsService } from '../sms-service';
 
 export class ResendService implements IResendServiceResolver {
     private readonly email: string | null;
@@ -62,10 +62,10 @@ export class ResendService implements IResendServiceResolver {
         }
 
         if (type === 'email' || type === 'both') {
-            await (new Mail(user.username, user.email, verification.email_verify_token)).sendEmailVerifyToken();
+            await (new MailService(user.username, user.email, verification.email_verify_token)).sendEmailVerifyToken();
         }
         if (type === 'phone' || type === 'both') {
-            await (new Sms(user.phone, verification.phone_verify_token)).sendSmsVerifyToken();
+            await (new SmsService(user.phone, verification.phone_verify_token)).sendSmsVerifyToken();
         }
 
         return true;

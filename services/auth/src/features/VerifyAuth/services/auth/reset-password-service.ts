@@ -8,12 +8,12 @@ import { IResetPasswordServiceResolver } from '../../../../core/resolvers';
 import { ContextModel, GeneratorModel } from '../../../../core/models';
 import { ResetPasswordForm } from '../../forms/reset-password--form';
 import { updateUser, UserGetRepository } from '../../repositories';
-import { Mail } from '../../../BasicAuth/services/mail';
 import { GeneratorService } from './generator-service';
 import { User, UserVerification } from '../../models';
-import { Sms } from '../../../BasicAuth/services/sms';
 import { UserFragment } from '../../fragments';
 import { VerificationForm } from '../../forms';
+import { MailService } from '../mail-service';
+import { SmsService } from '../sms-service';
 
 export class ResetPasswordService implements IResetPasswordServiceResolver {
     private readonly generatorService: GeneratorService;
@@ -67,10 +67,10 @@ export class ResetPasswordService implements IResetPasswordServiceResolver {
         }
 
         if (type === 'email') {
-            await (new Mail(user.username, user.email, verification.email_verify_token)).sendEmailResetToken();
+            await (new MailService(user.username, user.email, verification.email_verify_token)).sendEmailResetToken();
         }
         if (type === 'phone') {
-            await (new Sms(user.phone, verification.phone_verify_token)).sendSmsResetToken();
+            await (new SmsService(user.phone, verification.phone_verify_token)).sendSmsResetToken();
         }
         return true;
     }

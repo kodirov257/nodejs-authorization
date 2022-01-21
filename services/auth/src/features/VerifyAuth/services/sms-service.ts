@@ -11,7 +11,7 @@ import {
     SMS_USERNAME
 } from '../../../core/config';
 
-export class Sms implements ISmsServiceResolver {
+export class SmsService implements ISmsServiceResolver {
     private readonly phone: string;
     private readonly token: string;
 

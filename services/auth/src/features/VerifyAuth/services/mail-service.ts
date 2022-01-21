@@ -12,7 +12,7 @@ import {
     MAIL_PORT,
 } from '../../../core/config';
 
-export class Mail implements IMailServiceResolver {
+export class MailService implements IMailServiceResolver {
     private readonly username: string;
     private readonly email: string;
     private readonly emailVerifyToken: string;
