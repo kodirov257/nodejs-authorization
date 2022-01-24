@@ -16,18 +16,6 @@ export const validateVerifyPhone = (phone: string|null, token: string): {phone: 
     }, 'Failed to verify phone.');
 }
 
-export const validateEmail = (email: string): {email: string} => {
-    return validateGeneral<{email: string}>({email}, {
-        email: Joi.string().min(5).max(50).regex(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/).required(),
-    }, 'Failed to register the user.');
-}
-
-export const validatePhone = (phone: string): {phone: string} => {
-    return validateGeneral<{phone: string}>({phone}, {
-        phone: Joi.string().regex(/\+?998[0-9]{9}$/).required(),
-    }, 'Failed to register the user.');
-}
-
 export const validateResetViaEmail = (token: string|null, password: string|null): ResetViaEmailModel => {
     return validateGeneral<ResetViaEmailModel>({token, password}, {
         token: Joi.string().regex(/^[\w\d-]+$/).required(),

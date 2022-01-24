@@ -6,3 +6,5 @@ export * from './services/resend-service-resolver';
 export * from './services/reset-password-service-resolver';
 export * from './services/change-password-service-resolver';
 export * from './services/refresh-token-service-resolver';
+export * from './services/add-email-service-resolver';
+export * from './services/add-phone-service-resolver';

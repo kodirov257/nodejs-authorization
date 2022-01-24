@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 
+import { isAuthenticated, getCurrentUserId } from '../../../../core/helpers/user';
 import { IChangePasswordServiceResolver } from '../../../../core/resolvers';
 import { BasicChangePasswordService } from '../../../../core/abstracts';
 import { ContextModel, User } from '../../../../core/models';
-import { getCurrentUserId, isAuthenticated } from '../user';
 import { getUserById } from '../../../../core/repositories';
 import { UserFragment } from '../../../../core/fragments';
 import { updateUser } from '../../repositories';

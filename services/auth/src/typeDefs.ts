@@ -52,6 +52,8 @@ export const typeDefs = gql`
         auth_activate_account(username: ID!, secret_token: String!): Boolean
         auth_refresh_token: AuthPayload
         refresh_token(refresh_token: String!): AuthPayload
+        add_email(email: String!): Boolean
+        add_phone(phone: String!): Boolean
     }
 
     schema {

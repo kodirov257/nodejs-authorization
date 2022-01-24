@@ -1,17 +1,12 @@
 import { IResolvers } from '@graphql-tools/utils';
 
-import {
-    ChangePasswordService,
-    getCurrentUserId,
-    isAuthenticated, RefreshTokenService,
-} from './services';
-
-import {
-    getUserById,
-} from './repositories';
+import { isAuthenticated, getCurrentUserId } from '../../core/helpers/user';
+import {AddEmailService, ChangePasswordService, RefreshTokenService,} from './services';
 import { ContextModel, User } from '../../core/models';
 import { LoginForm, RegistrationForm } from './forms';
 import { Register, LoginService } from './services';
+import { getUserById } from './repositories';
+import {AddPhoneService} from "./services/user/add-phone-service";
 
 export class BasicAuth {
     protected hello() {
@@ -50,6 +45,16 @@ export class BasicAuth {
         return (new RefreshTokenService(refreshToken, ctx)).refreshToken();
     }
 
+    protected add_email = async (email: string, ctx: ContextModel) => {
+        const user: User = await (new AddEmailService(email, ctx)).addEmail();
+        return !!user;
+    }
+
+    protected add_phone = async (phone: string, ctx: ContextModel) => {
+        const user: User = await (new AddPhoneService(phone, ctx)).addPhone();
+        return !!user;
+    }
+
     public resolvers(): IResolvers {
         return {
             Query: {
@@ -63,6 +68,8 @@ export class BasicAuth {
                     this.change_password(args.old_password, args.new_password, ctx),
                 refresh_token: async (_: void, args: {refresh_token: string}, ctx: ContextModel) =>
                     this.refresh_token(args.refresh_token, ctx),
+                add_email: async (_: void, args: {email: string}, ctx: ContextModel) => this.add_email(args.email, ctx),
+                add_phone: async (_: void, args: {phone: string}, ctx: ContextModel) => this.add_phone(args.phone, ctx),
             }
         }
     }

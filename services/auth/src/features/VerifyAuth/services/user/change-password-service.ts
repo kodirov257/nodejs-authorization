@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-import { getCurrentUserId, isAuthenticated } from '../../../BasicAuth/services';
+import { isAuthenticated, getCurrentUserId } from '../../../../core/helpers/user';
 import { IChangePasswordServiceResolver } from '../../../../core/resolvers';
 import { BasicChangePasswordService } from '../../../../core/abstracts';
 import { getUserById } from '../../../../core/repositories';

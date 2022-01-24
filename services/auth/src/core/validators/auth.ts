@@ -18,6 +18,18 @@ export const validateChangePassword = (oldPassword: string, newPassword: string)
     }, 'Failed to change password.');
 }
 
+export const validateEmail = (email: string|null, message: string = 'Failed to register the user.'): {email: string} => {
+    return validateGeneral<{email: string}>({email}, {
+        email: Joi.string().min(5).max(50).regex(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/).required(),
+    }, message);
+}
+
+export const validatePhone = (phone: string|null, message: string = 'Failed to register the user.'): {phone: string} => {
+    return validateGeneral<{phone: string}>({phone}, {
+        phone: Joi.string().regex(/\+?998[0-9]{9}$/).required(),
+    }, message);
+}
+
 export const validateGeneral = <T>(payload: any, validator: any, errorMessage: string): T => {
     const schema = Joi.object(validator);
 
